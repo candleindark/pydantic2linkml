@@ -232,3 +232,72 @@ def test_get_locally_defined_fields():
     assert new["z"].schema == {"type": "bool"}
 
     assert overriding["a"].schema == {"type": "nullable", "schema": {"type": "str"}}
+
+
+def test_ensure_unique_names():
+    from enum import Enum, auto
+    from typing import Type
+
+    from pydantic import BaseModel
+    from pydantic2linkml.tools import ensure_unique_names
+    from pydantic2linkml.exceptions import NameCollisionError
+
+    class A:
+        pass
+
+    class B(BaseModel):
+        pass
+
+    class C(Enum):
+        C1 = auto()
+        C2 = auto()
+
+    class D(Enum):
+        D1 = auto()
+        D2 = auto()
+
+    class Y:
+        pass
+
+    def func() -> list[Type]:
+        """
+        A internal function used to provide a separate namespace
+        """
+
+        class X:
+            pass
+
+        # noinspection PyShadowingNames
+        class B:
+            pass
+
+        # noinspection PyShadowingNames
+        class C(BaseModel):
+            pass
+
+        # noinspection PyShadowingNames
+        class D(Enum):
+            D3 = auto()
+            D4 = auto()
+
+        class Z(Enum):
+            Z1 = auto()
+            Z2 = auto()
+
+        return [X, B, C, D, Z]
+
+    local_clses = [A, B, C, D, Y]
+
+    assert ensure_unique_names(local_clses) is None
+    assert ensure_unique_names(func()) is None
+
+    with pytest.raises(NameCollisionError) as exc_info:
+        ensure_unique_names(local_clses + func())
+
+    err_str = str(exc_info.value)
+
+    # Assert three collision messages separated by semicolons
+    assert err_str.count(";") == 2
+    assert err_str.count("Name collision @ B: ") == 1
+    assert err_str.count("Name collision @ C: ") == 1
+    assert err_str.count("Name collision @ D: ") == 1

@@ -5,6 +5,8 @@ from typing import Type, NamedTuple, Optional, cast
 from pydantic import BaseModel
 from pydantic_core import core_schema
 
+from .exceptions import NameCollisionError
+
 
 class LocallyDefinedFields(NamedTuple):
     new: dict[str, FieldSchema]
@@ -158,3 +160,31 @@ def get_locally_defined_fields(model: Type[BaseModel]) -> LocallyDefinedFields:
             for fn in overriding_fn
         },
     )
+
+
+def ensure_unique_names(cls_lst: list[Type]) -> None:
+    """
+    Ensure that all the classes in a given list have unique names
+
+    :param cls_lst: A list of class objects
+
+    :raises NameCollisionError: If there are classes with the same name
+    """
+    # Sort classes into buckets by name
+    buckets: dict[str, list[Type]] = {}
+    for cls in cls_lst:
+        name = cls.__name__
+        if name in buckets:
+            buckets[name].append(cls)
+        else:
+            buckets[name] = [cls]
+
+    # Build error message for any name collisions
+    err_msg: Optional[str] = None
+    for name, lst in buckets.items():
+        if len(lst) > 1:
+            new_err_msg = f"Name collision @ {name}: {lst!r}"
+            err_msg = new_err_msg if err_msg is None else f"{err_msg}; {new_err_msg}"
+
+    if err_msg is not None:
+        raise NameCollisionError(err_msg)
