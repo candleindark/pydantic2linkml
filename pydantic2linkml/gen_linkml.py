@@ -6,6 +6,7 @@ from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.linkml_model import SchemaDefinition
 
 from .exceptions import UserError
+from .tools import ensure_unique_names
 
 
 class LinkmlGenerator:
@@ -34,7 +35,12 @@ class LinkmlGenerator:
             the generated schema
         :param add_defaults: Whether to set some defaults in the generated schema as
             specified in `SchemaBuilder.add_defaults`
+
+        raises NameCollisionError: If there are classes with the same name in the
+            combined collection of `models` and `enums`
         """
+        ensure_unique_names(models + enums)
+
         self._models = models
         self._enums = enums
         sb = SchemaBuilder(name, id_)
