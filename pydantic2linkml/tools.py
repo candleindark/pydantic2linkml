@@ -162,17 +162,18 @@ def get_locally_defined_fields(model: Type[BaseModel]) -> LocallyDefinedFields:
     )
 
 
-def ensure_unique_names(cls_lst: list[Type]) -> None:
+def ensure_unique_names(*clses: Type) -> None:
     """
-    Ensure that all the classes in a given list have unique names
+    In the context of the collection of all classes given as an argument,
+    ensure all of them have a unique name.
 
-    :param cls_lst: A list of class objects
+    :param clses: The classes given as an argument packed in a tuple
 
     :raises NameCollisionError: If there are classes with the same name
     """
     # Sort classes into buckets by name
     buckets: dict[str, list[Type]] = {}
-    for cls in cls_lst:
+    for cls in clses:
         name = cls.__name__
         if name in buckets:
             buckets[name].append(cls)

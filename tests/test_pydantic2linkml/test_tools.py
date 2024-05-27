@@ -288,11 +288,11 @@ def test_ensure_unique_names():
 
     local_clses = [A, B, C, D, Y]
 
-    assert ensure_unique_names(local_clses) is None
-    assert ensure_unique_names(func()) is None
+    assert ensure_unique_names(*local_clses) is None
+    assert ensure_unique_names(*func()) is None
 
     with pytest.raises(NameCollisionError) as exc_info:
-        ensure_unique_names(local_clses + func())
+        ensure_unique_names(*local_clses, *func())
 
     err_str = str(exc_info.value)
 

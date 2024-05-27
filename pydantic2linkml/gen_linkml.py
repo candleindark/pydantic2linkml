@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Optional
+from collections.abc import Iterable
 
 from pydantic import BaseModel
 from linkml_runtime.utils.schema_builder import SchemaBuilder
@@ -22,16 +23,16 @@ class LinkmlGenerator:
         self,
         name: Optional[str] = None,
         id_: Optional[str] = None,
-        models: Optional[list[type[BaseModel]]] = None,
-        enums: Optional[list[type[Enum]]] = None,
+        models: Optional[Iterable[type[BaseModel]]] = None,
+        enums: Optional[Iterable[type[Enum]]] = None,
         add_defaults: bool = True,
     ):
         """
         :param name: The name of the LinkML schema to be generated
         :param id_: The ID of the LinkML schema to be generated
-        :param models: A list of Pydantic models to be converted to LinkML classes in
-            the generated schema
-        :param enums: A list of Enums to be converted to LinkML enums in
+        :param models: An iterable of Pydantic models to be converted to LinkML classes
+            in the generated schema
+        :param enums: An iterable of Enums to be converted to LinkML enums in
             the generated schema
         :param add_defaults: Whether to set some defaults in the generated schema as
             specified in `SchemaBuilder.add_defaults`
@@ -39,7 +40,7 @@ class LinkmlGenerator:
         raises NameCollisionError: If there are classes with the same name in the
             combined collection of `models` and `enums`
         """
-        ensure_unique_names(models + enums)
+        ensure_unique_names(*models, *enums)
 
         self._models = models
         self._enums = enums
