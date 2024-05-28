@@ -11,7 +11,12 @@ from linkml_runtime.linkml_model import (
 )
 
 from .exceptions import UserError
-from .tools import ensure_unique_names, normalize_whitespace
+from .tools import (
+    ensure_unique_names,
+    normalize_whitespace,
+    get_locally_defined_fields,
+    LocallyDefinedFields,
+)
 
 
 class LinkmlGenerator:
@@ -46,8 +51,13 @@ class LinkmlGenerator:
         """
         ensure_unique_names(*models, *enums)
 
-        self._models = models
+        # Map of models to their locally defined fields
+        self._m_f_map: dict[type[BaseModel], LocallyDefinedFields] = {
+            m: get_locally_defined_fields(m) for m in models
+        }
+
         self._enums = enums
+
         sb = SchemaBuilder(name, id_)
         self._sb = sb.add_defaults() if add_defaults else sb
 
@@ -102,13 +112,13 @@ class LinkmlGenerator:
 
     def _add_slots(self):
         """
-        Add the slots construed from the models in `self._models` to the schema
+        Add the slots construed from the fields in `self._m_f_map` to the schema
         """
         raise NotImplementedError("Method not yet implemented")
 
     def _add_classes(self):
         """
-        Add the classes construed from the models in `self._models` to the schema
+        Add the classes construed from the models in `self._m_f_map` to the schema
         """
         raise NotImplementedError("Method not yet implemented")
         # todo: Make sure to provide slot usage in the individual classes if needed
