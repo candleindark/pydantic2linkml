@@ -301,3 +301,24 @@ def test_ensure_unique_names():
     assert err_str.count("Name collision @ B: ") == 1
     assert err_str.count("Name collision @ C: ") == 1
     assert err_str.count("Name collision @ D: ") == 1
+
+
+@pytest.mark.parametrize(
+    "input_str, expected",
+    [
+        ("", ""),
+        ("  ", ""),
+        ("  a  ", "a"),
+        ("a  b", "a b"),
+        ("a b  c", "a b c"),
+        ("a\nb", "a b"),
+        ("a\n\nb", "a b"),
+        ("a\n\n\nb", "a b"),
+        ("\t ", ""),
+        ("\t a \t \n b \t", "a b"),
+    ],
+)
+def test_normalize_whitespace(input_str, expected):
+    from pydantic2linkml.tools import normalize_whitespace
+
+    assert normalize_whitespace(input_str) == expected

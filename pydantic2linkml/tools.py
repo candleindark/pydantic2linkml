@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Type, NamedTuple, Optional, cast
+import re
 
 from pydantic import BaseModel
 from pydantic_core import core_schema
@@ -189,3 +190,11 @@ def ensure_unique_names(*clses: Type) -> None:
 
     if err_msg is not None:
         raise NameCollisionError(err_msg)
+
+
+def normalize_whitespace(text: str) -> str:
+    """
+    Return a version of the input text with leading and trailing whitespaces removed
+    and sequences of consecutive whitespaces replaced with a single space.
+    """
+    return re.sub(r"\s+", " ", text.strip())
