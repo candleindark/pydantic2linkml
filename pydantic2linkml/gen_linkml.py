@@ -11,7 +11,7 @@ from linkml_runtime.linkml_model import (
 )
 
 from .exceptions import UserError
-from .tools import ensure_unique_names
+from .tools import ensure_unique_names, normalize_whitespace
 
 
 class LinkmlGenerator:
@@ -91,6 +91,11 @@ class LinkmlGenerator:
             self._sb.add_enum(
                 EnumDefinition(
                     name=enum_.__name__,
+                    description=(
+                        normalize_whitespace(enum_.__doc__)
+                        if enum_.__doc__ is not None
+                        else None
+                    ),
                     permissible_values=[
                         PermissibleValue(text=value_str, meaning=value_str)
                         for value_str in enum_value_strs
