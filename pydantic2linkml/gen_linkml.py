@@ -75,8 +75,10 @@ class LinkmlGenerator:
         self._add_enums()
 
         # Add slots to the schema
+        self._add_slots()
+
         # Add classes to the schema
-        # Make sure to provide slot usage in the individual classes if needed
+        self._add_classes()
 
         return self._sb.schema
 
@@ -102,3 +104,16 @@ class LinkmlGenerator:
                     ],
                 )
             )
+
+    def _add_slots(self):
+        """
+        Add the slots construed from the models in `self._models` to the schema
+        """
+        raise NotImplementedError("Method not yet implemented")
+
+    def _add_classes(self):
+        """
+        Add the classes construed from the models in `self._models` to the schema
+        """
+        raise NotImplementedError("Method not yet implemented")
+        # todo: Make sure to provide slot usage in the individual classes if needed
