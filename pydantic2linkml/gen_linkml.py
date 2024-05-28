@@ -4,7 +4,11 @@ from collections.abc import Iterable
 
 from pydantic import BaseModel
 from linkml_runtime.utils.schema_builder import SchemaBuilder
-from linkml_runtime.linkml_model import SchemaDefinition
+from linkml_runtime.linkml_model import (
+    SchemaDefinition,
+    EnumDefinition,
+    PermissibleValue,
+)
 
 from .exceptions import UserError
 from .tools import ensure_unique_names
@@ -68,8 +72,28 @@ class LinkmlGenerator:
             self._used = True
 
         # Add enums to the schema
+        self._add_enums()
+
         # Add slots to the schema
         # Add classes to the schema
         # Make sure to provide slot usage in the individual classes if needed
 
         return self._sb.schema
+
+    def _add_enums(self):
+        """
+        Add LinkML enum representations of the enums in `self._enums` to the schema
+        """
+        for enum_ in self._enums:
+            # All permissible values in the enum in string form
+            enum_value_strs = [str(member.value) for member in enum_]
+
+            self._sb.add_enum(
+                EnumDefinition(
+                    name=enum_.__name__,
+                    permissible_values=[
+                        PermissibleValue(text=value_str, meaning=value_str)
+                        for value_str in enum_value_strs
+                    ],
+                )
+            )
