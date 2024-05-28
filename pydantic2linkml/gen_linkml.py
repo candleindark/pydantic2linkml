@@ -71,14 +71,9 @@ class LinkmlGenerator:
         else:
             self._used = True
 
-        # Add enums to the schema
-        self._add_enums()
-
-        # Add slots to the schema
-        self._add_slots()
-
-        # Add classes to the schema
-        self._add_classes()
+        self._add_enums()  # Add enums to the schema
+        self._add_slots()  # Add slots to the schema
+        self._add_classes()  # Add classes to the schema
 
         return self._sb.schema
 
