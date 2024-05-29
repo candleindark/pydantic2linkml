@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Optional
 from collections.abc import Iterable
+from itertools import chain
+from warnings import warn
 
 from pydantic import BaseModel
 from linkml_runtime.utils.schema_builder import SchemaBuilder
@@ -8,6 +10,7 @@ from linkml_runtime.linkml_model import (
     SchemaDefinition,
     EnumDefinition,
     PermissibleValue,
+    SlotDefinition,
 )
 
 from .exceptions import UserError
@@ -16,6 +19,8 @@ from .tools import (
     normalize_whitespace,
     get_locally_defined_fields,
     LocallyDefinedFields,
+    FieldSchema,
+    resolve_ref_schema,
 )
 
 
@@ -114,7 +119,53 @@ class LinkmlGenerator:
         """
         Add the slots construed from the fields in `self._m_f_map` to the schema
         """
-        raise NotImplementedError("Method not yet implemented")
+        # Extract all the newly defined fields from across all models
+        new_fields: Iterable[tuple[str, FieldSchema]] = chain.from_iterable(
+            v.new.items() for v in self._m_f_map.values()
+        )
+
+        buckets: dict[str, list[FieldSchema]] = {}
+        for f_name, f_schema in new_fields:
+            if f_name in buckets:
+                buckets[f_name].append(f_schema)
+            else:
+                buckets[f_name] = [f_schema]
+
+        warnings_msg: Optional[str] = None
+        for f_name, schema_lst in buckets.items():
+            if len(schema_lst) > 1:
+                # Construct the list of classes that define the fields corresponding
+                # to the field schemas in `schema_lst`
+                cls_lst = []
+                for s in schema_lst:
+                    # Resolve the context schema into a model schema
+                    model_schema = resolve_ref_schema(s.context, s.context)
+
+                    assert model_schema["type"] == "model"
+
+                    cls_lst.append(model_schema["cls"])
+
+                new_warnings_msg = (
+                    f"Field name collision @ {f_name} from {cls_lst!r}, "
+                    f"{f_name} field definition from {cls_lst[0]!r} is used to specify "
+                    f"slot {f_name}"
+                )
+                warnings_msg = (
+                    new_warnings_msg
+                    if warnings_msg is None
+                    else f"{warnings_msg}; {new_warnings_msg}"
+                )
+
+        if warnings_msg is not None:
+            warn(warnings_msg)
+
+        # Add the slots to the schema
+        for f_name, schema_lst in buckets.items():
+            # Use the first schema in `schema_lst` to generate the slot
+            slot = gen_slot(f_name, schema_lst[0])
+
+            # Add the slot to the schema
+            self._sb.add_slot(slot)
 
     def _add_classes(self):
         """
@@ -122,3 +173,15 @@ class LinkmlGenerator:
         """
         raise NotImplementedError("Method not yet implemented")
         # todo: Make sure to provide slot usage in the individual classes if needed
+
+
+def gen_slot(field_name: str, field_schema: FieldSchema) -> SlotDefinition:
+    """
+    Generate a LinkML slot definition from a Pydantic model field
+
+    :param field_name: The name of the Pydantic model field
+    :param field_schema: The `FieldSchema` object specifying the Pydantic core schema
+        of the field with context
+    :return: The generated LinkML slot definition
+    """
+    raise NotImplementedError("Method not yet implemented")
