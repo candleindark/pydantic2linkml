@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional
 from collections.abc import Iterable
+from collections import defaultdict
 from itertools import chain
 from warnings import warn
 from operator import itemgetter
@@ -126,10 +127,9 @@ class LinkmlGenerator:
             v.new.items() for v in self._m_f_map.values()
         )
 
-        buckets: dict[str, list[FieldSchema]] = {
-            k: [i[1] for i in lst]
-            for k, lst in bucketize(new_fields, itemgetter(0)).items()
-        }
+        buckets: defaultdict[str, list[FieldSchema]] = bucketize(
+            new_fields, key_func=itemgetter(0), value_func=itemgetter(1)
+        )
 
         warnings_msg: Optional[str] = None
         for f_name, schema_lst in buckets.items():
