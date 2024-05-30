@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import cast
+from operator import itemgetter
 
 import pytest
 
@@ -232,6 +233,27 @@ def test_get_locally_defined_fields():
     assert new["z"].schema == {"type": "bool"}
 
     assert overriding["a"].schema == {"type": "nullable", "schema": {"type": "str"}}
+
+
+@pytest.mark.parametrize(
+    "items, key_func, expected",
+    [
+        (
+            list(range(10)),
+            lambda x: "even" if x % 2 == 0 else "odd",
+            {"even": list(range(0, 10, 2)), "odd": list(range(1, 10, 2))},
+        ),
+        (
+            ("a", "abc", "bmz", "acd", "cad", "cba"),
+            itemgetter(0),
+            {"a": ["a", "abc", "acd"], "b": ["bmz"], "c": ["cad", "cba"]},
+        ),
+    ],
+)
+def test_bucketize(items, key_func, expected):
+    from pydantic2linkml.tools import bucketize
+
+    assert bucketize(items, key_func) == expected
 
 
 def test_ensure_unique_names():

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from typing import Type, NamedTuple, Optional, cast
+from typing import Type, NamedTuple, Optional, cast, TypeVar
 import re
+from collections.abc import Iterable, Callable
+from collections import defaultdict
 
 from pydantic import BaseModel
 from pydantic_core import core_schema
@@ -161,6 +163,28 @@ def get_locally_defined_fields(model: Type[BaseModel]) -> LocallyDefinedFields:
             for fn in overriding_fn
         },
     )
+
+
+T = TypeVar("T")
+K = TypeVar("K")
+
+
+def bucketize(
+    items: Iterable[T], key_func: Callable[[T], K]
+) -> defaultdict[K, list[T]]:
+    """
+    Bucketize items based on a key function
+
+    :param items: The items to bucketize
+    :param key_func: The key function
+    :return: A dictionary with keys as the results of the key function and values as
+        the list of items that have the corresponding key
+    """
+    buckets: defaultdict[K, list[T]] = defaultdict(list)
+    for item in items:
+        key = key_func(item)
+        buckets[key].append(item)
+    return buckets
 
 
 def ensure_unique_names(*clses: Type) -> None:
