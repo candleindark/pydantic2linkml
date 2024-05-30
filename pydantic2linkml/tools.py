@@ -168,23 +168,28 @@ def get_locally_defined_fields(model: Type[BaseModel]) -> LocallyDefinedFields:
 
 T = TypeVar("T")
 K = TypeVar("K")
+V = TypeVar("V")
 
 
 def bucketize(
-    items: Iterable[T], key_func: Callable[[T], K]
-) -> defaultdict[K, list[T]]:
+    items: Iterable[T],
+    key_func: Callable[[T], K],
+    value_func: Optional[Callable[[T], V]] = None,
+) -> defaultdict[K, list[V]]:
     """
     Bucketize items based on a key function
 
     :param items: The items to bucketize
     :param key_func: The key function
+    :param value_func: An optional function to transform the items before storing to
+        the corresponding buckets identified by the corresponding keys
     :return: A dictionary with keys as the results of the key function and values as
-        the list of items that have the corresponding key
+        the list of (transformed) items that have the corresponding key
     """
     buckets: defaultdict[K, list[T]] = defaultdict(list)
     for item in items:
         key = key_func(item)
-        buckets[key].append(item)
+        buckets[key].append(item if value_func is None else value_func(item))
     return buckets
 
 

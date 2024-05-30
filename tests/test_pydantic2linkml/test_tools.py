@@ -236,24 +236,38 @@ def test_get_locally_defined_fields():
 
 
 @pytest.mark.parametrize(
-    "items, key_func, expected",
+    "items, key_func, value_func, expected",
     [
         (
             list(range(10)),
             lambda x: "even" if x % 2 == 0 else "odd",
+            None,
             {"even": list(range(0, 10, 2)), "odd": list(range(1, 10, 2))},
         ),
         (
             ("a", "abc", "bmz", "acd", "cad", "cba"),
             itemgetter(0),
+            None,
             {"a": ["a", "abc", "acd"], "b": ["bmz"], "c": ["cad", "cba"]},
+        ),
+        (
+            list(range(10)),
+            lambda x: "even" if x % 2 == 0 else "odd",
+            lambda x: x * 2,
+            {"even": list(range(0, 20, 4)), "odd": list(range(2, 20, 4))},
+        ),
+        (
+            ("a", "abc", "bmz", "acd", "cad", "cba"),
+            itemgetter(0),
+            lambda x: x[0],
+            {"a": ["a", "a", "a"], "b": ["b"], "c": ["c", "c"]},
         ),
     ],
 )
-def test_bucketize(items, key_func, expected):
+def test_bucketize(items, key_func, value_func, expected):
     from pydantic2linkml.tools import bucketize
 
-    assert bucketize(items, key_func) == expected
+    assert bucketize(items, key_func, value_func) == expected
 
 
 def test_ensure_unique_names():
