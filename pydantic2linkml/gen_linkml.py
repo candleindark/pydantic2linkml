@@ -3,6 +3,7 @@ from typing import Optional
 from collections.abc import Iterable
 from itertools import chain
 from warnings import warn
+from operator import itemgetter
 
 from pydantic import BaseModel
 from linkml_runtime.utils.schema_builder import SchemaBuilder
@@ -21,6 +22,7 @@ from .tools import (
     LocallyDefinedFields,
     FieldSchema,
     resolve_ref_schema,
+    bucketize,
 )
 
 
@@ -124,12 +126,10 @@ class LinkmlGenerator:
             v.new.items() for v in self._m_f_map.values()
         )
 
-        buckets: dict[str, list[FieldSchema]] = {}
-        for f_name, f_schema in new_fields:
-            if f_name in buckets:
-                buckets[f_name].append(f_schema)
-            else:
-                buckets[f_name] = [f_schema]
+        buckets: dict[str, list[FieldSchema]] = {
+            k: [i[1] for i in lst]
+            for k, lst in bucketize(new_fields, itemgetter(0)).items()
+        }
 
         warnings_msg: Optional[str] = None
         for f_name, schema_lst in buckets.items():

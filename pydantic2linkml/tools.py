@@ -4,6 +4,7 @@ from typing import Type, NamedTuple, Optional, cast, TypeVar
 import re
 from collections.abc import Iterable, Callable
 from collections import defaultdict
+from operator import attrgetter
 
 from pydantic import BaseModel
 from pydantic_core import core_schema
@@ -197,13 +198,7 @@ def ensure_unique_names(*clses: Type) -> None:
     :raises NameCollisionError: If there are classes with the same name
     """
     # Sort classes into buckets by name
-    buckets: dict[str, list[Type]] = {}
-    for cls in clses:
-        name = cls.__name__
-        if name in buckets:
-            buckets[name].append(cls)
-        else:
-            buckets[name] = [cls]
+    buckets: dict[str, list[type]] = bucketize(clses, attrgetter("__name__"))
 
     # Build error message for any name collisions
     err_msg: Optional[str] = None
