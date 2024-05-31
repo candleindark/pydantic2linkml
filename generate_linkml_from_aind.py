@@ -92,7 +92,6 @@ def main(
     root_module_name: str = KNOWN_MODELS["aind"],
     output_file: Path = Path("generated_linkml_models/aind.yml"),
 ):
-    org = "dandi"
     sb = SchemaBuilder()
     populate_schema_builder_from_module(sb, module=root_module_name)
     yml = yaml_dumper.dumps(sb.schema)
