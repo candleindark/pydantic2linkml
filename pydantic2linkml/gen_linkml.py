@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Callable
 from collections.abc import Iterable
 from collections import defaultdict
 from itertools import chain
@@ -7,6 +7,13 @@ from warnings import warn
 from operator import itemgetter
 
 from pydantic import BaseModel
+
+# noinspection PyProtectedMember
+from pydantic._internal import _typing_extra
+from pydantic.json_schema import (
+    CoreSchemaOrFieldType,
+    CoreSchemaOrField,
+)
 from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.linkml_model import (
     SchemaDefinition,
@@ -191,7 +198,47 @@ class SlotGenerator:
         :param field_schema: The `FieldSchema` object specifying the Pydantic core
             schema of the corresponding field with context
         """
-        raise NotImplementedError("Method not yet implemented")
+
+        self._slot: SlotDefinition = SlotDefinition(name=field_name)
+        self._field_schema: FieldSchema = field_schema
+        self._schema_type_to_method = self.build_schema_type_to_method()
+
+        # This changes to True after this generator generates a slot schema
+        # (for preventing issues caused by accidental re-use
+        # of this generator). See class docstring for more info.
+        self._used: bool = False
+
+    def build_schema_type_to_method(
+        self,
+    ) -> dict[CoreSchemaOrFieldType, Callable[[CoreSchemaOrField], None]]:
+        """Builds a dictionary mapping schema and field types to methods for
+            constructing the LinkML slot schema contained in the current instance
+
+        Returns:
+            A dictionary containing the mapping of `CoreSchemaOrFieldType` to a
+                handler method for constructing the LinkML slot schema for that type.
+
+        Raises:
+            TypeError: If no method has been defined for constructing the slot schema
+                for one of the schema or field types
+        """
+        mapping: dict[CoreSchemaOrFieldType, Callable[[CoreSchemaOrField], None]] = {}
+        core_schema_types: list[
+            CoreSchemaOrFieldType
+        ] = _typing_extra.all_literal_values(
+            CoreSchemaOrFieldType  # type: ignore
+        )
+        for key in core_schema_types:
+            method_name = f"_{key.replace('-', '_')}_schema"
+            try:
+                mapping[key] = getattr(self, method_name)
+            except AttributeError as e:  # pragma: no cover
+                raise TypeError(
+                    f"No method for constructing the slot schema for "
+                    f"core_schema.type={key!r} "
+                    f"(expected: {type(self).__name__}.{method_name})"
+                ) from e
+        return mapping
 
     def generate(self) -> SlotDefinition:
         """
