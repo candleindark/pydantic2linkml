@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import importlib
 import pydantic
 import enum
 import inspect
@@ -9,6 +8,8 @@ import typer
 from linkml_runtime.linkml_model import EnumDefinition
 from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.dumpers import yaml_dumper
+
+from pydantic2linkml.tools import get_all_modules
 
 app = typer.Typer()
 
@@ -21,23 +22,6 @@ app = typer.Typer()
 # ATOM: https://github.com/SciCrunch/NIF-Ontology/blob/atlas/ttl/atom.ttl
 # ATOM: https://www.nature.com/articles/s41597-023-02389-4
 KNOWN_MODELS = {"dandi": "dandischema.models", "aind": "aind_data_schema.models"}
-
-
-def get_all_modules(imported_modules: list, root_module_name: str):
-    try:
-        module = importlib.import_module(root_module_name)
-        imported_modules.append(module)
-        for submodule_filename in module.__loader__.get_resource_reader().contents():
-            if submodule_filename.endswith(".py") and not submodule_filename.startswith(
-                "__"
-            ):
-                get_all_modules(
-                    imported_modules,
-                    f'{root_module_name}.{submodule_filename[:-len(".py")]}',
-                )
-    except ModuleNotFoundError:
-        return imported_modules
-    return imported_modules
 
 
 def populate_enum(sb: SchemaBuilder, enum_name: str, enum_object: type[enum.Enum]):

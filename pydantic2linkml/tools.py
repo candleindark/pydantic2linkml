@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 from typing import Type, NamedTuple, Optional, cast, TypeVar
 import re
 from collections.abc import Iterable, Callable
@@ -222,3 +223,20 @@ def normalize_whitespace(text: str) -> str:
     and sequences of consecutive whitespaces replaced with a single space.
     """
     return re.sub(r"\s+", " ", text.strip())
+
+
+def get_all_modules(imported_modules: list, root_module_name: str):
+    try:
+        module = importlib.import_module(root_module_name)
+        imported_modules.append(module)
+        for submodule_filename in module.__loader__.get_resource_reader().contents():
+            if submodule_filename.endswith(".py") and not submodule_filename.startswith(
+                "__"
+            ):
+                get_all_modules(
+                    imported_modules,
+                    f'{root_module_name}.{submodule_filename[:-len(".py")]}',
+                )
+    except ModuleNotFoundError:
+        return imported_modules
+    return imported_modules
