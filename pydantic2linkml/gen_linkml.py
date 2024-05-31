@@ -14,6 +14,7 @@ from pydantic.json_schema import (
     CoreSchemaOrFieldType,
     CoreSchemaOrField,
 )
+from pydantic_core import core_schema
 from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.linkml_model import (
     SchemaDefinition,
@@ -258,3 +259,172 @@ class SlotGenerator:
 
         self._used = True
         return self._slot
+
+    def _any_schema(self, schema: core_schema.AnySchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _none_schema(self, schema: core_schema.NoneSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _bool_schema(self, schema: core_schema.BoolSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _int_schema(self, schema: core_schema.IntSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _float_schema(self, schema: core_schema.FloatSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _decimal_schema(self, schema: core_schema.DecimalSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _str_schema(self, schema: core_schema.StringSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _bytes_schema(self, schema: core_schema.BytesSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _date_schema(self, schema: core_schema.DateSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _time_schema(self, schema: core_schema.TimeSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _datetime_schema(self, schema: core_schema.DatetimeSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _timedelta_schema(self, schema: core_schema.TimedeltaSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _literal_schema(self, schema: core_schema.LiteralSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _enum_schema(self, schema: core_schema.EnumSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _is_instance_schema(self, schema: core_schema.IsInstanceSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _is_subclass_schema(self, schema: core_schema.IsSubclassSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _callable_schema(self, schema: core_schema.CallableSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _list_schema(self, schema: core_schema.ListSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _tuple_schema(self, schema: core_schema.TupleSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _set_schema(self, schema: core_schema.SetSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _frozenset_schema(self, schema: core_schema.FrozenSetSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _generator_schema(self, schema: core_schema.GeneratorSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _dict_schema(self, schema: core_schema.DictSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _function_after_schema(
+        self, schema: core_schema.AfterValidatorFunctionSchema
+    ) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _function_before_schema(
+        self, schema: core_schema.BeforeValidatorFunctionSchema
+    ) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _function_wrap_schema(
+        self, schema: core_schema.WrapValidatorFunctionSchema
+    ) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _function_plain_schema(
+        self, schema: core_schema.PlainValidatorFunctionSchema
+    ) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _default_schema(self, schema: core_schema.WithDefaultSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _nullable_schema(self, schema: core_schema.NullableSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _union_schema(self, schema: core_schema.UnionSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _tagged_union_schema(self, schema: core_schema.TaggedUnionSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _chain_schema(self, schema: core_schema.ChainSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _lax_or_strict_schema(self, schema: core_schema.LaxOrStrictSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _json_or_python_schema(self, schema: core_schema.JsonOrPythonSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _typed_dict_schema(self, schema: core_schema.TypedDictSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _model_fields_schema(self, schema: core_schema.ModelFieldsSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _model_schema(self, schema: core_schema.ModelSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _dataclass_args_schema(self, schema: core_schema.DataclassArgsSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _dataclass_schema(self, schema: core_schema.DataclassSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _arguments_schema(self, schema: core_schema.ArgumentsSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _call_schema(self, schema: core_schema.CallSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _custom_error_schema(self, schema: core_schema.CustomErrorSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _json_schema(self, schema: core_schema.JsonSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _url_schema(self, schema: core_schema.UrlSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _multi_host_url_schema(self, schema: core_schema.MultiHostUrlSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _definitions_schema(self, schema: core_schema.DefinitionsSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _definition_ref_schema(
+        self, schema: core_schema.DefinitionReferenceSchema
+    ) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _uuid_schema(self, schema: core_schema.UuidSchema) -> None:
+        raise NotImplementedError("Method not yet implemented")
+
+    def _model_field_schema(self, schema: core_schema.ModelField) -> None:
+
+        raise NotImplementedError("Method not yet implemented")
+
+    def _dataclass_field_schema(self, schema: core_schema.DataclassField) -> None:
+
+        raise NotImplementedError("Method not yet implemented")
+
+    def _typed_dict_field_schema(self, schema: core_schema.TypedDictField) -> None:
+
+        raise NotImplementedError("Method not yet implemented")
+
+    def _computed_field_schema(self, schema: core_schema.ComputedField) -> None:
+        raise NotImplementedError("Method not yet implemented")
