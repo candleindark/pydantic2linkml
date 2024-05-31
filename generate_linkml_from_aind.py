@@ -58,7 +58,7 @@ def populate_enum(sb: SchemaBuilder, enum_name: str, enum_object: enum.Enum):
             )
         )
     except ValueError as e:
-        if not "already exists" in str(e):
+        if "already exists" not in str(e):
             raise
 
 
