@@ -247,4 +247,14 @@ class SlotGenerator:
 
         :return: The generated LinkML slot schema
         """
-        raise NotImplementedError("Method not yet implemented")
+        if self._used:
+            raise UserError(
+                f"This {type(self).__name__} instance has already been used to generate"
+                " a slot schema. You must create a new instance of "
+                f"{type(self).__name__} to generate another schema."
+            )
+
+        # todo: initiate the slot construction process
+
+        self._used = True
+        return self._slot
