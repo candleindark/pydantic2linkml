@@ -6,9 +6,7 @@ import enum
 import inspect
 import typer
 
-from linkml_runtime import SchemaView
 from linkml_runtime.linkml_model import EnumDefinition
-from linkml_runtime.utils.schemaview import PermissibleValue, PermissibleValueText
 from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.dumpers import yaml_dumper
 
