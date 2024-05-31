@@ -40,7 +40,7 @@ def get_all_modules(imported_modules: list, root_module_name: str):
     return imported_modules
 
 
-def populate_enum(sb: SchemaBuilder, enum_name: str, enum_object: enum.Enum):
+def populate_enum(sb: SchemaBuilder, enum_name: str, enum_object: type[enum.Enum]):
     """
     Populate a LinkML SchemaBuilder instance with a new enum derived from
     a pydantic Enum object.
@@ -63,7 +63,7 @@ def populate_enum(sb: SchemaBuilder, enum_name: str, enum_object: enum.Enum):
 
 
 def populate_basemodel(
-    sb: SchemaBuilder, basemodel_name: str, basemodel_object: pydantic.BaseModel
+    sb: SchemaBuilder, basemodel_name: str, basemodel_object: type[pydantic.BaseModel]
 ):
     sb.add_class(
         basemodel_name,
