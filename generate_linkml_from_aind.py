@@ -63,7 +63,7 @@ def populate_basemodel(
 
 
 def populate_schema_builder_from_module(sb: SchemaBuilder, module: str):
-    for module in get_all_modules(imported_modules=list(), root_module_name=module):
+    for module in get_all_modules(root_module_name=module):
         for class_name, class_object in inspect.getmembers(module, inspect.isclass):
             if issubclass(class_object, enum.Enum):
                 populate_enum(sb, class_name, class_object)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 from typing import Type, NamedTuple, Optional, cast, TypeVar
+from types import ModuleType
 import re
 from collections.abc import Iterable, Callable
 from collections import defaultdict
@@ -225,18 +226,32 @@ def normalize_whitespace(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip())
 
 
-def get_all_modules(imported_modules: list, root_module_name: str):
-    try:
-        module = importlib.import_module(root_module_name)
-        imported_modules.append(module)
-        for submodule_filename in module.__loader__.get_resource_reader().contents():
-            if submodule_filename.endswith(".py") and not submodule_filename.startswith(
-                "__"
-            ):
-                get_all_modules(
-                    imported_modules,
-                    f'{root_module_name}.{submodule_filename[:-len(".py")]}',
-                )
-    except ModuleNotFoundError:
-        return imported_modules
-    return imported_modules
+# todo: write tests for this function
+def get_all_modules(root_module_name: str) -> list[ModuleType]:
+    """
+    Get all modules that are recursively imported by when importing a given module
+
+    :param root_module_name: The name of the given module
+    :return: The list of imported modules
+    """
+
+    def _get_all_modules(_imported_modules: list[ModuleType], _root_module_name: str):
+        try:
+            module = importlib.import_module(_root_module_name)
+            _imported_modules.append(module)
+            for (
+                submodule_filename
+            ) in module.__loader__.get_resource_reader().contents():
+                if submodule_filename.endswith(
+                    ".py"
+                ) and not submodule_filename.startswith("__"):
+                    _get_all_modules(
+                        _imported_modules,
+                        f'{_root_module_name}.{submodule_filename[:-len(".py")]}',
+                    )
+        except ModuleNotFoundError:
+            return _imported_modules
+        return _imported_modules
+
+    imported_modules: list[ModuleType] = []
+    return _get_all_modules(imported_modules, root_module_name)
