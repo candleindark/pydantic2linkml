@@ -162,7 +162,7 @@ class LinkmlGenerator:
         # Add the slots to the schema
         for f_name, schema_lst in buckets.items():
             # Use the first schema in `schema_lst` to generate the slot
-            slot = gen_slot(f_name, schema_lst[0])
+            slot = SlotGenerator(f_name, schema_lst[0]).generate()
 
             # Add the slot to the schema
             self._sb.add_slot(slot)
@@ -175,13 +175,29 @@ class LinkmlGenerator:
         # todo: Make sure to provide slot usage in the individual classes if needed
 
 
-def gen_slot(field_name: str, field_schema: FieldSchema) -> SlotDefinition:
+class SlotGenerator:
     """
-    Generate a LinkML slot definition from a Pydantic model field
+    Instances of this class are single-use slot generators.
 
-    :param field_name: The name of the Pydantic model field
-    :param field_schema: The `FieldSchema` object specifying the Pydantic core schema
-        of the field with context
-    :return: The generated LinkML slot definition
+    Note:
+        Each instance of this class should only be used once to generate
+            a LinkML slot schema.
     """
-    raise NotImplementedError("Method not yet implemented")
+
+    def __init__(self, field_name: str, field_schema: FieldSchema):
+        """
+        :param field_name: The name of the Pydantic model field corresponding
+            to the slot to be generated
+        :param field_schema: The `FieldSchema` object specifying the Pydantic core
+            schema of the corresponding field with context
+        """
+        raise NotImplementedError("Method not yet implemented")
+
+    def generate(self) -> SlotDefinition:
+        """
+        Generate a LinkML slot schema from the Pydantic model field schema provided to
+            this generator.
+
+        :return: The generated LinkML slot schema
+        """
+        raise NotImplementedError("Method not yet implemented")
