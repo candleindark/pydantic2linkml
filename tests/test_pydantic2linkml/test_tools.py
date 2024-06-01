@@ -358,3 +358,30 @@ def test_normalize_whitespace(input_str, expected):
     from pydantic2linkml.tools import normalize_whitespace
 
     assert normalize_whitespace(input_str) == expected
+
+
+class TestFetchDefs:
+    def test_no_pydantic_enum_model(self):
+        """
+        Test the situation where the provided modules do not contain any Pydantic
+        models that are subclasses of `Enum`.
+        """
+        from pydantic2linkml.tools import fetch_defs
+        from tests.assets import mock_module0, mock_module1
+
+        models, enums = fetch_defs([mock_module0, mock_module1])
+
+        assert set(models) == {
+            mock_module0.A,
+            mock_module0.B,
+            mock_module0.C,
+            mock_module1.X,
+            mock_module1.Y,
+        }
+        assert set(enums) == {
+            mock_module0.E0,
+            mock_module0.E1,
+            mock_module1.E2,
+            mock_module1.E3,
+            mock_module1.E4,
+        }

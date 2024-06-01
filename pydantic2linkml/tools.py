@@ -7,8 +7,10 @@ import re
 from collections.abc import Iterable, Callable
 from collections import defaultdict
 from operator import attrgetter
+from enum import Enum
+import inspect
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 from pydantic_core import core_schema
 
 from .exceptions import NameCollisionError
@@ -255,3 +257,34 @@ def get_all_modules(root_module_name: str) -> list[ModuleType]:
 
     imported_modules: list[ModuleType] = []
     return _get_all_modules(imported_modules, root_module_name)
+
+
+def fetch_defs(
+    modules: Iterable[ModuleType],
+) -> tuple[list[type[BaseModel]], list[type[Enum]]]:
+    """
+    Fetch Python objects that provide schema definitions from given modules
+
+    :param modules: The given modules
+    :return: A tuple of two lists:
+        The first list contains strict subclasses of `pydantic.BaseModel` that is not
+            a subclass of `pydantic.RootModel` in the given modules
+        The second list contains strict subclasses of `enum.Enum` in the given modules
+    """
+
+    models: list[type[BaseModel]] = []
+    enums: list[type[Enum]] = []
+
+    for module in modules:
+        for _, cls in inspect.getmembers(module, inspect.isclass):
+
+            if (
+                issubclass(cls, BaseModel)
+                and cls is not BaseModel
+                and not issubclass(cls, RootModel)
+            ):
+                models.append(cls)
+            elif issubclass(cls, Enum) and cls is not Enum:
+                enums.append(cls)
+
+    return models, enums
