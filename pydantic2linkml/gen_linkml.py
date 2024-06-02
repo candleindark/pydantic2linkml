@@ -10,10 +10,11 @@ from pydantic import BaseModel
 
 # noinspection PyProtectedMember
 from pydantic._internal import _typing_extra
-from pydantic.json_schema import (
-    CoreSchemaOrFieldType,
-    CoreSchemaOrField,
-)
+
+# noinspection PyProtectedMember
+from pydantic._internal._core_utils import CoreSchemaOrField
+
+from pydantic.json_schema import CoreSchemaOrFieldType
 from pydantic_core import core_schema
 from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.linkml_model import (
