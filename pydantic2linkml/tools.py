@@ -150,22 +150,22 @@ def get_locally_defined_fields(model: Type[BaseModel]) -> LocallyDefinedFields:
     parent_model = get_parent_model(model)
 
     # Names of locally defined fields
-    locally_defined_fn = set(model.model_fields).intersection(model.__annotations__)
+    locally_defined_fns = set(model.model_fields).intersection(model.__annotations__)
 
-    # Names newly defined fields
-    new_fn = locally_defined_fn.difference(parent_model.model_fields)
+    # Names of newly defined fields
+    new_fns = locally_defined_fns.difference(parent_model.model_fields)
 
     # Names of overriding fields
-    overriding_fn = locally_defined_fn - new_fn
+    overriding_fns = locally_defined_fns - new_fns
 
     model_schema = model.__pydantic_core_schema__
     return LocallyDefinedFields(
         new={
-            fn: FieldSchema(get_field_schema(model, fn), model_schema) for fn in new_fn
+            fn: FieldSchema(get_field_schema(model, fn), model_schema) for fn in new_fns
         },
         overriding={
             fn: FieldSchema(get_field_schema(model, fn), model_schema)
-            for fn in overriding_fn
+            for fn in overriding_fns
         },
     )
 
