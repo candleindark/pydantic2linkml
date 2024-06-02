@@ -13,6 +13,9 @@ import inspect
 from pydantic import BaseModel, RootModel
 from pydantic_core import core_schema
 
+# noinspection PyProtectedMember
+from pydantic._internal import _core_utils
+
 from .exceptions import NameCollisionError
 
 
@@ -103,6 +106,88 @@ def resolve_ref_schema(
     return maybe_ref_schema
 
 
+def strip_function_schema(
+    schema: _core_utils.AnyFunctionSchema,
+) -> core_schema.CoreSchema:
+    """
+    Strip the outermost schema of a function schema
+
+    :param schema: The function schema
+    :return: The inner schema of the function schema
+    :raises ValueError: If the given function schema is not a function with an inner
+        schema
+    """
+
+    if _core_utils.is_function_with_inner_schema(schema):
+        return schema["schema"]
+    else:
+        raise ValueError(
+            "The given function schema is not a function with an inner schema. "
+            "No outer schema to strip."
+        )
+
+
+# A mapping from unneeded wrapping schema types to functions that strip the outermost
+# unneeded wrapping schema. The set of schema types deemed as unneeded may change in
+# the future if we are able to harvest the information in any of the schema types.
+UNNEEDED_WRAPPING_SCHEMA_TYPE_TO_STRIP_FUNC: dict[
+    str, Callable[[core_schema.CoreSchema], core_schema.CoreSchema]
+] = {
+    "function-before": strip_function_schema,
+    "function-after": strip_function_schema,
+    "function-wrap": strip_function_schema,
+    "function-plain": strip_function_schema,
+}
+
+
+def strip_unneeded_wrapping_schema(
+    schema: core_schema.CoreSchema,
+) -> core_schema.CoreSchema:
+    """
+    Strip the outermost unneeded wrapping schema
+
+    :param schema: The schema to be stripped
+    :return: The inner schema of the given schema if the outermost schema of the given
+        schema is an unneeded wrapping schema. Otherwise, the given schema itself is
+        returned.
+    """
+    schema_type = schema["type"]
+
+    if schema_type in UNNEEDED_WRAPPING_SCHEMA_TYPE_TO_STRIP_FUNC:
+        return UNNEEDED_WRAPPING_SCHEMA_TYPE_TO_STRIP_FUNC[schema_type](schema)
+    else:
+        return schema
+
+
+def get_model_schema(model: Type[BaseModel]) -> core_schema.ModelSchema:
+    """
+    Get the corresponding `core_schema.ModelSchema` of a Pydantic model
+
+    :param model: The Pydantic model
+    """
+    raw_model_schema = model.__pydantic_core_schema__
+    model_schema = raw_model_schema
+
+    while True:
+        model_schema = resolve_ref_schema(model_schema, context=raw_model_schema)
+
+        # Strip an unneeded wrapping schema
+        inner_schema = strip_unneeded_wrapping_schema(model_schema)
+
+        if inner_schema is model_schema:
+            # Exit while-loop if no stripping is done, i.e. `model_schema` is already
+            # devoid of any unneeded wrapping schema
+            break
+        else:
+            model_schema = inner_schema
+
+    assert (
+        model_schema["type"] == "model"
+    ), "Assumption about how model schema is stored is wrong."
+
+    return cast(core_schema.ModelSchema, model_schema)
+
+
 def get_field_schema(model: Type[BaseModel], fn: str) -> core_schema.CoreSchema:
     """
     Get the resolved Pydantic core schema of a field in a Pydantic model
@@ -114,17 +199,15 @@ def get_field_schema(model: Type[BaseModel], fn: str) -> core_schema.CoreSchema:
     Note: The returned schema is guaranteed to be resolved, i.e. it is not a reference
         schema.
     """
-    context = model.__pydantic_core_schema__
-    model_schema = resolve_ref_schema(context, context)
 
-    assert model_schema["type"] == "model"
+    model_schema = get_model_schema(model)
 
     if model_schema["schema"]["type"] == "model-fields":
         return resolve_ref_schema(
             cast(core_schema.ModelFieldsSchema, model_schema["schema"])["fields"][fn][
                 "schema"
             ],
-            context,
+            context=model.__pydantic_core_schema__,
         )
     else:
         raise NotImplementedError(
