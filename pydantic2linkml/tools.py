@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import importlib
-from typing import Type, NamedTuple, Optional, cast, TypeVar
+from typing import NamedTuple, Optional, cast, TypeVar
 from types import ModuleType
 import re
 from collections.abc import Iterable, Callable
@@ -34,7 +34,7 @@ class FieldSchema(NamedTuple):
     context: core_schema.CoreSchema
 
 
-def get_parent_models(model: Type[BaseModel]) -> list[Type[BaseModel]]:
+def get_parent_models(model: type[BaseModel]) -> list[type[BaseModel]]:
     """
     Get the parent Pydantic models of a Pydantic model
 
@@ -149,7 +149,7 @@ def strip_unneeded_wrapping_schema(
         return schema
 
 
-def get_model_schema(model: Type[BaseModel]) -> core_schema.ModelSchema:
+def get_model_schema(model: type[BaseModel]) -> core_schema.ModelSchema:
     """
     Get the corresponding `core_schema.ModelSchema` of a Pydantic model
 
@@ -178,7 +178,7 @@ def get_model_schema(model: Type[BaseModel]) -> core_schema.ModelSchema:
     return cast(core_schema.ModelSchema, model_schema)
 
 
-def get_field_schema(model: Type[BaseModel], fn: str) -> core_schema.CoreSchema:
+def get_field_schema(model: type[BaseModel], fn: str) -> core_schema.CoreSchema:
     """
     Get the resolved Pydantic core schema of a field in a Pydantic model
 
@@ -206,7 +206,7 @@ def get_field_schema(model: Type[BaseModel], fn: str) -> core_schema.CoreSchema:
         )
 
 
-def get_locally_defined_fields(model: Type[BaseModel]) -> LocallyDefinedFields:
+def get_locally_defined_fields(model: type[BaseModel]) -> LocallyDefinedFields:
     """
     Get the fields defined in a Pydantic model that are not inherited
 
@@ -269,7 +269,7 @@ def bucketize(
     return buckets
 
 
-def ensure_unique_names(*clses: Type) -> None:
+def ensure_unique_names(*clses: type) -> None:
     """
     In the context of the collection of all classes given as an argument,
     ensure all of them have a unique name.
