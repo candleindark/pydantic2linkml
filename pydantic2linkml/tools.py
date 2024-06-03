@@ -34,29 +34,19 @@ class FieldSchema(NamedTuple):
     context: core_schema.CoreSchema
 
 
-def get_parent_model(model: Type[BaseModel]) -> Optional[Type[BaseModel]]:
+def get_parent_models(model: Type[BaseModel]) -> list[Type[BaseModel]]:
     """
-    Get the parent Pydantic model of a Pydantic model
+    Get the parent Pydantic models of a Pydantic model
 
     :param model: The Pydantic model
-    :return: The parent Pydantic model of the input model. Returns `None` if the input
-        is `pydantic.BaseModel`.
-    :raises ValueError: If the model has multiple Pydantic models as an immediate parent
+    :return: The list of parent Pydantic models of the input model
 
-    Note: This function only handles Pydantic models having only one Pydantic model as
-        an immediate parent. If the model has multiple Pydantic models as an immediate
-        parent, this function will raise a ValueError.
+    Note: The order of the parent models returned is the models' order in the definition
+        of the input model.
+    Note: The input Pydantic model of `pydantic.BaseModel` produces a result of an empty
+        list.
     """
-    parent_model: Optional[Type[BaseModel]] = None
-
-    for base in model.__bases__:
-        if issubclass(base, BaseModel):
-            if parent_model is None:
-                parent_model = base
-            else:
-                raise ValueError(f"Model {model} has multiple Pydantic base models")
-
-    return parent_model
+    return [b for b in model.__bases__ if issubclass(b, BaseModel)]
 
 
 def resolve_ref_schema(
@@ -229,14 +219,13 @@ def get_locally_defined_fields(model: Type[BaseModel]) -> LocallyDefinedFields:
             The values in both dictionaries are `FieldSchema` objects representing the
                 Pydantic core schemas of respective fields in context.
     """
-
-    parent_model = get_parent_model(model)
-
     # Names of locally defined fields
     locally_defined_fns = set(model.model_fields).intersection(model.__annotations__)
 
     # Names of newly defined fields
-    new_fns = locally_defined_fns.difference(parent_model.model_fields)
+    new_fns = locally_defined_fns.difference(
+        *(pm.model_fields for pm in get_parent_models(model))
+    )
 
     # Names of overriding fields
     overriding_fns = locally_defined_fns - new_fns

@@ -7,13 +7,16 @@ import pytest
 
 
 def test_get_parent_model():
-    from pydantic2linkml.tools import get_parent_model
+    from pydantic2linkml.tools import get_parent_models
     from pydantic import BaseModel
 
     class Foo:
         pass
 
     class Bar:
+        pass
+
+    class Baz:
         pass
 
     class A(BaseModel):
@@ -28,16 +31,14 @@ def test_get_parent_model():
     class X(BaseModel):
         pass
 
-    class Z(X, C):
+    class Z(X, Baz, C):
         pass
 
-    assert get_parent_model(BaseModel) is None
-    assert get_parent_model(A) is BaseModel
-    assert get_parent_model(B) is A
-    assert get_parent_model(C) is B
-
-    with pytest.raises(ValueError, match="multiple Pydantic base models"):
-        get_parent_model(Z)
+    assert len(get_parent_models(BaseModel)) == 0
+    assert get_parent_models(A) == [BaseModel]
+    assert get_parent_models(B) == [A]
+    assert get_parent_models(C) == [B]
+    assert get_parent_models(Z) == [X, C]
 
 
 class TestResolveRefSchema:
