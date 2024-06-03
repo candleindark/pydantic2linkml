@@ -333,19 +333,19 @@ def get_all_modules(root_module_name: str) -> list[ModuleType]:
 
 def fetch_defs(
     modules: Iterable[ModuleType],
-) -> tuple[list[type[BaseModel]], list[type[Enum]]]:
+) -> tuple[set[type[BaseModel]], set[type[Enum]]]:
     """
     Fetch Python objects that provide schema definitions from given modules
 
     :param modules: The given modules
-    :return: A tuple of two lists:
-        The first list contains strict subclasses of `pydantic.BaseModel` that is not
+    :return: A tuple of two sets:
+        The first set contains strict subclasses of `pydantic.BaseModel` that is not
             a subclass of `pydantic.RootModel` in the given modules
-        The second list contains strict subclasses of `enum.Enum` in the given modules
+        The second set contains strict subclasses of `enum.Enum` in the given modules
     """
 
-    models: list[type[BaseModel]] = []
-    enums: list[type[Enum]] = []
+    models: set[type[BaseModel]] = set()
+    enums: set[type[Enum]] = set()
 
     for module in modules:
         for _, cls in inspect.getmembers(module, inspect.isclass):
@@ -355,8 +355,8 @@ def fetch_defs(
                 and cls is not BaseModel
                 and not issubclass(cls, RootModel)
             ):
-                models.append(cls)
+                models.add(cls)
             elif issubclass(cls, Enum) and cls is not Enum:
-                enums.append(cls)
+                enums.add(cls)
 
     return models, enums
