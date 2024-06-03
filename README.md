@@ -10,5 +10,3 @@ To run the program, use:
 ```
 
 ### Limitations
-
-1. Supports only Pydantic models with maximum of one immediate parent that is a Pydantic model. 
