@@ -193,10 +193,14 @@ def get_field_schema(model: type[BaseModel], fn: str) -> core_schema.CoreSchema:
     model_schema = get_model_schema(model)
 
     if model_schema["schema"]["type"] == "model-fields":
+        model_field = cast(core_schema.ModelFieldsSchema, model_schema["schema"])[
+            "fields"
+        ][fn]
+
+        assert model_field["type"] == "model-field"
+
         return resolve_ref_schema(
-            cast(core_schema.ModelFieldsSchema, model_schema["schema"])["fields"][fn][
-                "schema"
-            ],
+            model_field["schema"],
             context=model.__pydantic_core_schema__,
         )
     else:
