@@ -203,14 +203,14 @@ class SlotGenerator:
 
         self._slot: SlotDefinition = SlotDefinition(name=field_name)
         self._field_schema: FieldSchema = field_schema
-        self._schema_type_to_method = self.build_schema_type_to_method()
+        self._schema_type_to_method = self._build_schema_type_to_method()
 
         # This changes to True after this generator generates a slot schema
         # (for preventing issues caused by accidental re-use
         # of this generator). See class docstring for more info.
         self._used: bool = False
 
-    def build_schema_type_to_method(
+    def _build_schema_type_to_method(
         self,
     ) -> dict[CoreSchemaOrFieldType, Callable[[CoreSchemaOrField], None]]:
         """Builds a dictionary mapping schema and field types to methods for
