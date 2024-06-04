@@ -25,3 +25,27 @@ class TestGenLinkml:
 
         models, enums = fetch_defs(get_all_modules(root_module_name))
         LinkmlGenerator(models=models, enums=enums)
+
+
+class TestSlotGenerator:
+    def test_instantiation(self):
+        from pydantic import BaseModel
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: int
+
+        field_schema = get_field_schema(Foo, "x")
+
+        slot_gen = SlotGenerator("Eks", field_schema)
+
+        assert slot_gen._slot.name == "Eks"
+        assert slot_gen._field_schema == field_schema
+
+        # Test the _schema_type_to_method mapping at selective keys
+        assert slot_gen._schema_type_to_method["any"] == slot_gen._any_schema
+        assert slot_gen._schema_type_to_method["bool"] == slot_gen._bool_schema
+        assert slot_gen._schema_type_to_method["model"] == slot_gen._model_schema
+
+        assert not slot_gen._used
