@@ -174,19 +174,27 @@ class TestGetFieldSchema:
 
         a_field_schema_from_a = get_field_schema(A, "a")
         a_field_schema_from_b = get_field_schema(B, "a")
-        assert a_field_schema_from_a == a_field_schema_from_b == {"type": "int"}
+        assert (
+            a_field_schema_from_a.schema
+            == a_field_schema_from_b.schema
+            == {"type": "int"}
+        )
 
         b_field_schema_from_a = get_field_schema(A, "b")
         b_field_schema_from_b = get_field_schema(B, "b")
-        assert b_field_schema_from_a == b_field_schema_from_b == {"type": "str"}
+        assert (
+            b_field_schema_from_a.schema
+            == b_field_schema_from_b.schema
+            == {"type": "str"}
+        )
 
         x_field_schema = get_field_schema(B, "x")
-        assert x_field_schema["type"] == "model"
-        assert x_field_schema["cls"] is A
+        assert x_field_schema.schema["type"] == "model"
+        assert x_field_schema.schema["cls"] is A
 
         y_field_schema = get_field_schema(B, "y")
-        assert y_field_schema["type"] == "model"
-        assert y_field_schema["cls"] is B
+        assert y_field_schema.schema["type"] == "model"
+        assert y_field_schema.schema["cls"] is B
 
     def test_input_without_model_fields(self):
         """

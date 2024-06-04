@@ -178,9 +178,10 @@ def get_model_schema(model: type[BaseModel]) -> core_schema.ModelSchema:
     return cast(core_schema.ModelSchema, model_schema)
 
 
-def get_field_schema(model: type[BaseModel], fn: str) -> core_schema.CoreSchema:
+def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
     """
-    Get the resolved Pydantic core schema of a field in a Pydantic model
+    Get the `FieldSchema` wrapping the resolved Pydantic core schema of a field
+        in a Pydantic model
 
     :param model: The Pydantic model
     :param fn: The name of the field
@@ -199,8 +200,11 @@ def get_field_schema(model: type[BaseModel], fn: str) -> core_schema.CoreSchema:
 
         assert model_field["type"] == "model-field"
 
-        return resolve_ref_schema(
-            model_field["schema"],
+        return FieldSchema(
+            schema=resolve_ref_schema(
+                model_field["schema"],
+                context=model.__pydantic_core_schema__,
+            ),
             context=model.__pydantic_core_schema__,
         )
     else:
@@ -234,15 +238,9 @@ def get_locally_defined_fields(model: type[BaseModel]) -> LocallyDefinedFields:
     # Names of overriding fields
     overriding_fns = locally_defined_fns - new_fns
 
-    model_schema = model.__pydantic_core_schema__
     return LocallyDefinedFields(
-        new={
-            fn: FieldSchema(get_field_schema(model, fn), model_schema) for fn in new_fns
-        },
-        overriding={
-            fn: FieldSchema(get_field_schema(model, fn), model_schema)
-            for fn in overriding_fns
-        },
+        new={fn: get_field_schema(model, fn) for fn in new_fns},
+        overriding={fn: get_field_schema(model, fn) for fn in overriding_fns},
     )
 
 
