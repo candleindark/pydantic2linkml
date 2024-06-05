@@ -51,7 +51,6 @@ class LinkmlGenerator:
         id_: Optional[str] = None,
         models: Optional[Iterable[type[BaseModel]]] = None,
         enums: Optional[Iterable[type[Enum]]] = None,
-        add_defaults: bool = True,
     ):
         """
         :param name: The name of the LinkML schema to be generated
@@ -60,8 +59,6 @@ class LinkmlGenerator:
             in the generated schema
         :param enums: An iterable of Enums to be converted to LinkML enums in
             the generated schema
-        :param add_defaults: Whether to set some defaults in the generated schema as
-            specified in `SchemaBuilder.add_defaults`
 
         raises NameCollisionError: If there are classes with the same name in the
             combined collection of `models` and `enums`
@@ -75,8 +72,7 @@ class LinkmlGenerator:
 
         self._enums = enums
 
-        sb = SchemaBuilder(name, id_)
-        self._sb = sb.add_defaults() if add_defaults else sb
+        self._sb = SchemaBuilder(name, id_).add_defaults()
 
         # This changes to True after this generator generates a schema
         # (for preventing issues caused by accidental re-use
