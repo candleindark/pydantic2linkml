@@ -6,10 +6,22 @@ class TestGenLinkml:
         "root_module_name",
         [
             "dandischema.models",
-            # "aind_data_schema.models" todo: to be added later
-            # currently, it causes name collision due to
-            # multiple classes from different modules having the
-            # same name
+            "aind_data_schema.components.coordinates",
+            # Naming conflict at this one
+            # TODO: Re-enable this one once handling of the naming conflict is devised
+            # "aind_data_schema.components.devices",
+            "aind_data_schema.components.reagent",
+            "aind_data_schema.components.stimulus",
+            "aind_data_schema.components.tile",
+            "aind_data_schema.core.acquisition",
+            "aind_data_schema.core.data_description",
+            "aind_data_schema.core.instrument",
+            "aind_data_schema.core.metadata",
+            "aind_data_schema.core.procedures",
+            "aind_data_schema.core.processing",
+            "aind_data_schema.core.rig",
+            "aind_data_schema.core.session",
+            "aind_data_schema.core.subject",
         ],
     )
     def test_instantiation_with_definitions_in_module(self, root_module_name):
