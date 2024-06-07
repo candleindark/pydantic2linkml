@@ -14,6 +14,9 @@ from pydantic import BaseModel, RootModel
 from pydantic_core import core_schema
 
 # noinspection PyProtectedMember
+from pydantic.fields import FieldInfo
+
+# noinspection PyProtectedMember
 from pydantic._internal import _core_utils
 
 from .exceptions import NameCollisionError
@@ -32,6 +35,9 @@ class FieldSchema(NamedTuple):
     # (i.e. the Pydantic core schema of the model that defined the field).
     # This context is needed to resolve any references in the field schema.
     context: core_schema.CoreSchema
+
+    # The `FieldInfo` object representing the field in the Pydantic model
+    field: FieldInfo
 
 
 def get_parent_models(model: type[BaseModel]) -> list[type[BaseModel]]:
@@ -191,6 +197,10 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
         schema.
     """
 
+    # The `FieldInfo` object representing the field in the Pydantic model
+    field: FieldInfo = model.model_fields[fn]
+
+    # The `core_schema.ModelSchema` of the Pydantic model
     model_schema = get_model_schema(model)
 
     if model_schema["schema"]["type"] == "model-fields":
@@ -206,6 +216,7 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
                 context=model.__pydantic_core_schema__,
             ),
             context=model.__pydantic_core_schema__,
+            field=field,
         )
     else:
         raise NotImplementedError(
