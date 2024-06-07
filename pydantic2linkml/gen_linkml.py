@@ -63,6 +63,9 @@ class LinkmlGenerator:
         raises NameCollisionError: If there are classes with the same name in the
             combined collection of `models` and `enums`
         """
+        models: Iterable[type[BaseModel]] = models if models is not None else set()
+        enums: Iterable[type[Enum]] = enums if enums is not None else set()
+
         ensure_unique_names(*models, *enums)
 
         # Map of models to their locally defined fields
