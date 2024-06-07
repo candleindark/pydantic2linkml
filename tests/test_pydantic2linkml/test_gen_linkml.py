@@ -38,6 +38,24 @@ class TestGenLinkml:
         models, enums = fetch_defs(get_all_modules(root_module_name))
         LinkmlGenerator(models=models, enums=enums)
 
+    def test_establish_supporting_defs(self):
+        """
+        Verify the setting of supporting definitions in the schema associated with
+            a GenLinkml object.
+
+        The setting of the supporting definitions is done by the
+            `_establish_supporting_defs()` method.
+        """
+        from pydantic2linkml.gen_linkml import LinkmlGenerator
+
+        gen = LinkmlGenerator()
+        schema = gen._sb.schema
+
+        assert "Any" in schema.classes
+        assert schema.classes["Any"].name == "Any"
+        assert schema.classes["Any"].description == "Any object"
+        assert schema.classes["Any"].class_uri == "linkml:Any"
+
 
 class TestSlotGenerator:
     def test_instantiation(self):

@@ -19,6 +19,7 @@ from pydantic_core import core_schema
 from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.linkml_model import (
     SchemaDefinition,
+    ClassDefinition,
     EnumDefinition,
     PermissibleValue,
     SlotDefinition,
@@ -74,8 +75,8 @@ class LinkmlGenerator:
         }
 
         self._enums = enums
-
         self._sb = SchemaBuilder(name, id_).add_defaults()
+        self._establish_supporting_defs()
 
         # This changes to True after this generator generates a schema
         # (for preventing issues caused by accidental re-use
@@ -181,6 +182,17 @@ class LinkmlGenerator:
         """
         raise NotImplementedError("Method not yet implemented")
         # todo: Make sure to provide slot usage in the individual classes if needed
+
+    def _establish_supporting_defs(self):
+        """
+        Establish the supporting definitions in the schema
+        """
+        # Add an `linkml:Any` class
+        self._sb.add_class(
+            ClassDefinition(
+                name="Any", description="Any object", class_uri="linkml:Any"
+            )
+        )
 
 
 class SlotGenerator:
