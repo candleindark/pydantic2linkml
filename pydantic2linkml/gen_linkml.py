@@ -36,6 +36,12 @@ from .tools import (
     bucketize,
 )
 
+# The LinkML Any type
+# For more info, see https://linkml.io/linkml/schemas/advanced.html#linkml-any-type
+any_class_def = ClassDefinition(
+    name="Any", description="Any object", class_uri="linkml:Any"
+)
+
 
 class LinkmlGenerator:
     """
@@ -188,11 +194,7 @@ class LinkmlGenerator:
         Establish the supporting definitions in the schema
         """
         # Add an `linkml:Any` class
-        self._sb.add_class(
-            ClassDefinition(
-                name="Any", description="Any object", class_uri="linkml:Any"
-            )
-        )
+        self._sb.add_class(any_class_def)
 
 
 class SlotGenerator:
@@ -293,7 +295,7 @@ class SlotGenerator:
 
         :param _schema: The core schema
         """
-        self._slot.range = "Any"
+        self._slot.range = any_class_def.name
 
     def _none_schema(self, schema: core_schema.NoneSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
