@@ -267,10 +267,25 @@ class SlotGenerator:
                 f"{type(self).__name__} to generate another schema."
             )
 
-        # todo: initiate the slot construction process
+        # Shape the contained slot according to core schema of the corresponding field
+        self._shape_slot(self._field_schema.schema)
 
         self._used = True
         return self._slot
+
+    def _shape_slot(self, schema: CoreSchemaOrField) -> None:
+        """
+        Shape the slot definition contained in this generator
+            per the schema provided
+
+        Note:
+             This method is inspired by
+                `pydantic.json_schema.GenerateJsonSchema.generate_inner()`
+        """
+        shape_slot_for_specific_schema_type = self._schema_type_to_method[
+            schema["type"]
+        ]
+        shape_slot_for_specific_schema_type(schema)
 
     def _any_schema(self, schema: core_schema.AnySchema) -> None:
         raise NotImplementedError("Method not yet implemented")
