@@ -287,8 +287,13 @@ class SlotGenerator:
         ]
         shape_slot_for_specific_schema_type(schema)
 
-    def _any_schema(self, schema: core_schema.AnySchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+    def _any_schema(self, _schema: core_schema.AnySchema) -> None:
+        """
+        Shape the contained slot definition to match any value
+
+        :param _schema: The core schema
+        """
+        self._slot.range = "Any"
 
     def _none_schema(self, schema: core_schema.NoneSchema) -> None:
         raise NotImplementedError("Method not yet implemented")

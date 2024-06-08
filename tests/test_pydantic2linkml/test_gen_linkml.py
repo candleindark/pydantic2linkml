@@ -79,3 +79,19 @@ class TestSlotGenerator:
         assert slot_gen._schema_type_to_method["model"] == slot_gen._model_schema
 
         assert not slot_gen._used
+
+    def test_any_schema(self):
+        from typing import Any
+
+        from pydantic import BaseModel
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: Any
+
+        field_schema = get_field_schema(Foo, "x")
+        gen = SlotGenerator("x", field_schema)
+        slot = gen.generate()
+        assert slot.range == "Any"
