@@ -175,9 +175,9 @@ class LinkmlGenerator:
             warn(warnings_msg)
 
         # Add the slots to the schema
-        for f_name, schema_lst in buckets.items():
+        for schema_lst in buckets.values():
             # Use the first schema in `schema_lst` to generate the slot
-            slot = SlotGenerator(f_name, schema_lst[0]).generate()
+            slot = SlotGenerator(schema_lst[0]).generate()
 
             # Add the slot to the schema
             self._sb.add_slot(slot)
@@ -206,15 +206,12 @@ class SlotGenerator:
             a LinkML slot schema.
     """
 
-    def __init__(self, field_name: str, field_schema: FieldSchema):
+    def __init__(self, field_schema: FieldSchema):
         """
-        :param field_name: The name of the Pydantic model field corresponding
-            to the slot to be generated
         :param field_schema: The `FieldSchema` object specifying the Pydantic core
             schema of the corresponding field with context
         """
-
-        self._slot: SlotDefinition = SlotDefinition(name=field_name)
+        self._slot: SlotDefinition = SlotDefinition(name=field_schema.field_name)
         self._field_schema: FieldSchema = field_schema
         self._schema_type_to_method = self._build_schema_type_to_method()
 

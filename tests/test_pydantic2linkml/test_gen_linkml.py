@@ -68,9 +68,9 @@ class TestSlotGenerator:
 
         field_schema = get_field_schema(Foo, "x")
 
-        slot_gen = SlotGenerator("Eks", field_schema)
+        slot_gen = SlotGenerator(field_schema)
 
-        assert slot_gen._slot.name == "Eks"
+        assert slot_gen._slot.name == "x"
         assert slot_gen._field_schema == field_schema
 
         # Test the _schema_type_to_method mapping at selective keys
@@ -92,6 +92,6 @@ class TestSlotGenerator:
             x: Any
 
         field_schema = get_field_schema(Foo, "x")
-        gen = SlotGenerator("x", field_schema)
+        gen = SlotGenerator(field_schema)
         slot = gen.generate()
         assert slot.range == "Any"
