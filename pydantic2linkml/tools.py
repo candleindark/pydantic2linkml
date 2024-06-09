@@ -36,6 +36,9 @@ class FieldSchema(NamedTuple):
     # This context is needed to resolve any references in the field schema.
     context: core_schema.CoreSchema
 
+    # The name of the field in the Pydantic model
+    field_name: str
+
     # The `FieldInfo` object representing the field in the Pydantic model
     field_info: FieldInfo
 
@@ -216,6 +219,7 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
                 context=model.__pydantic_core_schema__,
             ),
             context=model.__pydantic_core_schema__,
+            field_name=fn,
             field_info=field_info,
         )
     else:
