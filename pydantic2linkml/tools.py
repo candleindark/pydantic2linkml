@@ -190,7 +190,7 @@ def get_model_schema(model: type[BaseModel]) -> core_schema.ModelSchema:
 def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
     """
     Get the `FieldSchema` wrapping the resolved Pydantic core schema of a field
-        in a Pydantic model
+    in a Pydantic model
 
     :param model: The Pydantic model
     :param fn: The name of the field

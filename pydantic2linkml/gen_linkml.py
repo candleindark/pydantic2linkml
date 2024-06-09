@@ -447,7 +447,7 @@ class SlotGenerator:
     ) -> None:
         """
         Shape the contained slot definition to match
-            a `core_schema.DefinitionReferenceSchema`
+        a `core_schema.DefinitionReferenceSchema`
 
         :param schema: The `core_schema.DefinitionsSchema`
         """
