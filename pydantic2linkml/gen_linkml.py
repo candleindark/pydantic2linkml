@@ -435,7 +435,12 @@ class SlotGenerator:
         raise NotImplementedError("Method not yet implemented")
 
     def _definitions_schema(self, schema: core_schema.DefinitionsSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a `core_schema.DefinitionsSchema`
+
+        :param schema: The `core_schema.DefinitionsSchema`
+        """
+        self._shape_slot(resolve_ref_schema(schema, self._field_schema.context))
 
     def _definition_ref_schema(
         self, schema: core_schema.DefinitionReferenceSchema
