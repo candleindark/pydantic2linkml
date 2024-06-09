@@ -181,8 +181,8 @@ class TestGetFieldSchema:
         )
         assert a_field_schema_from_a.context == A.__pydantic_core_schema__
         assert a_field_schema_from_b.context == B.__pydantic_core_schema__
-        assert a_field_schema_from_a.field is A.model_fields["a"]
-        assert a_field_schema_from_b.field is B.model_fields["a"]
+        assert a_field_schema_from_a.field_info is A.model_fields["a"]
+        assert a_field_schema_from_b.field_info is B.model_fields["a"]
 
         b_field_schema_from_a = get_field_schema(A, "b")
         b_field_schema_from_b = get_field_schema(B, "b")
@@ -193,8 +193,8 @@ class TestGetFieldSchema:
         )
         assert b_field_schema_from_a.context == A.__pydantic_core_schema__
         assert b_field_schema_from_b.context == B.__pydantic_core_schema__
-        assert b_field_schema_from_a.field is A.model_fields["b"]
-        assert b_field_schema_from_b.field is B.model_fields["b"]
+        assert b_field_schema_from_a.field_info is A.model_fields["b"]
+        assert b_field_schema_from_b.field_info is B.model_fields["b"]
 
         # Verify the resolution of the field schema
         x_field_schema = get_field_schema(B, "x")

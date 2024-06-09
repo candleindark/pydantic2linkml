@@ -37,7 +37,7 @@ class FieldSchema(NamedTuple):
     context: core_schema.CoreSchema
 
     # The `FieldInfo` object representing the field in the Pydantic model
-    field: FieldInfo
+    field_info: FieldInfo
 
 
 def get_parent_models(model: type[BaseModel]) -> list[type[BaseModel]]:
@@ -198,7 +198,7 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
     """
 
     # The `FieldInfo` object representing the field in the Pydantic model
-    field: FieldInfo = model.model_fields[fn]
+    field_info: FieldInfo = model.model_fields[fn]
 
     # The `core_schema.ModelSchema` of the Pydantic model
     model_schema = get_model_schema(model)
@@ -216,7 +216,7 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
                 context=model.__pydantic_core_schema__,
             ),
             context=model.__pydantic_core_schema__,
-            field=field,
+            field_info=field_info,
         )
     else:
         raise NotImplementedError(
