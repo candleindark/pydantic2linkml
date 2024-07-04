@@ -294,8 +294,20 @@ class SlotGenerator:
         """
         self._slot.range = any_class_def.name
 
-    def _none_schema(self, schema: core_schema.NoneSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+    def _none_schema(self, _schema: core_schema.NoneSchema) -> None:
+        """
+        Shape the contained slot definition to match `core_schema.NoneSchema`
+
+        Note in the contained slot definition that the corresponding field in
+        a Pydantic model is restricted to `NoneType` yet LinkML does not have
+        null values
+
+        Note: Currently, this method does not add any restriction to the contained slot.
+        """
+        self._slot.notes.append(
+            f"{__package__}: LinkML does not have null values. "
+            f"(For details, see https://github.com/orgs/linkml/discussions/1975)."
+        )
 
     def _bool_schema(self, schema: core_schema.BoolSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
