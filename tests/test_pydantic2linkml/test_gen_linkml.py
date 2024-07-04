@@ -94,8 +94,7 @@ class TestSlotGenerator:
             x: Any
 
         field_schema = get_field_schema(Foo, "x")
-        gen = SlotGenerator(field_schema)
-        slot = gen.generate()
+        slot = SlotGenerator(field_schema).generate()
         assert slot.range == "Any"
 
     def test_none_schema(self):
