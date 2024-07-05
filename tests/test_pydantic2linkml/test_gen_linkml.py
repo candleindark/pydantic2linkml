@@ -113,3 +113,16 @@ class TestSlotGenerator:
             slot.notes[0] == f"{TRANSLATOR_PACKAGE}: LinkML does not have null values. "
             f"(For details, see https://github.com/orgs/linkml/discussions/1975)."
         )
+
+    def test_bool_schema(self):
+        from pydantic import BaseModel
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: bool
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+        assert slot.range == "boolean"

@@ -309,8 +309,11 @@ class SlotGenerator:
             f"(For details, see https://github.com/orgs/linkml/discussions/1975)."
         )
 
-    def _bool_schema(self, schema: core_schema.BoolSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+    def _bool_schema(self, _schema: core_schema.BoolSchema) -> None:
+        """
+        Shape the contained slot definition to match a Boolean value
+        """
+        self._slot.range = "boolean"
 
     def _int_schema(self, schema: core_schema.IntSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
