@@ -316,7 +316,32 @@ class SlotGenerator:
         self._slot.range = "boolean"
 
     def _int_schema(self, schema: core_schema.IntSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match an integer value
+        """
+        self._slot.range = "integer"
+
+        if "multiple_of" in schema:
+            self._slot.notes.append(
+                f"{__package__}: Unable to express the restriction of being "
+                f"a multiple of {schema['multiple_of']}."
+            )
+        if "le" in schema:
+            self._slot.maximum_value = schema["le"]
+        if "ge" in schema:
+            self._slot.minimum_value = schema["ge"]
+        if "lt" in schema:
+            self._slot.maximum_value = (
+                schema["lt"] - 1
+                if self._slot.maximum_value is None
+                else min(self._slot.maximum_value, schema["lt"] - 1)
+            )
+        if "gt" in schema:
+            self._slot.minimum_value = (
+                schema["gt"] + 1
+                if self._slot.minimum_value is None
+                else max(self._slot.minimum_value, schema["gt"] + 1)
+            )
 
     def _float_schema(self, schema: core_schema.FloatSchema) -> None:
         raise NotImplementedError("Method not yet implemented")

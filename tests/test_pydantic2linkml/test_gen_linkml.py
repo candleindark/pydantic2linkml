@@ -126,3 +126,38 @@ class TestSlotGenerator:
         field_schema = get_field_schema(Foo, "x")
         slot = SlotGenerator(field_schema).generate()
         assert slot.range == "boolean"
+
+    @pytest.mark.parametrize(
+        "multiple_of, le, lt, ge, gt, expected_max, expected_min",
+        [
+            (2, 100, 101, 0, -1, 100, 0),
+            (2, 100, 200, -10, -100, 100, -10),
+            (2, 200, 100, -100, -10, 99, -9),
+            (None, 200, 100, -100, -10, 99, -9),
+            (2, 200, None, -100, None, 200, -100),
+            (2, None, 100, None, -10, 99, -9),
+            (None, None, None, None, None, None, None),
+        ],
+    )
+    def test_int_schema(self, multiple_of, le, lt, ge, gt, expected_max, expected_min):
+        from pydantic import BaseModel, Field
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: int = Field(..., multiple_of=multiple_of, le=le, ge=ge, lt=lt, gt=gt)
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert slot.range == "integer"
+
+        if multiple_of is not None:
+            assert len(slot.notes) == 1
+            assert f"a multiple of {multiple_of}" in slot.notes[0]
+        else:
+            assert len(slot.notes) == 0
+
+        assert slot.maximum_value == expected_max
+        assert slot.minimum_value == expected_min
