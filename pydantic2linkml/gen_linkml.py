@@ -306,6 +306,8 @@ class SlotGenerator:
         """
         Shape the contained slot definition to match `core_schema.NoneSchema`
 
+        :param _schema: The `core_schema.NoneSchema` representing the `None` value
+
         Note in the contained slot definition that the corresponding field in
         a Pydantic model is restricted to `NoneType` yet LinkML does not have
         null values
@@ -320,12 +322,16 @@ class SlotGenerator:
     def _bool_schema(self, _schema: core_schema.BoolSchema) -> None:
         """
         Shape the contained slot definition to match a Boolean value
+
+        :param _schema: The `core_schema.BoolSchema` representing the boolean value
         """
         self._slot.range = "boolean"
 
     def _int_schema(self, schema: core_schema.IntSchema) -> None:
         """
         Shape the contained slot definition to match an integer value
+
+        :param schema: The `core_schema.IntSchema` representing the integer value
         """
         self._slot.range = "integer"
 
@@ -354,6 +360,8 @@ class SlotGenerator:
     def _float_schema(self, schema: core_schema.FloatSchema) -> None:
         """
         Shape the contained slot definition to match a float value
+
+        :param schema: The `core_schema.FloatSchema` representing the float value
         """
         self._slot.range = "float"
         if "allow_inf_nan" not in schema or schema["allow_inf_nan"]:
