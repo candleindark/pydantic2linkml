@@ -1,6 +1,17 @@
+from collections.abc import Iterable
+
 import pytest
 
 TRANSLATOR_PACKAGE = "pydantic2linkml"
+
+
+def has_exactly_one_truthy(iterable: Iterable) -> bool:
+    """
+    Determine if exactly one element in an iterable is truthy.
+
+    :param iterable: The iterable
+    """
+    return sum(map(bool, iterable)) == 1
 
 
 class TestGenLinkml:
