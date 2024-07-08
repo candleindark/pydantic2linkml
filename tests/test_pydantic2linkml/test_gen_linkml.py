@@ -172,3 +172,61 @@ class TestSlotGenerator:
 
         assert slot.maximum_value == expected_max
         assert slot.minimum_value == expected_min
+
+    @pytest.mark.parametrize("allow_inf_nan", [True, False, None])
+    @pytest.mark.parametrize("multiple_of", [2, 42, None])
+    @pytest.mark.parametrize("le", [100, -11, None])
+    @pytest.mark.parametrize("ge", [10, -42, None])
+    @pytest.mark.parametrize("lt", [10, -11, None])
+    @pytest.mark.parametrize("gt", [100, -120, None])
+    def test_float_schema(self, allow_inf_nan, multiple_of, le, ge, lt, gt):
+        from pydantic import BaseModel, Field
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: float = Field(
+                ...,
+                allow_inf_nan=allow_inf_nan,
+                multiple_of=multiple_of,
+                le=le,
+                ge=ge,
+                lt=lt,
+                gt=gt,
+            )
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert slot.range == "float"
+
+        msg_in_note_lst = [
+            "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`" in note
+            for note in slot.notes
+        ]
+        if allow_inf_nan is None or allow_inf_nan:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)
+
+        msg_in_note_lst = [f"multiple of {multiple_of}" in note for note in slot.notes]
+        if multiple_of is not None:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)
+
+        assert slot.maximum_value == le
+        assert slot.minimum_value == ge
+
+        msg_in_note_lst = [f"less than {lt}" in note for note in slot.notes]
+        if lt is not None:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)
+
+        msg_in_note_lst = [f"greater than {gt}" in note for note in slot.notes]
+        if gt is not None:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)

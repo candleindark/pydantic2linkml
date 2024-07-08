@@ -352,7 +352,35 @@ class SlotGenerator:
             )
 
     def _float_schema(self, schema: core_schema.FloatSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a float value
+        """
+        self._slot.range = "float"
+        if "allow_inf_nan" not in schema or schema["allow_inf_nan"]:
+            self._attach_note(
+                "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'` "
+                "values. Support for these values is not translated."
+            )
+        if "multiple_of" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being "
+                f"a multiple of {schema['multiple_of']}."
+            )
+        if "le" in schema:
+            self._slot.maximum_value = schema["le"]
+        if "ge" in schema:
+            self._slot.minimum_value = schema["ge"]
+        if "lt" in schema:
+            self._attach_note(
+                f"Unable to express the restriction of being less than {schema['lt']}. "
+                f"For details, see https://github.com/orgs/linkml/discussions/2144"
+            )
+        if "gt" in schema:
+            self._attach_note(
+                f"Unable to express the restriction of being greater than "
+                f"{schema['gt']}. "
+                f"For details, see https://github.com/orgs/linkml/discussions/2144"
+            )
 
     def _decimal_schema(self, schema: core_schema.DecimalSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
