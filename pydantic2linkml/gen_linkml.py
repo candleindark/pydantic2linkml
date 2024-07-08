@@ -286,6 +286,14 @@ class SlotGenerator:
         ]
         shape_slot_for_specific_schema_type(schema)
 
+    def _attach_note(self, note: str) -> None:
+        """
+        Attach a note to the contained slot definition
+
+        :param note: The note to attach
+        """
+        self._slot.notes.append(f"{__package__}: {note}")
+
     def _any_schema(self, _schema: core_schema.AnySchema) -> None:
         """
         Shape the contained slot definition to match any value
@@ -304,9 +312,9 @@ class SlotGenerator:
 
         Note: Currently, this method does not add any restriction to the contained slot.
         """
-        self._slot.notes.append(
-            f"{__package__}: LinkML does not have null values. "
-            f"(For details, see https://github.com/orgs/linkml/discussions/1975)."
+        self._attach_note(
+            "LinkML does not have null values. "
+            "(For details, see https://github.com/orgs/linkml/discussions/1975)."
         )
 
     def _bool_schema(self, _schema: core_schema.BoolSchema) -> None:
@@ -322,8 +330,8 @@ class SlotGenerator:
         self._slot.range = "integer"
 
         if "multiple_of" in schema:
-            self._slot.notes.append(
-                f"{__package__}: Unable to express the restriction of being "
+            self._attach_note(
+                "Unable to express the restriction of being "
                 f"a multiple of {schema['multiple_of']}."
             )
         if "le" in schema:
