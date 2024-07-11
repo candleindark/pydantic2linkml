@@ -14,6 +14,28 @@ def has_exactly_one_truthy(iterable: Iterable) -> bool:
     return sum(map(bool, iterable)) == 1
 
 
+def in_exactly_one_string(substr: str, str_lst: list[str]) -> bool:
+    """
+    Determine if exactly one string in a list of strings contains a given substring.
+
+    :param substr: The substring
+    :param str_lst: The list of strings
+    :return: Whether exactly one string contains the substring
+    """
+    return has_exactly_one_truthy(substr in note for note in str_lst)
+
+
+def in_no_string(substr: str, str_lst: list[str]) -> bool:
+    """
+    Determine if no string in a list of strings contains a given substring.
+
+    :param substr: The substring
+    :param str_lst: The list of strings
+    :return: Whether no string contains the substring
+    """
+    return not any(substr in note for note in str_lst)
+
+
 class TestGenLinkml:
     @pytest.mark.parametrize(
         "root_module_name",
@@ -202,35 +224,32 @@ class TestSlotGenerator:
 
         assert slot.range == "float"
 
-        msg_in_note_lst = [
-            "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`" in note
-            for note in slot.notes
-        ]
+        msg = "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`"
         if allow_inf_nan is None or allow_inf_nan:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [f"multiple of {multiple_of}" in note for note in slot.notes]
+        msg = f"multiple of {multiple_of}"
         if multiple_of is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
         assert slot.maximum_value == le
         assert slot.minimum_value == ge
 
-        msg_in_note_lst = [f"less than {lt}" in note for note in slot.notes]
+        msg = f"less than {lt}"
         if lt is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [f"greater than {gt}" in note for note in slot.notes]
+        msg = f"greater than {gt}"
         if gt is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
     # noinspection DuplicatedCode
     @pytest.mark.parametrize(
@@ -269,52 +288,44 @@ class TestSlotGenerator:
 
         assert slot.range == "decimal"
 
-        msg_in_note_lst = [
-            "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`" in note
-            for note in slot.notes
-        ]
+        msg = "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`"
         if allow_inf_nan is not None and allow_inf_nan:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [
-            f"max number of {max_digits} digits" in note for note in slot.notes
-        ]
+        msg = f"max number of {max_digits} digits"
         if max_digits is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [
-            f"max number of {decimal_places} decimal places" in note
-            for note in slot.notes
-        ]
+        msg = f"max number of {decimal_places} decimal places"
         if decimal_places is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [f"multiple of {multiple_of}" in note for note in slot.notes]
+        msg = f"multiple of {multiple_of}"
         if multiple_of is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
         assert slot.maximum_value == le
         assert slot.minimum_value == ge
 
-        msg_in_note_lst = [f"less than {lt}" in note for note in slot.notes]
+        msg = f"less than {lt}"
         if lt is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [f"greater than {gt}" in note for note in slot.notes]
+        msg = f"greater than {gt}"
         if gt is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
     # noinspection DuplicatedCode
     @pytest.mark.parametrize(
@@ -374,47 +385,32 @@ class TestSlotGenerator:
 
         assert slot.pattern == output_pattern
 
-        msg_in_note_lst = [
-            f"The max length constraint of {max_length} is incorporated" in n
-            for n in slot.notes
-        ]
+        msg = f"The max length constraint of {max_length} is incorporated"
         if max_length is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [
-            f"The min length constraint of {min_length} is incorporated" in n
-            for n in slot.notes
-        ]
+        msg = f"The min length constraint of {min_length} is incorporated"
         if min_length is not None:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [
-            "stripping leading and trailing whitespace in LinkML" in n
-            for n in slot.notes
-        ]
+        msg = "stripping leading and trailing whitespace in LinkML"
         if strip_whitespace is not None and strip_whitespace:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [
-            "Unable to express the option of converting the string to lowercase" in n
-            for n in slot.notes
-        ]
+        msg = "Unable to express the option of converting the string to lowercase"
         if to_lower is not None and to_lower:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
 
-        msg_in_note_lst = [
-            "Unable to express the option of converting the string to uppercase" in n
-            for n in slot.notes
-        ]
+        msg = "Unable to express the option of converting the string to uppercase"
         if to_upper is not None and to_upper:
-            assert has_exactly_one_truthy(msg_in_note_lst)
+            assert in_exactly_one_string(msg, slot.notes)
         else:
-            assert not any(msg_in_note_lst)
+            assert in_no_string(msg, slot.notes)
