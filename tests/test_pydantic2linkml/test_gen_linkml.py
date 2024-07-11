@@ -315,3 +315,106 @@ class TestSlotGenerator:
             assert has_exactly_one_truthy(msg_in_note_lst)
         else:
             assert not any(msg_in_note_lst)
+
+    # noinspection DuplicatedCode
+    @pytest.mark.parametrize(
+        "pattern, max_length, min_length, output_pattern",
+        [
+            (None, 10, 4, r"^(?=.{4,10}$)"),
+            (None, None, 4, r"^(?=.{4,}$)"),
+            (None, 10, None, r"^(?=.{,10}$)"),
+            (r"^[a-zA-Z0-9]+", 3, 2, r"^(?=.{2,3}$)[a-zA-Z0-9]+"),
+            (r"^[a-zA-Z0-9]+", None, 2, r"^(?=.{2,}$)[a-zA-Z0-9]+"),
+            (r"^[a-zA-Z0-9]+", 3, None, r"^(?=.{,3}$)[a-zA-Z0-9]+"),
+            (ptrn := r"^[a-zA-Z0-9]+", None, None, ptrn),
+            (r".*", 10, 4, r"^(?=.{4,10}$).*"),
+            (r".*", None, 4, r"^(?=.{4,}$).*"),
+            (r".*", 10, None, r"^(?=.{,10}$).*"),
+            (ptrn := r".*", None, None, ptrn),
+            (None, None, None, None),
+        ],
+    )
+    @pytest.mark.parametrize("strip_whitespace", [True, False, None])
+    @pytest.mark.parametrize("to_lower", [True, False, None])
+    @pytest.mark.parametrize("to_upper", [True, False, None])
+    def test_str_schema(
+        self,
+        pattern,
+        max_length,
+        min_length,
+        strip_whitespace,
+        to_lower,
+        to_upper,
+        output_pattern,
+    ):
+        from pydantic import BaseModel, StringConstraints
+        from typing_extensions import Annotated
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            # noinspection PyTypeHints
+            x: Annotated[
+                str,
+                StringConstraints(
+                    pattern=pattern,
+                    max_length=max_length,
+                    min_length=min_length,
+                    strip_whitespace=strip_whitespace,
+                    to_lower=to_lower,
+                    to_upper=to_upper,
+                ),
+            ]
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert slot.range == "string"
+
+        assert slot.pattern == output_pattern
+
+        msg_in_note_lst = [
+            f"The max length constraint of {max_length} is incorporated" in n
+            for n in slot.notes
+        ]
+        if max_length is not None:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)
+
+        msg_in_note_lst = [
+            f"The min length constraint of {min_length} is incorporated" in n
+            for n in slot.notes
+        ]
+        if min_length is not None:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)
+
+        msg_in_note_lst = [
+            "stripping leading and trailing whitespace in LinkML" in n
+            for n in slot.notes
+        ]
+        if strip_whitespace is not None and strip_whitespace:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)
+
+        msg_in_note_lst = [
+            "Unable to express the option of converting the string to lowercase" in n
+            for n in slot.notes
+        ]
+        if to_lower is not None and to_lower:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)
+
+        msg_in_note_lst = [
+            "Unable to express the option of converting the string to uppercase" in n
+            for n in slot.notes
+        ]
+        if to_upper is not None and to_upper:
+            assert has_exactly_one_truthy(msg_in_note_lst)
+        else:
+            assert not any(msg_in_note_lst)

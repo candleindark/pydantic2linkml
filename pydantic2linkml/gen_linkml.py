@@ -437,7 +437,79 @@ class SlotGenerator:
             )
 
     def _str_schema(self, schema: core_schema.StringSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a string value
+
+        :param schema: The `core_schema.StringSchema` representing the string value
+        """
+        self._slot.range = "string"
+
+        if "pattern" in schema:
+            self._slot.pattern = schema["pattern"]
+
+        max_length: Optional[int] = schema.get("max_length")
+        min_length: Optional[int] = schema.get("min_length")
+
+        if max_length is not None:
+            self._attach_note(
+                "LinkML does not have direct support for max length constraints. "
+                f"The max length constraint of {max_length} is incorporated "
+                "into the pattern of the slot."
+            )
+
+        if min_length is not None:
+            self._attach_note(
+                "LinkML does not have direct support for min length constraints. "
+                f"The min length constraint of {min_length} is incorporated "
+                "into the pattern of the slot."
+            )
+
+        # == Incorporate any length constraints into the pattern of the slot ==
+        if max_length is not None or min_length is not None:
+            length_constraint_regex = (
+                f"^(?=."
+                f"{{{min_length if min_length is not None else ''},"
+                f"{max_length if max_length is not None else ''}}}$)"
+            )
+
+            orig_ptrn = self._slot.pattern
+            if orig_ptrn is not None:
+                # == There is an existing pattern carried over
+                # from the Pydantic core schema ==
+
+                # Update the pattern to include the length constraint
+                self._slot.pattern = (
+                    f"{length_constraint_regex}"
+                    f"{orig_ptrn[1:] if orig_ptrn.startswith('^') else orig_ptrn}"
+                )
+            else:
+                # == There is no existing pattern carried over
+                # from the Pydantic core schema ==
+
+                # Set the pattern to the length constraint
+                self._slot.pattern = length_constraint_regex
+
+        if "strip_whitespace" in schema and schema["strip_whitespace"]:
+            self._attach_note(
+                "Unable to express the option of "
+                "stripping leading and trailing whitespace in LinkML."
+            )
+        if "to_lower" in schema and schema["to_lower"]:
+            self._attach_note(
+                "Unable to express the option of converting the string to lowercase "
+                "in LinkML."
+            )
+        if "to_upper" in schema and schema["to_upper"]:
+            self._attach_note(
+                "Unable to express the option of converting the string to uppercase "
+                "in LinkML."
+            )
+        if "regex_engine" in schema:
+            # I believe nothing needs to be done here.
+            # The regex engine mostly supports a subset of the standard regular
+            # expressions. For more info,
+            # see https://docs.pydantic.dev/latest/migration/#patterns-regex-on-strings.
+            pass
 
     def _bytes_schema(self, schema: core_schema.BytesSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
