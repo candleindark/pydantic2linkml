@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from functools import partial
+from datetime import date
 
 import pytest
 
@@ -379,4 +380,59 @@ class TestSlotGenerator:
         verify_notes(
             "Unable to express the option of converting the string to uppercase",
             to_upper,
+        )
+
+    @pytest.mark.parametrize("le", [date(2022, 1, 1), None])
+    @pytest.mark.parametrize("ge", [date(2022, 2, 1), None])
+    @pytest.mark.parametrize("lt", [date(2022, 3, 1), None])
+    @pytest.mark.parametrize("gt", [date(2000, 1, 4), None])
+    @pytest.mark.parametrize("now_op", ["past", "future", None])
+    @pytest.mark.parametrize("now_utc_offset", [10, -20, None])
+    def test_date_schema(self, le, ge, lt, gt, now_op, now_utc_offset):
+
+        from pydantic import BaseModel, condate
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: condate(le=le, ge=ge, lt=lt, gt=gt)
+
+        field_schema = get_field_schema(Foo, "x")
+
+        # There is no interface for end users to set values for
+        # "now_op" and "now_utc_offset" keys.
+        # Here, we manually set them in the schema directly.
+        if now_op is not None:
+            field_schema.schema["now_op"] = now_op
+        if now_utc_offset is not None:
+            field_schema.schema["now_utc_offset"] = now_utc_offset
+
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        assert slot.range == "date"
+        verify_notes(
+            "Unable to express the restriction of being less than or equal to",
+            le is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being greater than or equal to",
+            ge is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being less than a date",
+            lt is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being greater than a date",
+            gt is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being before or after",
+            now_op is not None,
+        )
+        verify_notes(
+            "Unable to express the utc offset of the current date in restriction",
+            now_utc_offset is not None,
         )

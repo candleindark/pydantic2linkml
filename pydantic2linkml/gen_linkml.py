@@ -515,7 +515,44 @@ class SlotGenerator:
         raise NotImplementedError("Method not yet implemented")
 
     def _date_schema(self, schema: core_schema.DateSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a date value
+
+        :param schema: The `core_schema.DateSchema` representing the date value
+        """
+        self._slot.range = "date"
+
+        if "le" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being less than or equal to "
+                "a date. LinkML lacks direct support for this restriction."
+            )
+        if "ge" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being greater than or equal to "
+                "a date. LinkML lacks direct support for this restriction."
+            )
+        if "lt" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being less than a date. "
+                "LinkML lacks direct support for this restriction."
+            )
+        if "gt" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being greater than a date. "
+                "LinkML lacks direct support for this restriction."
+            )
+        if "now_op" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being before or after the "
+                "current date. LinkML lacks direct support for this restriction."
+            )
+        if "now_utc_offset" in schema:
+            self._attach_note(
+                "Unable to express the utc offset of the current date in restriction "
+                "of being before or after the current date. "
+                "LinkML lacks direct support for this restriction."
+            )
 
     def _time_schema(self, schema: core_schema.TimeSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
