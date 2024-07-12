@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from functools import partial
 
 import pytest
 
@@ -34,6 +35,26 @@ def in_no_string(substr: str, str_lst: list[str]) -> bool:
     :return: Whether no string contains the substring
     """
     return not any(substr in note for note in str_lst)
+
+
+def verify_str_lst(
+    substr: str,
+    condition: bool,
+    str_lst: list[str],
+):
+    """
+    Verify the presence of a substring in exactly one of the strings in a given list
+    if a given condition is met and the absence of the substring in all the strings
+    in the list if the condition is not met.
+
+    :param substr: The substring
+    :param condition: The condition
+    :param str_lst: The list of strings
+    """
+    if condition:
+        assert in_exactly_one_string(substr, str_lst)
+    else:
+        assert in_no_string(substr, str_lst)
 
 
 class TestGenLinkml:
@@ -195,7 +216,6 @@ class TestSlotGenerator:
         assert slot.maximum_value == expected_max
         assert slot.minimum_value == expected_min
 
-    # noinspection DuplicatedCode
     @pytest.mark.parametrize("allow_inf_nan", [True, False, None])
     @pytest.mark.parametrize("multiple_of", [2, 42, None])
     @pytest.mark.parametrize("le", [100, -11, None])
@@ -221,37 +241,19 @@ class TestSlotGenerator:
 
         field_schema = get_field_schema(Foo, "x")
         slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         assert slot.range == "float"
-
-        msg = "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`"
-        if allow_inf_nan is None or allow_inf_nan:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = f"multiple of {multiple_of}"
-        if multiple_of is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
+        verify_notes(
+            "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`",
+            allow_inf_nan is None or allow_inf_nan,
+        )
+        verify_notes(f"multiple of {multiple_of}", multiple_of is not None)
         assert slot.maximum_value == le
         assert slot.minimum_value == ge
+        verify_notes(f"less than {lt}", lt is not None)
+        verify_notes(f"greater than {gt}", gt is not None)
 
-        msg = f"less than {lt}"
-        if lt is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = f"greater than {gt}"
-        if gt is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-    # noinspection DuplicatedCode
     @pytest.mark.parametrize(
         "allow_inf_nan, max_digits, decimal_places",
         [(True, None, None), (False, 3, 42), (None, 2, 4), (False, None, 2)],
@@ -285,49 +287,23 @@ class TestSlotGenerator:
 
         field_schema = get_field_schema(Foo, "x")
         slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         assert slot.range == "decimal"
-
-        msg = "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`"
-        if allow_inf_nan is not None and allow_inf_nan:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = f"max number of {max_digits} digits"
-        if max_digits is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = f"max number of {decimal_places} decimal places"
-        if decimal_places is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = f"multiple of {multiple_of}"
-        if multiple_of is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
+        verify_notes(
+            "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'`",
+            allow_inf_nan,
+        )
+        verify_notes(f"max number of {max_digits} digits", max_digits is not None)
+        verify_notes(
+            f"max number of {decimal_places} decimal places", decimal_places is not None
+        )
+        verify_notes(f"multiple of {multiple_of}", multiple_of is not None)
         assert slot.maximum_value == le
         assert slot.minimum_value == ge
+        verify_notes(f"less than {lt}", lt is not None)
+        verify_notes(f"greater than {gt}", gt is not None)
 
-        msg = f"less than {lt}"
-        if lt is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = f"greater than {gt}"
-        if gt is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-    # noinspection DuplicatedCode
     @pytest.mark.parametrize(
         "pattern, max_length, min_length, output_pattern",
         [
@@ -380,37 +356,27 @@ class TestSlotGenerator:
 
         field_schema = get_field_schema(Foo, "x")
         slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         assert slot.range == "string"
-
         assert slot.pattern == output_pattern
-
-        msg = f"The max length constraint of {max_length} is incorporated"
-        if max_length is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = f"The min length constraint of {min_length} is incorporated"
-        if min_length is not None:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = "stripping leading and trailing whitespace in LinkML"
-        if strip_whitespace is not None and strip_whitespace:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = "Unable to express the option of converting the string to lowercase"
-        if to_lower is not None and to_lower:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
-
-        msg = "Unable to express the option of converting the string to uppercase"
-        if to_upper is not None and to_upper:
-            assert in_exactly_one_string(msg, slot.notes)
-        else:
-            assert in_no_string(msg, slot.notes)
+        verify_notes(
+            f"The max length constraint of {max_length} is incorporated",
+            max_length is not None,
+        )
+        verify_notes(
+            f"The min length constraint of {min_length} is incorporated",
+            min_length is not None,
+        )
+        verify_notes(
+            "stripping leading and trailing whitespace in LinkML",
+            strip_whitespace,
+        )
+        verify_notes(
+            "Unable to express the option of converting the string to lowercase",
+            to_lower,
+        )
+        verify_notes(
+            "Unable to express the option of converting the string to uppercase",
+            to_upper,
+        )
