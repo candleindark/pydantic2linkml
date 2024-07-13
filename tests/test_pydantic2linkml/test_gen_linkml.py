@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from functools import partial
-from datetime import date
+from datetime import date, time
 
 import pytest
 
@@ -435,4 +435,59 @@ class TestSlotGenerator:
         verify_notes(
             "Unable to express the utc offset of the current date in restriction",
             now_utc_offset is not None,
+        )
+
+    @pytest.mark.parametrize("le", [time(12, 0, 0), None])
+    @pytest.mark.parametrize("ge", [time(14, 0, 0), None])
+    @pytest.mark.parametrize("lt", [time(15, 30, 0), None])
+    @pytest.mark.parametrize("gt", [time(10, 15, 0), None])
+    @pytest.mark.parametrize("tz_constraint", ["aware", 42, None])
+    @pytest.mark.parametrize("microseconds_precision", ["error", None])
+    def test_time_schema(self, le, ge, lt, gt, tz_constraint, microseconds_precision):
+        from pydantic import BaseModel, Field
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: time = Field(le=le, ge=ge, lt=lt, gt=gt)
+
+        field_schema = get_field_schema(Foo, "x")
+
+        # There is no interface for end users to set values for
+        # the "tz_constraint" and "microseconds_precision" keys.
+        # Here, we manually set them in the schema directly.
+        if tz_constraint is not None:
+            field_schema.schema["tz_constraint"] = tz_constraint
+        if microseconds_precision is not None:
+            field_schema.schema["microseconds_precision"] = microseconds_precision
+
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        assert slot.range == "time"
+        verify_notes(
+            "Unable to express the restriction of being less than or equal to",
+            le is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being greater than or equal to",
+            ge is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being less than a time",
+            lt is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being greater than a time",
+            gt is not None,
+        )
+        verify_notes(
+            f"Unable to express the timezone constraint of {tz_constraint}",
+            tz_constraint is not None,
+        )
+        verify_notes(
+            f"Unable to express the microseconds precision constraint of "
+            f"{microseconds_precision}",
+            microseconds_precision is not None,
         )

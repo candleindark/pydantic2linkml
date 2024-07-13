@@ -555,7 +555,45 @@ class SlotGenerator:
             )
 
     def _time_schema(self, schema: core_schema.TimeSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a time value
+
+        :param schema: The `core_schema.TimeSchema` representing the time value
+        """
+        self._slot.range = "time"
+
+        if "le" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being less than or equal to "
+                "a time. LinkML lacks direct support for this restriction."
+            )
+        if "ge" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being greater than or equal to "
+                "a time. LinkML lacks direct support for this restriction."
+            )
+        if "lt" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being less than a time. "
+                "LinkML lacks direct support for this restriction."
+            )
+        if "gt" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being greater than a time. "
+                "LinkML lacks direct support for this restriction."
+            )
+        if "tz_constraint" in schema:
+            self._attach_note(
+                f"Unable to express the timezone constraint of "
+                f"{schema['tz_constraint']}. "
+                f"LinkML lacks direct support for this restriction."
+            )
+        if "microseconds_precision" in schema:
+            self._attach_note(
+                f"Unable to express the microseconds precision constraint of "
+                f"{schema['microseconds_precision']}. "
+                "LinkML lacks direct support for this restriction."
+            )
 
     def _datetime_schema(self, schema: core_schema.DatetimeSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
