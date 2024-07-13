@@ -549,8 +549,8 @@ class SlotGenerator:
             )
         if "now_utc_offset" in schema:
             self._attach_note(
-                "Unable to express the utc offset of the current date in restriction "
-                "of being before or after the current date. "
+                "Unable to express the utc offset of the current date "
+                "in the restriction of being before or after the current date. "
                 "LinkML lacks direct support for this restriction."
             )
 

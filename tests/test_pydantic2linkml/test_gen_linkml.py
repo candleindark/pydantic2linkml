@@ -433,7 +433,8 @@ class TestSlotGenerator:
             now_op is not None,
         )
         verify_notes(
-            "Unable to express the utc offset of the current date in restriction",
+            "Unable to express the utc offset of the current date "
+            "in the restriction",
             now_utc_offset is not None,
         )
 
