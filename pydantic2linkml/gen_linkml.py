@@ -596,7 +596,56 @@ class SlotGenerator:
             )
 
     def _datetime_schema(self, schema: core_schema.DatetimeSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a datetime value
+
+        :param schema: The `core_schema.DatetimeSchema` representing the datetime value
+        """
+        self._slot.range = "datetime"
+
+        if "le" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being less than or equal to "
+                "a datetime. LinkML lacks direct support for this restriction."
+            )
+        if "ge" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being greater than or equal to "
+                "a datetime. LinkML lacks direct support for this restriction."
+            )
+        if "lt" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being less than a datetime. "
+                "LinkML lacks direct support for this restriction."
+            )
+        if "gt" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being greater than a datetime. "
+                "LinkML lacks direct support for this restriction."
+            )
+        if "now_op" in schema:
+            self._attach_note(
+                "Unable to express the restriction of being before or after the "
+                "current datetime. LinkML lacks direct support for this restriction."
+            )
+        if "tz_constraint" in schema:
+            self._attach_note(
+                f"Unable to express the timezone constraint of "
+                f"{schema['tz_constraint']}. "
+                f"LinkML lacks direct support for this restriction."
+            )
+        if "now_utc_offset" in schema:
+            self._attach_note(
+                "Unable to express the utc offset of the current datetime in "
+                "the restriction of being before or after the current datetime. "
+                "LinkML lacks direct support for this restriction."
+            )
+        if "microseconds_precision" in schema:
+            self._attach_note(
+                f"Unable to express the microseconds precision constraint of "
+                f"{schema['microseconds_precision']}. "
+                "LinkML lacks direct support for this restriction."
+            )
 
     def _timedelta_schema(self, schema: core_schema.TimedeltaSchema) -> None:
         raise NotImplementedError("Method not yet implemented")

@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from functools import partial
-from datetime import date, time
+from datetime import date, time, datetime
 
 import pytest
 
@@ -485,6 +485,87 @@ class TestSlotGenerator:
         verify_notes(
             f"Unable to express the timezone constraint of {tz_constraint}",
             tz_constraint is not None,
+        )
+        verify_notes(
+            f"Unable to express the microseconds precision constraint of "
+            f"{microseconds_precision}",
+            microseconds_precision is not None,
+        )
+
+    @pytest.mark.parametrize("le", [datetime(2022, 1, 1, 12, 0, 0), None])
+    @pytest.mark.parametrize("ge", [datetime(2022, 2, 1, 14, 0, 0), None])
+    @pytest.mark.parametrize("lt", [datetime(2044, 3, 1, 15, 30, 0), None])
+    @pytest.mark.parametrize("gt", [datetime(2000, 1, 4, 10, 15, 0), None])
+    @pytest.mark.parametrize("now_op", ["future", None])
+    @pytest.mark.parametrize("tz_constraint", ["native", 42, None])
+    @pytest.mark.parametrize("now_utc_offset", [10, -20, None])
+    @pytest.mark.parametrize("microseconds_precision", ["truncate", None])
+    def test_datetime_schema(
+        self,
+        le,
+        ge,
+        lt,
+        gt,
+        now_op,
+        tz_constraint,
+        now_utc_offset,
+        microseconds_precision,
+    ):
+        from pydantic import BaseModel, Field
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: datetime = Field(le=le, ge=ge, lt=lt, gt=gt)
+
+        field_schema = get_field_schema(Foo, "x")
+
+        # There is no interface for end users to set values for
+        # the "now_op", "tz_constraint", "now_utc_offset",
+        # and "microseconds_precision" keys.
+        # Here, we manually set them in the schema directly.
+        if now_op is not None:
+            field_schema.schema["now_op"] = now_op
+        if tz_constraint is not None:
+            field_schema.schema["tz_constraint"] = tz_constraint
+        if now_utc_offset is not None:
+            field_schema.schema["now_utc_offset"] = now_utc_offset
+        if microseconds_precision is not None:
+            field_schema.schema["microseconds_precision"] = microseconds_precision
+
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        assert slot.range == "datetime"
+        verify_notes(
+            "Unable to express the restriction of being less than or equal to",
+            le is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being greater than or equal to",
+            ge is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being less than a datetime",
+            lt is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being greater than a datetime",
+            gt is not None,
+        )
+        verify_notes(
+            "Unable to express the restriction of being before or after",
+            now_op is not None,
+        )
+        verify_notes(
+            f"Unable to express the timezone constraint of {tz_constraint}",
+            tz_constraint is not None,
+        )
+        verify_notes(
+            "Unable to express the utc offset of the current datetime "
+            "in the restriction",
+            now_utc_offset is not None,
         )
         verify_notes(
             f"Unable to express the microseconds precision constraint of "
