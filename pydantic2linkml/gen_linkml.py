@@ -266,6 +266,10 @@ class SlotGenerator:
                 f"{type(self).__name__} to generate another schema."
             )
 
+        # Initialized the `required` meta slot to `True` since all
+        # Pydantic fields are required unless a default value is provided
+        self._slot.required = True
+
         # Shape the contained slot according to core schema of the corresponding field
         self._shape_slot(self._field_schema.schema)
 
