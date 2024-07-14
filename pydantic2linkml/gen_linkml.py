@@ -81,8 +81,7 @@ class LinkmlGenerator:
         }
 
         self._enums = enums
-        self._sb = SchemaBuilder(name, id_).add_defaults()
-        self._establish_supporting_defs()
+        self._sb = SchemaBuilder(name, id_)
 
         # This changes to True after this generator generates a schema
         # (for preventing issues caused by accidental re-use
@@ -103,6 +102,9 @@ class LinkmlGenerator:
             )
         else:
             self._used = True
+
+        self._sb.add_defaults()
+        self._establish_supporting_defs()
 
         self._add_enums()  # Add enums to the schema
         self._add_slots()  # Add slots to the schema
