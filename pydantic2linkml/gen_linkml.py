@@ -314,6 +314,7 @@ class SlotGenerator:
         Shape the contained slot definition to match `core_schema.NoneSchema`
 
         :param _schema: The `core_schema.NoneSchema` representing the `None` value
+            restriction
 
         Note in the contained slot definition that the corresponding field in
         a Pydantic model is restricted to `NoneType` yet LinkML does not have
@@ -331,6 +332,7 @@ class SlotGenerator:
         Shape the contained slot definition to match a Boolean value
 
         :param _schema: The `core_schema.BoolSchema` representing the boolean value
+            restriction
         """
         self._slot.range = "boolean"
 
@@ -339,6 +341,7 @@ class SlotGenerator:
         Shape the contained slot definition to match an integer value
 
         :param schema: The `core_schema.IntSchema` representing the integer value
+            restriction
         """
         self._slot.range = "integer"
 
@@ -370,6 +373,7 @@ class SlotGenerator:
         Shape the contained slot definition to match a float value
 
         :param schema: The `core_schema.FloatSchema` representing the float value
+            restriction
         """
         self._slot.range = "float"
         if "allow_inf_nan" not in schema or schema["allow_inf_nan"]:
@@ -404,6 +408,7 @@ class SlotGenerator:
         Shape the contained slot definition to match a decimal value
 
         :param schema: The `core_schema.DecimalSchema` representing the decimal value
+            restriction
         """
         self._slot.range = "decimal"
 
@@ -448,6 +453,7 @@ class SlotGenerator:
         Shape the contained slot definition to match a string value
 
         :param schema: The `core_schema.StringSchema` representing the string value
+            restriction
         """
         self._slot.range = "string"
 
@@ -526,6 +532,7 @@ class SlotGenerator:
         Shape the contained slot definition to match a date value
 
         :param schema: The `core_schema.DateSchema` representing the date value
+            restriction
         """
         self._slot.range = "date"
 
@@ -566,6 +573,7 @@ class SlotGenerator:
         Shape the contained slot definition to match a time value
 
         :param schema: The `core_schema.TimeSchema` representing the time value
+            restriction
         """
         self._slot.range = "time"
 
@@ -607,6 +615,7 @@ class SlotGenerator:
         Shape the contained slot definition to match a datetime value
 
         :param schema: The `core_schema.DatetimeSchema` representing the datetime value
+            restriction
         """
         self._slot.range = "datetime"
 
