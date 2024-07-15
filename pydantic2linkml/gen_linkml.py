@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 from collections.abc import Iterable
 from collections import defaultdict
 from itertools import chain
@@ -24,6 +24,7 @@ from linkml_runtime.linkml_model import (
     PermissibleValue,
     SlotDefinition,
 )
+from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 
 from .exceptions import UserError
 from .tools import (
@@ -657,7 +658,31 @@ class SlotGenerator:
         raise NotImplementedError("Method not yet implemented")
 
     def _literal_schema(self, schema: core_schema.LiteralSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to allow only a specific set of values
+
+        :param schema: The `core_schema.LiteralSchema` representing a set of literal
+            values that the slot can take
+        """
+        # Check if the types of the given literals are supportable
+        expected: list[Any] = schema["expected"]
+        literal_types = {type(literal) for literal in expected}
+        if not literal_types.issubset({str, int}):
+            self._attach_note(
+                "Unable to express the restriction of being one of the elements in "
+                f"`{expected}`. LinkML has direct support for only string "
+                f"and integer elements in expressing such a restriction."
+            )
+        else:
+            self._slot.range = "Any"
+            self._slot.any_of = [
+                (
+                    AnonymousSlotExpression(equals_string=literal, range="string")
+                    if type(literal) is str
+                    else AnonymousSlotExpression(equals_number=literal, range="integer")
+                )
+                for literal in expected
+            ]
 
     def _enum_schema(self, schema: core_schema.EnumSchema) -> None:
         raise NotImplementedError("Method not yet implemented")

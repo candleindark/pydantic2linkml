@@ -1,8 +1,10 @@
+from typing import Literal
 from collections.abc import Iterable
 from functools import partial
 from datetime import date, time, datetime
 
 import pytest
+from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 
 TRANSLATOR_PACKAGE = "pydantic2linkml"
 
@@ -555,3 +557,55 @@ class TestSlotGenerator:
             f"{microseconds_precision}",
             microseconds_precision is not None,
         )
+
+    @pytest.mark.parametrize(
+        "literal_specs, are_literals_supported, any_of_slot_value",
+        [
+            (
+                Literal[4, "hello", 1, "you"],
+                True,
+                [
+                    AnonymousSlotExpression(range="integer", equals_number=4),
+                    AnonymousSlotExpression(range="string", equals_string="hello"),
+                    AnonymousSlotExpression(range="integer", equals_number=1),
+                    AnonymousSlotExpression(range="string", equals_string="you"),
+                ],
+            ),
+            (
+                Literal["hello"],
+                True,
+                [
+                    AnonymousSlotExpression(range="string", equals_string="hello"),
+                ],
+            ),
+            (Literal[4, "hello", 1, None, "you"], False, None),
+            (Literal[True], False, None),
+        ],
+    )
+    def test_literal_schema(
+        self, literal_specs, are_literals_supported, any_of_slot_value
+    ):
+        from pydantic import BaseModel
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: literal_specs
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        verify_notes(
+            "Unable to express the restriction of being one of the elements",
+            not are_literals_supported,
+        )
+
+        if are_literals_supported:
+            assert slot.range == "Any"
+            assert slot.any_of == any_of_slot_value
+        else:
+            # The `range` and `any_of` meta slots should be unset
+            assert slot.range is None
+            assert len(slot.any_of) == 0
