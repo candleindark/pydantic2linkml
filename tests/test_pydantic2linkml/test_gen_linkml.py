@@ -2,6 +2,7 @@ from typing import Literal
 from collections.abc import Iterable
 from functools import partial
 from datetime import date, time, datetime
+from enum import Enum
 
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
@@ -609,3 +610,37 @@ class TestSlotGenerator:
             # The `range` and `any_of` meta slots should be unset
             assert slot.range is None
             assert len(slot.any_of) == 0
+
+    @pytest.mark.parametrize(
+        "enum_cls, missing_call_back",
+        [
+            (Enum("Greeting", "HELLO GOODBYE"), None),
+            (Enum("Color", "GREEN BLUE RED"), lambda x: x + 1),
+        ],
+    )
+    def test_enum_schema(self, enum_cls, missing_call_back):
+
+        from pydantic import BaseModel
+
+        from pydantic2linkml.gen_linkml import SlotGenerator
+        from pydantic2linkml.tools import get_field_schema
+
+        class Foo(BaseModel):
+            x: enum_cls
+
+        field_schema = get_field_schema(Foo, "x")
+
+        # There is no interface for end users to set values for
+        # the "missing" key. Here, we manually set it in the schema directly.
+        if missing_call_back is not None:
+            field_schema.schema["missing"] = missing_call_back
+
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        assert slot.range == enum_cls.__name__
+        verify_notes(
+            "Unable to express calling "
+            f"{missing_call_back.__name__ if missing_call_back else ''}",
+            missing_call_back is not None,
+        )

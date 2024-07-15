@@ -685,7 +685,20 @@ class SlotGenerator:
             ]
 
     def _enum_schema(self, schema: core_schema.EnumSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match an enum value
+
+        :param schema: The `core_schema.EnumSchema` representing the enum type the
+            value belongs to
+        """
+        enum_name = schema["cls"].__name__
+
+        self._slot.range = enum_name
+        if "missing" in schema:
+            self._attach_note(
+                f"Unable to express calling {schema['missing'].__name__} in LinkML "
+                f"when the provide value is not found in the enum type, {enum_name}."
+            )
 
     def _is_instance_schema(self, schema: core_schema.IsInstanceSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
