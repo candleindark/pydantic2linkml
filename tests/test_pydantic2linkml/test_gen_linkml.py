@@ -6,6 +6,10 @@ from enum import Enum
 
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
+from pydantic import BaseModel, Field, StringConstraints, condate
+
+from pydantic2linkml.gen_linkml import SlotGenerator
+from pydantic2linkml.tools import get_field_schema
 
 TRANSLATOR_PACKAGE = "pydantic2linkml"
 
@@ -101,9 +105,6 @@ class TestGenLinkml:
 
 class TestSlotGenerator:
     def test_instantiation(self):
-        from pydantic import BaseModel
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
 
         class Foo(BaseModel):
             x: int
@@ -125,11 +126,6 @@ class TestSlotGenerator:
     def test_any_schema(self):
         from typing import Any
 
-        from pydantic import BaseModel
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
-
         class Foo(BaseModel):
             x: Any
 
@@ -138,10 +134,6 @@ class TestSlotGenerator:
         assert slot.range == "Any"
 
     def test_none_schema(self):
-        from pydantic import BaseModel
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
 
         class Foo(BaseModel):
             x: None
@@ -155,10 +147,6 @@ class TestSlotGenerator:
         )
 
     def test_bool_schema(self):
-        from pydantic import BaseModel
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
 
         class Foo(BaseModel):
             x: bool
@@ -180,11 +168,6 @@ class TestSlotGenerator:
         ],
     )
     def test_int_schema(self, multiple_of, le, lt, ge, gt, expected_max, expected_min):
-        from pydantic import BaseModel, Field
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
-
         class Foo(BaseModel):
             x: int = Field(..., multiple_of=multiple_of, le=le, ge=ge, lt=lt, gt=gt)
 
@@ -209,11 +192,6 @@ class TestSlotGenerator:
     @pytest.mark.parametrize("lt", [10, -11, None])
     @pytest.mark.parametrize("gt", [100, -120, None])
     def test_float_schema(self, allow_inf_nan, multiple_of, le, ge, lt, gt):
-        from pydantic import BaseModel, Field
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
-
         class Foo(BaseModel):
             x: float = Field(
                 ...,
@@ -253,10 +231,6 @@ class TestSlotGenerator:
         self, allow_inf_nan, max_digits, decimal_places, multiple_of, le, ge, lt, gt
     ):
         from decimal import Decimal
-        from pydantic import BaseModel, Field
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
 
         class Foo(BaseModel):
             x: Decimal = Field(
@@ -320,11 +294,7 @@ class TestSlotGenerator:
         to_upper,
         output_pattern,
     ):
-        from pydantic import BaseModel, StringConstraints
         from typing_extensions import Annotated
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
 
         class Foo(BaseModel):
             # noinspection PyTypeHints
@@ -374,12 +344,6 @@ class TestSlotGenerator:
     @pytest.mark.parametrize("now_op", ["past", "future", None])
     @pytest.mark.parametrize("now_utc_offset", [10, -20, None])
     def test_date_schema(self, le, ge, lt, gt, now_op, now_utc_offset):
-
-        from pydantic import BaseModel, condate
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
-
         class Foo(BaseModel):
             x: condate(le=le, ge=ge, lt=lt, gt=gt)
 
@@ -430,11 +394,6 @@ class TestSlotGenerator:
     @pytest.mark.parametrize("tz_constraint", ["aware", 42, None])
     @pytest.mark.parametrize("microseconds_precision", ["error", None])
     def test_time_schema(self, le, ge, lt, gt, tz_constraint, microseconds_precision):
-        from pydantic import BaseModel, Field
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
-
         class Foo(BaseModel):
             x: time = Field(le=le, ge=ge, lt=lt, gt=gt)
 
@@ -497,11 +456,6 @@ class TestSlotGenerator:
         now_utc_offset,
         microseconds_precision,
     ):
-        from pydantic import BaseModel, Field
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
-
         class Foo(BaseModel):
             x: datetime = Field(le=le, ge=ge, lt=lt, gt=gt)
 
@@ -586,10 +540,6 @@ class TestSlotGenerator:
     def test_literal_schema(
         self, literal_specs, are_literals_supported, any_of_slot_value
     ):
-        from pydantic import BaseModel
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
 
         class Foo(BaseModel):
             x: literal_specs
@@ -619,11 +569,6 @@ class TestSlotGenerator:
         ],
     )
     def test_enum_schema(self, enum_cls, missing_call_back):
-
-        from pydantic import BaseModel
-
-        from pydantic2linkml.gen_linkml import SlotGenerator
-        from pydantic2linkml.tools import get_field_schema
 
         class Foo(BaseModel):
             x: enum_cls
