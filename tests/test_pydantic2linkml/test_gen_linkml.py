@@ -6,7 +6,7 @@ from enum import Enum
 
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
-from pydantic import BaseModel, Field, StringConstraints, condate
+from pydantic import BaseModel, Field, StringConstraints, condate, conlist
 
 from pydantic2linkml.gen_linkml import SlotGenerator
 from pydantic2linkml.tools import get_field_schema
@@ -589,3 +589,40 @@ class TestSlotGenerator:
             f"{missing_call_back.__name__ if missing_call_back else ''}",
             missing_call_back is not None,
         )
+
+    @pytest.mark.parametrize(
+        "item_type, is_item_type_list_type, expected_range",
+        [
+            (int, False, "integer"),
+            (list[int], True, None),
+            (str, False, "string"),
+            (list[list[str]], True, None),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "min_len, max_len", [(1, 10), (0, 5), (None, 11), (3, None), (None, None)]
+    )
+    def test_list_schema(
+        self, item_type, is_item_type_list_type, expected_range, min_len, max_len
+    ):
+        class Foo(BaseModel):
+            x: conlist(item_type, min_length=min_len, max_length=max_len)
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        if is_item_type_list_type:
+            assert in_exactly_one_string("Translation is incomplete", slot.notes)
+        else:
+            assert in_no_string("Translation is incomplete", slot.notes)
+            assert slot.multivalued
+            assert slot.minimum_cardinality == (
+                # This is needed due to Pydantic's behavior:
+                # The any argument for `min_length` of `conlist` that is less than
+                # or equal to 0 is ignored.
+                None
+                if (min_len is not None and min_len <= 0)
+                else min_len
+            )
+            assert slot.maximum_cardinality == max_len
+            assert slot.range == expected_range

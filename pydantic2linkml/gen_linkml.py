@@ -719,7 +719,26 @@ class SlotGenerator:
         raise NotImplementedError("Method not yet implemented")
 
     def _list_schema(self, schema: core_schema.ListSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a list value
+
+        :param schema: The `core_schema.ListSchema` representing
+            the list value restriction
+        """
+        if self._slot.multivalued:
+            # === This must be a nested list type ===
+            self._attach_note(
+                "Translation is incomplete." "Nested list types are not yet supported."
+            )
+            return
+
+        self._slot.multivalued = True
+        if "min_length" in schema:
+            self._slot.minimum_cardinality = schema["min_length"]
+        if "max_length" in schema:
+            self._slot.maximum_cardinality = schema["max_length"]
+        if "items_schema" in schema:
+            self._shape_slot(schema["items_schema"])
 
     def _tuple_schema(self, schema: core_schema.TupleSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
