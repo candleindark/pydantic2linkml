@@ -758,7 +758,17 @@ class SlotGenerator:
     def _function_after_schema(
         self, schema: core_schema.AfterValidatorFunctionSchema
     ) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to provide the restriction set by an after
+            validation function
+
+        :param schema: The schema representing the after validation function
+        """
+        self._attach_note(
+            "Unable to translate the logic contained in an after validation function, "
+            f"{schema['function']['function']!r}."
+        )
+        self._shape_slot(schema["schema"])
 
     def _function_before_schema(
         self, schema: core_schema.BeforeValidatorFunctionSchema

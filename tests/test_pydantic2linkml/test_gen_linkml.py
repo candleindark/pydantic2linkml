@@ -7,6 +7,7 @@ from enum import Enum
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 from pydantic import BaseModel, Field, StringConstraints, condate, conlist
+from typing_extensions import Annotated
 
 from pydantic2linkml.gen_linkml import SlotGenerator
 from pydantic2linkml.tools import get_field_schema
@@ -294,8 +295,6 @@ class TestSlotGenerator:
         to_upper,
         output_pattern,
     ):
-        from typing_extensions import Annotated
-
         class Foo(BaseModel):
             # noinspection PyTypeHints
             x: Annotated[
@@ -626,3 +625,24 @@ class TestSlotGenerator:
             )
             assert slot.maximum_cardinality == max_len
             assert slot.range == expected_range
+
+    def test_function_after_schema(self):
+        from pydantic import AfterValidator
+
+        def validator_func(v):
+            return v
+
+        class Foo(BaseModel):
+            x: Annotated[int, AfterValidator(validator_func)]
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        in_exactly_one_string(
+            "Unable to translate the logic contained in after validation function "
+            f"{validator_func!r}",
+            slot.notes,
+        )
+
+        # Verify the translation is properly propagated to the next level
+        assert slot.range == "integer"
