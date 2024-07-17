@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Union
 from collections.abc import Iterable
 from functools import partial
 from datetime import date, time, datetime
@@ -6,7 +6,17 @@ from enum import Enum
 
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
-from pydantic import BaseModel, Field, StringConstraints, condate, conlist
+from pydantic import (
+    BaseModel,
+    Field,
+    StringConstraints,
+    condate,
+    conlist,
+    AfterValidator,
+    BeforeValidator,
+    WrapValidator,
+    PlainValidator,
+)
 from typing_extensions import Annotated
 
 from pydantic2linkml.gen_linkml import SlotGenerator
@@ -627,22 +637,56 @@ class TestSlotGenerator:
             assert slot.range == expected_range
 
     def test_function_after_schema(self):
-        from pydantic import AfterValidator
-
         def validator_func(v):
             return v
 
+        self._test_function_schema(AfterValidator(validator_func), "after", True)
+
+    def test_function_before_schema(self):
+        def validator_func(v):
+            return v
+
+        self._test_function_schema(BeforeValidator(validator_func), "before", True)
+
+    def test_function_wrap_schema(self):
+        def validator_func(v, _handler):
+            return v
+
+        self._test_function_schema(WrapValidator(validator_func), "wrap", True)
+
+    def test_function_plain_schema(self):
+        def validator_func(v):
+            return v
+
+        self._test_function_schema(PlainValidator(validator_func), "plain", False)
+
+    @staticmethod
+    def _test_function_schema(
+        validator: Union[
+            AfterValidator, BeforeValidator, WrapValidator, PlainValidator
+        ],
+        validator_type: Literal["after", "before", "wrap", "plain"],
+        translation_propagated: bool,
+    ):
+        """
+        Helper function called by tests for translation of function schemas
+        """
+
         class Foo(BaseModel):
-            x: Annotated[int, AfterValidator(validator_func)]
+            x: Annotated[int, validator]
 
         field_schema = get_field_schema(Foo, "x")
         slot = SlotGenerator(field_schema).generate()
 
-        in_exactly_one_string(
-            "Unable to translate the logic contained in after validation function "
-            f"{validator_func!r}",
+        assert in_exactly_one_string(
+            "Unable to translate the logic contained "
+            f"in the {validator_type} validation function, {validator.func!r}",
             slot.notes,
         )
 
-        # Verify the translation is properly propagated to the next level
-        assert slot.range == "integer"
+        if translation_propagated:
+            # Verify the translation is properly propagated to the next level
+            assert slot.range == "integer"
+        else:
+            # Verify the translation is not propagated to the next level
+            assert slot.range is None

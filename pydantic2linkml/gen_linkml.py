@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, Union
 from collections.abc import Iterable
 from collections import defaultdict
 from itertools import chain
@@ -755,6 +755,30 @@ class SlotGenerator:
     def _dict_schema(self, schema: core_schema.DictSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
 
+    def _function_schema(
+        self,
+        schema: Union[
+            core_schema.AfterValidatorFunctionSchema,
+            core_schema.BeforeValidatorFunctionSchema,
+            core_schema.WrapValidatorFunctionSchema,
+            core_schema.PlainValidatorFunctionSchema,
+        ],
+    ) -> None:
+        """
+        A helper method that shapes the contained slot definition to provide
+            the restriction set by a validation function
+
+        :param schema: The schema representing the validation function
+        """
+        mode = schema["type"].split("-")[1]
+
+        self._attach_note(
+            "Unable to translate the logic contained in "
+            f"the {mode} validation function, {schema['function']['function']!r}."
+        )
+        if mode != "plain":
+            self._shape_slot(schema["schema"])
+
     def _function_after_schema(
         self, schema: core_schema.AfterValidatorFunctionSchema
     ) -> None:
@@ -764,26 +788,40 @@ class SlotGenerator:
 
         :param schema: The schema representing the after validation function
         """
-        self._attach_note(
-            "Unable to translate the logic contained in an after validation function, "
-            f"{schema['function']['function']!r}."
-        )
-        self._shape_slot(schema["schema"])
+        self._function_schema(schema)
 
     def _function_before_schema(
         self, schema: core_schema.BeforeValidatorFunctionSchema
     ) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to provide the restriction set by a before
+            validation function
+
+        :param schema: The schema representing the before validation function
+        """
+        self._function_schema(schema)
 
     def _function_wrap_schema(
         self, schema: core_schema.WrapValidatorFunctionSchema
     ) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to provide the restriction set by a wrap
+            validation function
+
+        :param schema: The schema representing the wrap validation function
+        """
+        self._function_schema(schema)
 
     def _function_plain_schema(
         self, schema: core_schema.PlainValidatorFunctionSchema
     ) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to provide the restriction set by a plain
+            validation function
+
+        :param schema: The schema representing the plain validation function
+        """
+        self._function_schema(schema)
 
     def _default_schema(self, schema: core_schema.WithDefaultSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
