@@ -5,6 +5,7 @@ from collections import defaultdict
 from itertools import chain
 from warnings import warn
 from operator import itemgetter
+from datetime import date
 
 from pydantic import BaseModel
 
@@ -824,7 +825,61 @@ class SlotGenerator:
         self._function_schema(schema)
 
     def _default_schema(self, schema: core_schema.WithDefaultSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to have a default value
+
+        :param schema: The `core_schema.WithDefaultSchema` representing the default
+            value specification
+        """
+        inner_schema = schema["schema"]
+
+        self._slot.required = False
+        if "default" in schema and (default := schema["default"]) is not None:
+            # === Set `ifabsent` meta slot ===
+            default_type = type(default)
+            if default_type is bool:
+                self._slot.ifabsent = str(default)
+            elif default_type is int:
+                self._slot.ifabsent = f"int({default})"
+            elif default_type is str:
+                self._slot.ifabsent = f"string({default})"
+            elif default_type is float:
+                self._slot.ifabsent = f"float({default})"
+            elif default_type is date:
+                self._slot.ifabsent = f"date({default})"
+            else:
+                self._attach_note(
+                    f"Unable to set a default value of {default!r} in LinkML. "
+                    f"Default values of type {default_type} are not supported."
+                )
+
+            if inner_schema["type"] == "nullable":
+                self._attach_note(
+                    "Warning: LinkML doesn't have a null value. "
+                    "The translation of `Optional` in Python may need further "
+                    "adjustments."
+                )
+        if "default_factory" in schema:
+            self._attach_note(
+                "Unable to express the default factory, "
+                f"{schema['default_factory']!r}, in LinkML."
+            )
+        if "on_error" in schema and schema["on_error"] != "raise":
+            self._attach_note(
+                "Unable to express the `on_error` option of "
+                f"{schema['on_error']} in LinkML."
+            )
+        if "validate_default" in schema:
+            # This is purposely left empty.
+            # LinkML validates the default value of a slot, provided by the `ifabsent`
+            # meta slot, no matter what. In the case of `schema['validate_default']`
+            # being `False`, the default, LinkML's behavior is just stricter, and
+            # attaching a note to the slot about not able to express
+            # `schema['validate_default']` being `False` would generate too much
+            # clutter.
+            pass
+
+        self._shape_slot(inner_schema)
 
     def _nullable_schema(self, schema: core_schema.NullableSchema) -> None:
         raise NotImplementedError("Method not yet implemented")

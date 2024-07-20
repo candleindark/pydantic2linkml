@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Union, Optional
 from collections.abc import Iterable
 from functools import partial
 from datetime import date, time, datetime
@@ -690,3 +690,96 @@ class TestSlotGenerator:
         else:
             # Verify the translation is not propagated to the next level
             assert slot.range is None
+
+    @pytest.mark.parametrize(
+        "apply_optional, default, default_type, type_supported, "
+        "default_factory, expected_ifabsent, expected_range",
+        [
+            (False, True, bool, True, None, "True", "boolean"),
+            (True, False, bool, True, None, "False", "boolean"),
+            (False, 42, int, True, None, "int(42)", "integer"),
+            (True, 42, int, True, None, "int(42)", "integer"),
+            (False, "Hello", str, True, None, "string(Hello)", "string"),
+            (False, 3.14, float, True, None, "float(3.14)", "float"),
+            (False, date(2022, 2, 1), date, True, None, "date(2022-02-01)", "date"),
+            (True, None, type(None), True, None, None, None),
+            (True, None, int, True, None, None, "integer"),
+            (True, None, str, True, None, None, "string"),
+            (False, None, int, True, None, None, "integer"),
+            (False, None, str, True, None, None, "string"),
+            (False, time(3, 24, 3), time, False, None, None, "time"),
+            (False, None, int, True, lambda: 42, None, "integer"),
+            (True, None, str, True, lambda: "Hello, world", None, "string"),
+        ],
+    )
+    @pytest.mark.parametrize("on_error", ["raise", "omit", "default", None])
+    @pytest.mark.parametrize(
+        "validate_default",
+        [
+            True,
+            False,
+            None,
+        ],
+    )
+    def test_default_schema(
+        self,
+        apply_optional,
+        default,
+        default_type,
+        type_supported,
+        # Note: When the `default_factory` param of `Field` is provided and is not
+        # `None` the `default` param of `Field` must be left unset.
+        default_factory,
+        on_error,
+        validate_default,
+        expected_ifabsent,
+        expected_range,
+    ):
+        type_annotation = Optional[default_type] if apply_optional else default_type
+        field_specs = (
+            Field(
+                default,
+                validate_default=validate_default,
+            )
+            # Use this condition to provide `None` as the `default`
+            if default_factory is None
+            else Field(
+                default_factory=default_factory, validate_default=validate_default
+            )
+        )
+
+        class Foo(BaseModel):
+            x: type_annotation = field_specs
+
+        field_schema = get_field_schema(Foo, "x")
+
+        # There is no interface for end users to set value for
+        # the "on_error" key. Here, we manually set it in the schema directly.
+        if on_error is not None:
+            field_schema.schema["on_error"] = on_error
+
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        assert not slot.required
+        assert slot.ifabsent == expected_ifabsent
+        verify_notes(
+            f"Unable to set a default value of {default!r} in LinkML. "
+            f"Default values of type {default_type} are not supported.",
+            not type_supported,
+        )
+        verify_notes(
+            "The translation of `Optional` in Python may need further adjustments.",
+            default_factory is None and default is not None and apply_optional,
+        )
+        verify_notes(
+            f"Unable to express the default factory, {default_factory!r}, in LinkML.",
+            default_factory is not None,
+        )
+        verify_notes(
+            f"Unable to express the `on_error` option of {on_error} in LinkML.",
+            on_error is not None and on_error != "raise",
+        )
+
+        # Verify the translation is propagated to the next level
+        assert slot.range == expected_range
