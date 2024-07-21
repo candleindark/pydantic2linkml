@@ -905,10 +905,33 @@ class SlotGenerator:
         self._shape_slot(schema["schema"])
 
     def _union_schema(self, schema: core_schema.UnionSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a union restriction
+
+        :param schema: The schema representing the union restriction
+        """
+        # todo: the current implementation is just an annotation
+        #   A usable implementation is yet to be decided. Useful information
+        #   can be found at, https://github.com/orgs/linkml/discussions/2154
+        self._attach_note(
+            "Warning: The translation is incomplete. Union types are yet to be "
+            "supported."
+        )
 
     def _tagged_union_schema(self, schema: core_schema.TaggedUnionSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a tagged union restriction
+
+        :param schema: The schema representing the tagged union restriction
+        """
+        # todo: the current implementation is just an annotation
+        #   A usable implementation is yet to be decided. Useful information
+        #   can be found at, https://github.com/orgs/linkml/discussions/2154
+        #   and https://linkml.io/linkml/schemas/type-designators.html
+        self._attach_note(
+            "Warning: The translation is incomplete. Tagged union types are yet to be "
+            "supported."
+        )
 
     def _chain_schema(self, schema: core_schema.ChainSchema) -> None:
         raise NotImplementedError("Method not yet implemented")

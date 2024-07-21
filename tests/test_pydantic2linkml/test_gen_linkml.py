@@ -803,3 +803,35 @@ class TestSlotGenerator:
 
         # Verify the translation is propagated to the next level
         assert slot.range == "integer"
+
+    def test_union_schema(self):
+        class Foo(BaseModel):
+            x: Union[int, str]
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert in_exactly_one_string("Union types are yet to be supported", slot.notes)
+
+    def test_tagged_union_schema(self):
+        class Cat(BaseModel):
+            pet_type: Literal["cat"]
+            meows: int
+
+        class Dog(BaseModel):
+            pet_type: Literal["dog"]
+            barks: float
+
+        class Lizard(BaseModel):
+            pet_type: Literal["reptile", "lizard"]
+            scales: bool
+
+        class Foo(BaseModel):
+            pet: Union[Cat, Dog, Lizard] = Field(..., discriminator="pet_type")
+
+        field_schema = get_field_schema(Foo, "pet")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert in_exactly_one_string(
+            "Tagged union types are yet to be supported", slot.notes
+        )
