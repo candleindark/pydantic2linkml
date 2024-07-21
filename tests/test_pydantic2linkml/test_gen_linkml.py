@@ -783,3 +783,23 @@ class TestSlotGenerator:
 
         # Verify the translation is propagated to the next level
         assert slot.range == expected_range
+
+    @pytest.mark.parametrize("has_default", [True, False])
+    def test_nullable_schema(self, has_default):
+        field_specs = Field(42) if has_default else Field(...)
+
+        class Foo(BaseModel):
+            x: Optional[int] = field_specs
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        verify_notes(
+            "The translation of `Optional` for a required field may require "
+            "further adjustments.",
+            not has_default,
+        )
+
+        # Verify the translation is propagated to the next level
+        assert slot.range == "integer"

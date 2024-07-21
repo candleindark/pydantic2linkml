@@ -882,7 +882,27 @@ class SlotGenerator:
         self._shape_slot(inner_schema)
 
     def _nullable_schema(self, schema: core_schema.NullableSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a nullable value restriction
+
+        :param schema: The schema representing the nullable value restriction
+
+        Note: There is no null value in LinkML
+              (https://github.com/orgs/linkml/discussions/1975).
+        """
+        if self._slot.required:
+            # === The field being translated must have no default value ===
+
+            self._attach_note(
+                "Warning: LinkML doesn't have a null value. "
+                "The translation of `Optional` for a required field may require "
+                "further adjustments."
+            )
+
+        # Note: The case of `self._slot.required` being `False` is handled in
+        #   `SlotGenerator._default_schema()
+
+        self._shape_slot(schema["schema"])
 
     def _union_schema(self, schema: core_schema.UnionSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
