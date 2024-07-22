@@ -835,3 +835,15 @@ class TestSlotGenerator:
         assert in_exactly_one_string(
             "Tagged union types are yet to be supported", slot.notes
         )
+
+    def test_model_schema(self):
+        class Bar(BaseModel):
+            y: int
+
+        class Foo(BaseModel):
+            x: Bar
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert slot.range == "Bar"

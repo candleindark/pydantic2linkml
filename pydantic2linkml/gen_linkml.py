@@ -949,7 +949,13 @@ class SlotGenerator:
         raise NotImplementedError("Method not yet implemented")
 
     def _model_schema(self, schema: core_schema.ModelSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match an instance of a model, or class
+            in LinkML
+
+        :param schema: The schema representing the model
+        """
+        self._slot.range = schema["cls"].__name__
 
     def _dataclass_args_schema(self, schema: core_schema.DataclassArgsSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
