@@ -16,6 +16,8 @@ from pydantic import (
     BeforeValidator,
     WrapValidator,
     PlainValidator,
+    UrlConstraints,
+    AnyUrl,
 )
 from typing_extensions import Annotated
 
@@ -847,3 +849,63 @@ class TestSlotGenerator:
         slot = SlotGenerator(field_schema).generate()
 
         assert slot.range == "Bar"
+
+    @pytest.mark.parametrize(
+        "max_length, allowed_schemes, expected_pattern",
+        [
+            (100, ["http", "https"], r"^(?=.{,100}$)(?i:http|https)://[^\s]+$"),
+            (42, ["http"], r"^(?=.{,42}$)(?i:http)://[^\s]+$"),
+            (None, ["http", "https"], r"^(?i:http|https)://[^\s]+$"),
+            (50, None, r"^(?=.{,50}$)[^\s]+://[^\s]+$"),
+            (None, None, r"^[^\s]+://[^\s]+$"),
+        ],
+    )
+    @pytest.mark.parametrize("host_required", [True, False, None])
+    @pytest.mark.parametrize("default_host", ["example.com", None])
+    @pytest.mark.parametrize("default_port", [42, None])
+    @pytest.mark.parametrize("default_path", ["/path", None])
+    def test_url_schema(
+        self,
+        max_length,
+        allowed_schemes,
+        host_required,
+        default_host,
+        default_port,
+        default_path,
+        expected_pattern,
+    ):
+        class Foo(BaseModel):
+            x: Annotated[
+                AnyUrl,
+                UrlConstraints(
+                    max_length,
+                    allowed_schemes,
+                    host_required,
+                    default_host,
+                    default_port,
+                    default_path,
+                ),
+            ]
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+        verify_notes = partial(verify_str_lst, str_lst=slot.notes)
+
+        assert slot.range == "uri"
+        assert slot.pattern == expected_pattern
+        verify_notes(
+            "Unable to express the `host_required` option in LinkML.",
+            host_required is not None,
+        )
+        verify_notes(
+            "Unable to express the `default_host` option in LinkML.",
+            default_host is not None,
+        )
+        verify_notes(
+            "Unable to express the `default_port` option in LinkML.",
+            default_port is not None,
+        )
+        verify_notes(
+            "Unable to express the `default_path` option in LinkML.",
+            default_path is not None,
+        )

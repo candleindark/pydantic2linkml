@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 from typing import Optional, Callable, Any, Union
 from collections.abc import Iterable
@@ -976,7 +977,36 @@ class SlotGenerator:
         raise NotImplementedError("Method not yet implemented")
 
     def _url_schema(self, schema: core_schema.UrlSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a URL restriction
+
+        :param schema: The schema representing the URL restriction
+        """
+        # This method may be further improved or implemented more fully upon the
+        # resolution of https://github.com/linkml/linkml/issues/2215
+
+        self._slot.range = "uri"
+
+        # Incorporate `max_length` and `allowed_schemes` restrictions into the pattern
+        # meta slot
+        max_length: Optional[int] = schema.get("max_length")
+        allowed_schemes: Optional[list[str]] = schema.get("allowed_schemes")
+        max_length_re = rf"(?=.{{,{max_length}}}$)" if max_length is not None else ""
+        allowed_schemes_re = (
+            rf"(?i:{'|'.join(re.escape(scheme) for scheme in allowed_schemes)})"
+            if allowed_schemes is not None
+            else r"[^\s]+"
+        )
+        self._slot.pattern = rf"^{max_length_re}{allowed_schemes_re}://[^\s]+$"
+
+        if "host_required" in schema:
+            self._attach_note("Unable to express the `host_required` option in LinkML.")
+        if "default_host" in schema:
+            self._attach_note("Unable to express the `default_host` option in LinkML.")
+        if "default_port" in schema:
+            self._attach_note("Unable to express the `default_port` option in LinkML.")
+        if "default_path" in schema:
+            self._attach_note("Unable to express the `default_path` option in LinkML.")
 
     def _multi_host_url_schema(self, schema: core_schema.MultiHostUrlSchema) -> None:
         raise NotImplementedError("Method not yet implemented")
