@@ -1,5 +1,6 @@
 aind-data-schema
 dandischema
 linkml
+pydantic
 typer
 pytest
