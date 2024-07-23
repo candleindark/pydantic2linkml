@@ -25,9 +25,9 @@ from pydantic2linkml.gen_linkml import LinkmlGenerator
 # ATOM: https://www.nature.com/articles/s41597-023-02389-4
 # no longer used: KNOWN_MODELS = {"dandi": "dandischema.models", "aind": "aind_data_schema.models"}
 
-def get_schema_for_module(module: str) -> ...:
+def get_schema_for_modules(modules: list[str]) -> ...:
     models, enums = [], []
-    for module in get_all_modules(root_module_name=module):
+    for module in get_all_modules(modules):
         for class_name, class_object in inspect.getmembers(module, inspect.isclass):
             if issubclass(class_object, enum.Enum):
                 enums.append(class_object)
@@ -42,10 +42,10 @@ def get_schema_for_module(module: str) -> ...:
 
 
 def main(
-    root_module_name: str,
+    module_names: list[str],
     output_file: Path = None,
 ):
-    schema = get_schema_for_module(module=root_module_name)
+    schema = get_schema_for_modules(module_names)
     yml = yaml_dumper.dumps(schema)
     if not output_file:
         print(yml)
