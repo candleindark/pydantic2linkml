@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from pathlib import Path
 
 import pydantic
@@ -10,6 +12,7 @@ from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.dumpers import yaml_dumper
 
 from pydantic2linkml.tools import get_all_modules
+from pydantic2linkml.gen_linkml import LinkmlGenerator
 
 app = typer.Typer()
 
@@ -23,64 +26,34 @@ app = typer.Typer()
 # ATOM: https://www.nature.com/articles/s41597-023-02389-4
 KNOWN_MODELS = {"dandi": "dandischema.models", "aind": "aind_data_schema.models"}
 
-
-def populate_enum(sb: SchemaBuilder, enum_name: str, enum_object: type[enum.Enum]):
-    """
-    Populate a LinkML SchemaBuilder instance with a new enum derived from
-    a pydantic Enum object.
-    """
-    try:
-        sb.add_enum(
-            EnumDefinition(
-                name=enum_name,
-                permissible_values=dict(
-                    (attribute, getattr(enum_object, attribute).value)
-                    for attribute in dir(enum_object)
-                    if not attribute.startswith("__")
-                    and isinstance(getattr(enum_object, attribute), enum.Enum)
-                ),
-            )
-        )
-    except ValueError as e:
-        if "already exists" not in str(e):
-            raise
-
-
-def populate_basemodel(
-    sb: SchemaBuilder, basemodel_name: str, basemodel_object: type[pydantic.BaseModel]
-):
-    sb.add_class(
-        basemodel_name,
-        slots=basemodel_object.__annotations__,
-        is_a=basemodel_object.__mro__[1].__name__,
-        class_uri=f"schema:{basemodel_name}",
-        description=(
-            basemodel_object.__doc__.strip()
-            if basemodel_object.__doc__
-            else "No description"
-        ),
-    )
-
-
-def populate_schema_builder_from_module(sb: SchemaBuilder, module: str):
+def get_schema_for_module(module: str) -> ...:
+    models, enums = [], []
     for module in get_all_modules(root_module_name=module):
         for class_name, class_object in inspect.getmembers(module, inspect.isclass):
             if issubclass(class_object, enum.Enum):
-                populate_enum(sb, class_name, class_object)
+                enums.append(class_object)
             elif issubclass(class_object, pydantic.BaseModel):
-                populate_basemodel(sb, class_name, class_object)
+                models.append(class_object)
+    generator = LinkmlGenerator(
+        name=module,
+        enums=enums,
+        models=models,
+    )
+    return generator.generate()
 
 
 @app.command()
 def main(
-    root_module_name: str = KNOWN_MODELS["aind"],
-    output_file: Path = Path("generated_linkml_models/aind.yml"),
+    root_module_name: str,
+    output_file: Path = None,
 ):
-    sb = SchemaBuilder()
-    populate_schema_builder_from_module(sb, module=root_module_name)
-    yml = yaml_dumper.dumps(sb.schema)
-    with output_file.open("w") as f:
-        f.write(yml)
+    schema = get_schema_for_module(module=root_module_name)
+    yml = yaml_dumper.dumps(schema)
+    if not output_file:
+        print(yml)
+    else:
+        with output_file.open("w") as f:
+            f.write(yml)
     print("Success!")
 
 
