@@ -5,7 +5,6 @@ from pathlib import Path
 import pydantic
 import enum
 import inspect
-import typer
 
 from linkml_runtime.linkml_model import EnumDefinition
 from linkml_runtime.utils.schema_builder import SchemaBuilder
@@ -14,7 +13,7 @@ from linkml_runtime.dumpers import yaml_dumper
 from pydantic2linkml.tools import get_all_modules
 from pydantic2linkml.gen_linkml import LinkmlGenerator
 
-app = typer.Typer()
+
 
 # BICAN already has linkml here:
 #   https://github.com/brain-bican/models/tree/main/linkml-schema
@@ -24,7 +23,7 @@ app = typer.Typer()
 # ATOM: https://bioportal.bioontology.org/ontologies/ATOM
 # ATOM: https://github.com/SciCrunch/NIF-Ontology/blob/atlas/ttl/atom.ttl
 # ATOM: https://www.nature.com/articles/s41597-023-02389-4
-KNOWN_MODELS = {"dandi": "dandischema.models", "aind": "aind_data_schema.models"}
+# no longer used: KNOWN_MODELS = {"dandi": "dandischema.models", "aind": "aind_data_schema.models"}
 
 def get_schema_for_module(module: str) -> ...:
     models, enums = [], []
@@ -42,7 +41,6 @@ def get_schema_for_module(module: str) -> ...:
     return generator.generate()
 
 
-@app.command()
 def main(
     root_module_name: str,
     output_file: Path = None,
@@ -58,4 +56,6 @@ def main(
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    import typer
+    app = typer.Typer()
+    typer.run(app.command()(main))
