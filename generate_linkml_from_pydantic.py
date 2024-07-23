@@ -10,7 +10,7 @@ from linkml_runtime.linkml_model import EnumDefinition
 from linkml_runtime.utils.schema_builder import SchemaBuilder
 from linkml_runtime.dumpers import yaml_dumper
 
-from pydantic2linkml.tools import get_all_modules
+from pydantic2linkml.tools import get_all_modules, fetch_defs
 from pydantic2linkml.gen_linkml import LinkmlGenerator
 
 
@@ -25,27 +25,19 @@ from pydantic2linkml.gen_linkml import LinkmlGenerator
 # ATOM: https://www.nature.com/articles/s41597-023-02389-4
 # no longer used: KNOWN_MODELS = {"dandi": "dandischema.models", "aind": "aind_data_schema.models"}
 
-def get_schema_for_modules(modules: list[str]) -> ...:
-    models, enums = [], []
-    for module in get_all_modules(modules):
-        for class_name, class_object in inspect.getmembers(module, inspect.isclass):
-            if issubclass(class_object, enum.Enum):
-                enums.append(class_object)
-            elif issubclass(class_object, pydantic.BaseModel):
-                models.append(class_object)
-    generator = LinkmlGenerator(
-        name=module,
-        enums=enums,
-        models=models,
-    )
-    return generator.generate()
-
-
 def main(
     module_names: list[str],
     output_file: Path = None,
 ):
-    schema = get_schema_for_modules(module_names)
+    # TODO: RF prints to log messages to stderr
+    modules = get_all_modules(module_names)
+    print(f"Considering {len(modules)} modules for provided {len(module_names)} modules: {module_names}")
+    models, enums = fetch_defs(modules)
+    print(f"Fetched {len(models)} models and {len(enums)} enums")
+    generator = LinkmlGenerator(models=models, enums=enums)
+    print("Generating schema")
+    schema = generator.generate()
+    print("Dumping schema")
     yml = yaml_dumper.dumps(schema)
     if not output_file:
         print(yml)
