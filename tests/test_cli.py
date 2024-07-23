@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from generate_linkml_from_aind import app
+from generate_linkml_from_pydantic import app
 
 runner = CliRunner()
 
