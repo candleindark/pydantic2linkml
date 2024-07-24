@@ -15,5 +15,5 @@ def test_smoke_cli():
     app = typer.Typer()
     app.command()(main)
 
-    result = runner.invoke(app)
+    result = runner.invoke(app, ["dandischema.models"])
     assert result.exit_code == 0
