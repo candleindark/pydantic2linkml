@@ -14,7 +14,6 @@ from pydantic2linkml.tools import get_all_modules, fetch_defs
 from pydantic2linkml.gen_linkml import LinkmlGenerator
 
 
-
 # BICAN already has linkml here:
 #   https://github.com/brain-bican/models/tree/main/linkml-schema
 # Biolink also has linkml:
@@ -25,13 +24,17 @@ from pydantic2linkml.gen_linkml import LinkmlGenerator
 # ATOM: https://www.nature.com/articles/s41597-023-02389-4
 # no longer used: KNOWN_MODELS = {"dandi": "dandischema.models", "aind": "aind_data_schema.models"}
 
+
 def main(
     module_names: list[str],
     output_file: Path = None,
 ):
     # TODO: RF prints to log messages to stderr
     modules = get_all_modules(module_names)
-    print(f"Considering {len(modules)} modules for provided {len(module_names)} modules: {module_names}")
+    print(
+        f"Considering {len(modules)} modules for provided {len(module_names)} modules: "
+        f"{module_names}"
+    )
     models, enums = fetch_defs(modules)
     print(f"Fetched {len(models)} models and {len(enums)} enums")
     generator = LinkmlGenerator(models=models, enums=enums)
@@ -49,5 +52,6 @@ def main(
 
 if __name__ == "__main__":
     import typer
+
     app = typer.Typer()
     typer.run(app.command()(main))
