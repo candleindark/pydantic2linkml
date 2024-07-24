@@ -321,27 +321,34 @@ def normalize_whitespace(text: str) -> str:
 # todo: write tests for this function
 def get_all_modules(module_names: list[str], method="yarik") -> list[ModuleType]:
     """
-    Get all modules and submodules of a give list of module names.
+    Get the modules of the given names and their submodules loaded to `sys.modules`
 
-    :param module_names: The names of the modules to import and look for submodules.
-    :return: The list of imported modules
+    :param module_names: The names of the modules in a list
+    :return: The modules of the given names and their submodules loaded to `sys.modules`
     """
     imported_modules: list[ModuleType] = []
 
     if method == "yarik":
-        # pre-import all of them first so we have no order effects etc
+        # Pre-import all the modules of given names first, so we have no order effects
+        # etc. Note: This will load some of the submodules of these modules to
+        # `sys.modules` as well.
         for module_name in module_names:
             module = importlib.import_module(module_name)
+
+        # Collect all the modules of given names and their submodules loaded to
+        # `sys.modules`
         for module_name in module_names:
             imported_modules.extend(
-                m 
-                for name, m in sys.modules.items() 
+                m
+                for name, m in sys.modules.items()
                 if name == module_name or name.startswith(module_name + ".")
             )
     elif method == "old":
         # TODO: fixit up -- it is masking all ImportError's and logic is
         # likely wrong/insufficient and does not produce correct module paths
-        def _get_all_modules(_imported_modules: list[ModuleType], _root_module_name: str):
+        def _get_all_modules(
+            _imported_modules: list[ModuleType], _root_module_name: str
+        ):
             try:
                 module = importlib.import_module(_root_module_name)
                 _imported_modules.append(module)
@@ -356,7 +363,7 @@ def get_all_modules(module_names: list[str], method="yarik") -> list[ModuleType]
                             f'{_root_module_name}.{submodule_filename[:-len(".py")]}',
                         )
             except ModuleNotFoundError:
-                return _imported_modules 
+                return _imported_modules
             return _imported_modules
 
         for module_name in module_names:
