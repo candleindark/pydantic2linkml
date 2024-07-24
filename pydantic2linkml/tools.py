@@ -333,7 +333,7 @@ def get_all_modules(module_names: list[str], method="yarik") -> list[ModuleType]
         # etc. Note: This will load some of the submodules of these modules to
         # `sys.modules` as well.
         for module_name in module_names:
-            module = importlib.import_module(module_name)
+            importlib.import_module(module_name)
 
         # Collect all the modules of given names and their submodules loaded to
         # `sys.modules`
