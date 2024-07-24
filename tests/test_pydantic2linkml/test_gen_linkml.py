@@ -80,39 +80,38 @@ def verify_str_lst(
 
 class TestLinkmlGenerator:
     @pytest.mark.parametrize(
-        "root_module_name",
+        "module_names",
         [
-            "dandischema.models",
-            "aind_data_schema.components.coordinates",
+            ["dandischema.models"],
+            ["aind_data_schema.components.coordinates"],
             # Naming conflict at this one
             # TODO: Re-enable this one once handling of the naming conflict is devised
             # "aind_data_schema.components.devices",
-            "aind_data_schema.components.reagent",
-            "aind_data_schema.components.stimulus",
-            "aind_data_schema.components.tile",
-            "aind_data_schema.core.acquisition",
-            "aind_data_schema.core.data_description",
-            "aind_data_schema.core.instrument",
-            "aind_data_schema.core.metadata",
-            "aind_data_schema.core.procedures",
-            "aind_data_schema.core.processing",
-            "aind_data_schema.core.rig",
-            "aind_data_schema.core.session",
-            "aind_data_schema.core.subject",
+            ["aind_data_schema.components.reagent"],
+            ["aind_data_schema.components.stimulus"],
+            ["aind_data_schema.components.tile"],
+            ["aind_data_schema.core.acquisition"],
+            ["aind_data_schema.core.data_description"],
+            ["aind_data_schema.core.instrument"],
+            ["aind_data_schema.core.metadata"],
+            ["aind_data_schema.core.procedures"],
+            ["aind_data_schema.core.processing"],
+            ["aind_data_schema.core.rig"],
+            ["aind_data_schema.core.session"],
+            ["aind_data_schema.core.subject"],
         ],
     )
-    def test_instantiation_with_definitions_in_module(self, root_module_name):
+    def test_instantiation_with_definitions_in_module(self, module_names):
         """
         Test instantiation of a `LinkmlGenerator` object with Pydantic models and enums
-            from a module and its supporting modules.
+            from named modules and their submodules
 
-        :param root_module_name: The name of the module, the root module, importing
-            of which necessitates the importing of its supporting modules.
+        :param module_names: The names of the modules
         """
         from pydantic2linkml.tools import get_all_modules, fetch_defs
         from pydantic2linkml.gen_linkml import LinkmlGenerator
 
-        models, enums = fetch_defs(get_all_modules(root_module_name))
+        models, enums = fetch_defs(get_all_modules(module_names))
         LinkmlGenerator(models=models, enums=enums)
 
 
