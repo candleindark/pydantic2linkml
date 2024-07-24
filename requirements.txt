@@ -4,3 +4,4 @@ linkml
 pydantic
 typer
 pytest
+pytest-xdist
