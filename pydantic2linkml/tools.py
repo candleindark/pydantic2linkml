@@ -319,7 +319,7 @@ def normalize_whitespace(text: str) -> str:
 
 
 # todo: write tests for this function
-def get_all_modules(module_names: list[str]) -> set[ModuleType]:
+def get_all_modules(module_names: Iterable[str]) -> set[ModuleType]:
     """
     Get the modules of the given names and their submodules loaded to `sys.modules`
 
