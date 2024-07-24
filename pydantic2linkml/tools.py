@@ -319,7 +319,7 @@ def normalize_whitespace(text: str) -> str:
 
 
 # todo: write tests for this function
-def get_all_modules(module_names: list[str]) -> list[ModuleType]:
+def get_all_modules(module_names: list[str]) -> set[ModuleType]:
     """
     Get the modules of the given names and their submodules loaded to `sys.modules`
 
@@ -343,7 +343,7 @@ def get_all_modules(module_names: list[str]) -> list[ModuleType]:
             if name == module_name or name.startswith(module_name + ".")
         )
 
-    return modules
+    return set(modules)
 
 
 def fetch_defs(
