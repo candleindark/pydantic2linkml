@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import re
 from typing import cast
 from operator import itemgetter
 
 import pytest
+
+from pydantic2linkml.tools import get_uuid_regex
 
 
 def test_get_parent_model():
@@ -397,3 +400,107 @@ def test_fetch_defs():
         mock_module1.E3,
         mock_module1.E4,
     }
+
+
+class TestGetUuidRegex:
+    @pytest.mark.parametrize(
+        "version, expected_output",
+        [
+            (
+                1,
+                (
+                    r"^(?:urn:uuid:)?"  # Optional "urn:uuid:" prefix
+                    r"[0-9a-fA-F]{8}-?"  # 8 hex digits with optional hyphen
+                    r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+                    # Version and 3 hex digits with optional hyphen
+                    r"1[0-9a-fA-F]{3}-?"
+                    # Variant and 3 hex digits with optional hyphen
+                    r"[89abAB][0-9a-fA-F]{3}-?"
+                    r"[0-9a-fA-F]{12}$"  # 12 hex digits
+                ),
+            ),
+            (
+                4,
+                (
+                    r"^(?:urn:uuid:)?"  # Optional "urn:uuid:" prefix
+                    r"[0-9a-fA-F]{8}-?"  # 8 hex digits with optional hyphen
+                    r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+                    # Version and 3 hex digits with optional hyphen
+                    r"4[0-9a-fA-F]{3}-?"
+                    # Variant and 3 hex digits with optional hyphen
+                    r"[89abAB][0-9a-fA-F]{3}-?"
+                    r"[0-9a-fA-F]{12}$"  # 12 hex digits
+                ),
+            ),
+            (
+                None,
+                (
+                    r"^(?:urn:uuid:)?"  # Optional "urn:uuid:" prefix
+                    r"[0-9a-fA-F]{8}-?"  # 8 hex digits with optional hyphen
+                    r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+                    r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+                    r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+                    r"[0-9a-fA-F]{12}$"  # 12 hex digits
+                ),
+            ),
+        ],
+    )
+    def test_valid_input(self, version, expected_output):
+        assert get_uuid_regex(version) == expected_output
+
+    @pytest.mark.parametrize("version", [0, 2, 6])
+    def test_invalid_input(self, version):
+        with pytest.raises(ValueError, match="Invalid UUID version"):
+            get_uuid_regex(version)
+
+    @pytest.mark.parametrize(
+        "text, version, match_expected",
+        [
+            ("60c32af6-4b10-11ef-9ab2-0ecb4bcddcb5", 1, True),
+            ("3f46ae03-c654-36b0-a55d-cd0aa042c9f2", 3, True),
+            ("6b4c4599-1963-4d01-abbf-abdcb30ad9ff", 4, True),
+            ("2cba86aa-e4d3-5340-9c8d-012bfe7d5d9d", 5, True),
+            ("2cba86aa-e4d3-5340-9c8d-012bfe7d5d9d", None, True),
+            # With some hyphens missing
+            ("2cba86aae4d353409c8d012bfe7d5d9d", None, True),
+            ("6b4c4599-19634d01-abbfabdcb30ad9ff", 4, True),
+            # With mismatched version
+            ("60c32af6-4b10-11ef-9ab2-0ecb4bcddcb5", 3, False),
+            ("3f46ae03-c654-36b0-a55d-cd0aa042c9f2", 1, False),
+            ("6b4c4599-1963-4d01-abbf-abdcb30ad9ff", 1, False),
+            ("2cba86aa-e4d3-5340-9c8d-012bfe7d5d9d", 4, False),
+            # With wrong variant
+            ("60c32af6-4b10-11ef-0ab2-0ecb4bcddcb5", 1, False),
+            ("3f46ae03-c654-36b0-755d-cd0aa042c9f2", 3, False),
+            ("6b4c4599-1963-4d01-cbbf-abdcb30ad9ff", 4, False),
+            ("2cba86aa-e4d3-5340-2c8d-012bfe7d5d9d", 5, False),
+            # With wrong variant and version, though version doesn't really matter here
+            # With some hyphens missing
+            ("12345678123456781234567812345678", 4, False),
+            # too long
+            ("6b4c4599-1963-4d01-abbf-abdacb30ad9ff", 4, False),
+            ("2cba86aae4d353409c8d012bfbe7d5d9d", None, False),
+            # too short
+            ("6b4c4599-19634d01-abbabdcb30ad9ff", 4, False),
+            ("6b4c4599-1963-4d01-abf-abdcb30ad9ff", None, False),
+            # too many consecutive hyphens
+            ("3f46ae03-c654--36b0-a55d-cd0aa042c9f2", 3, False),
+            # Arbitrary strings
+            ("Hello world!", 4, False),
+            ("Foobar", None, False),
+        ],
+    )
+    @pytest.mark.parametrize("prepend_prefix", [True, False])
+    def test_generated_regex_behavior(
+        self, text, version, prepend_prefix, match_expected
+    ):
+        """
+        Verify the behavior of the generated regex pattern
+        """
+        if prepend_prefix:
+            text = f"urn:uuid:{text}"
+
+        if match_expected:
+            assert re.match(get_uuid_regex(version), text) is not None
+        else:
+            assert re.match(get_uuid_regex(version), text) is None

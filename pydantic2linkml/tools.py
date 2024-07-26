@@ -375,3 +375,34 @@ def fetch_defs(
                 enums.add(cls)
 
     return models, enums
+
+
+def get_uuid_regex(version: Optional[int]) -> str:
+    """
+    Get the regular expression for UUIDs. If a version is provided, the regular
+    expression will be specific to that version.
+
+    :param version: The optional version number that is 1, 3, 4, or 5 (version supported
+        by the Python `uuid` module)
+    """
+    if version is None:
+        return (
+            r"^(?:urn:uuid:)?"  # Optional "urn:uuid:" prefix
+            r"[0-9a-fA-F]{8}-?"  # 8 hex digits with optional hyphen
+            r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+            r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+            r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+            r"[0-9a-fA-F]{12}$"  # 12 hex digits
+        )
+    elif version in {1, 3, 4, 5}:
+        return (
+            r"^(?:urn:uuid:)?"  # Optional "urn:uuid:" prefix
+            r"[0-9a-fA-F]{8}-?"  # 8 hex digits with optional hyphen
+            r"[0-9a-fA-F]{4}-?"  # 4 hex digits with optional hyphen
+            # Version and 3 hex digits with optional hyphen
+            rf"{version}[0-9a-fA-F]{{3}}-?"
+            r"[89abAB][0-9a-fA-F]{3}-?"  # Variant and 3 hex digits with optional hyphen
+            r"[0-9a-fA-F]{12}$"  # 12 hex digits
+        )
+    else:
+        raise ValueError("Invalid UUID version number")
