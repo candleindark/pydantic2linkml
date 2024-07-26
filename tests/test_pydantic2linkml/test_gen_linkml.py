@@ -25,7 +25,13 @@ from pydantic import (
 from typing_extensions import Annotated
 
 from pydantic2linkml.gen_linkml import SlotGenerator
-from pydantic2linkml.tools import get_field_schema, get_uuid_regex
+from pydantic2linkml.tools import (
+    get_field_schema,
+    get_uuid_regex,
+    get_all_modules,
+    fetch_defs,
+)
+
 
 TRANSLATOR_PACKAGE = "pydantic2linkml"
 
@@ -81,9 +87,18 @@ def verify_str_lst(
         assert in_no_string(substr, str_lst)
 
 
+@pytest.fixture
+def models_and_enums(request) -> tuple[set[type[BaseModel]], set[type[Enum]]]:
+    """
+    Fixture to fetch Pydantic models and enums from named modules and their submodules
+    """
+    module_names: list[str] = request.param
+    return fetch_defs(get_all_modules(module_names))
+
+
 class TestLinkmlGenerator:
     @pytest.mark.parametrize(
-        "module_names",
+        "models_and_enums",
         [
             ["dandischema.models"],
             ["aind_data_schema.components.coordinates"],
@@ -103,18 +118,16 @@ class TestLinkmlGenerator:
             ["aind_data_schema.core.session"],
             ["aind_data_schema.core.subject"],
         ],
+        indirect=True,
     )
-    def test_instantiation_with_definitions_in_module(self, module_names):
+    def test_instantiation_with_definitions_in_module(self, models_and_enums):
         """
         Test instantiation of a `LinkmlGenerator` object with Pydantic models and enums
             from named modules and their submodules
-
-        :param module_names: The names of the modules
         """
-        from pydantic2linkml.tools import get_all_modules, fetch_defs
         from pydantic2linkml.gen_linkml import LinkmlGenerator
 
-        models, enums = fetch_defs(get_all_modules(module_names))
+        models, enums = models_and_enums
         LinkmlGenerator(models=models, enums=enums)
 
 
