@@ -1,18 +1,29 @@
 from __future__ import annotations
 
 import re
-from typing import cast
+from typing import cast, Optional, ClassVar, Type
 from operator import itemgetter
+from enum import Enum, auto
 
 import pytest
+from pydantic import BaseModel, RootModel
+from pydantic_core import core_schema
 
-from pydantic2linkml.tools import get_uuid_regex
+from pydantic2linkml.tools import (
+    get_uuid_regex,
+    resolve_ref_schema,
+    get_parent_models,
+    get_field_schema,
+    get_locally_defined_fields,
+    bucketize,
+    ensure_unique_names,
+    normalize_whitespace,
+    fetch_defs,
+)
+from pydantic2linkml.exceptions import NameCollisionError
 
 
 def test_get_parent_model():
-    from pydantic2linkml.tools import get_parent_models
-    from pydantic import BaseModel
-
     class Foo:
         pass
 
@@ -49,11 +60,6 @@ class TestResolveRefSchema:
         """
         Test with valid input
         """
-        from typing import Optional
-
-        from pydantic2linkml.tools import resolve_ref_schema
-        from pydantic import BaseModel
-        from pydantic_core import core_schema
 
         class A(BaseModel):
             pass
@@ -108,8 +114,6 @@ class TestResolveRefSchema:
         Test with invalid input, i.e. context` is not a `DefinitionsSchema` object when
         `maybe_ref_schema` is a `DefinitionsSchema` or `DefinitionReferenceSchema`.
         """
-        from pydantic import BaseModel
-        from pydantic2linkml.tools import resolve_ref_schema
 
         class A(BaseModel):
             pass
@@ -128,8 +132,6 @@ class TestResolveRefSchema:
         Test the case where the provided context does not have the corresponding schema
         for the provided reference schema.
         """
-        from pydantic import BaseModel
-        from pydantic2linkml.tools import resolve_ref_schema
 
         class A(BaseModel):
             pass
@@ -151,8 +153,6 @@ class TestGetFieldSchema:
         """
         Test with valid input
         """
-        from pydantic2linkml.tools import get_field_schema
-        from pydantic import BaseModel
 
         class A(BaseModel):
             a: int
@@ -211,9 +211,6 @@ class TestGetFieldSchema:
         """
         Test input model without model fields
         """
-        from pydantic2linkml.tools import get_field_schema
-        from pydantic import RootModel
-
         # noinspection PyPep8Naming
         Pets = RootModel[list[str]]
 
@@ -225,11 +222,6 @@ class TestGetFieldSchema:
 
 
 def test_get_locally_defined_fields():
-    from pydantic2linkml.tools import get_locally_defined_fields
-    from pydantic import BaseModel
-
-    from typing import ClassVar, Optional
-
     class A(BaseModel):
         a: str
         b: int
@@ -285,19 +277,10 @@ def test_get_locally_defined_fields():
     ],
 )
 def test_bucketize(items, key_func, value_func, expected):
-    from pydantic2linkml.tools import bucketize
-
     assert bucketize(items, key_func, value_func) == expected
 
 
 def test_ensure_unique_names():
-    from enum import Enum, auto
-    from typing import Type
-
-    from pydantic import BaseModel
-    from pydantic2linkml.tools import ensure_unique_names
-    from pydantic2linkml.exceptions import NameCollisionError
-
     class A:
         pass
 
@@ -375,13 +358,10 @@ def test_ensure_unique_names():
     ],
 )
 def test_normalize_whitespace(input_str, expected):
-    from pydantic2linkml.tools import normalize_whitespace
-
     assert normalize_whitespace(input_str) == expected
 
 
 def test_fetch_defs():
-    from pydantic2linkml.tools import fetch_defs
     from tests.assets import mock_module0, mock_module1
 
     models, enums = fetch_defs([mock_module0, mock_module1])
