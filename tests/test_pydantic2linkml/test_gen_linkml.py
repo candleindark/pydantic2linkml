@@ -24,7 +24,7 @@ from pydantic import (
 )
 from typing_extensions import Annotated
 
-from pydantic2linkml.gen_linkml import SlotGenerator
+from pydantic2linkml.gen_linkml import SlotGenerator, LinkmlGenerator
 from pydantic2linkml.tools import (
     get_field_schema,
     get_uuid_regex,
@@ -96,6 +96,15 @@ def models_and_enums(request) -> tuple[set[type[BaseModel]], set[type[Enum]]]:
     return fetch_defs(get_all_modules(module_names))
 
 
+@pytest.fixture
+def linkml_generator(models_and_enums) -> LinkmlGenerator:
+    """
+    Fixture to obtain a `LinkmlGenerator` object for named modules and their submodules
+    """
+    models, enums = models_and_enums
+    return LinkmlGenerator(models=models, enums=enums)
+
+
 class TestLinkmlGenerator:
     @pytest.mark.parametrize(
         "models_and_enums",
@@ -125,8 +134,6 @@ class TestLinkmlGenerator:
         Test instantiation of a `LinkmlGenerator` object with Pydantic models and enums
             from named modules and their submodules
         """
-        from pydantic2linkml.gen_linkml import LinkmlGenerator
-
         models, enums = models_and_enums
         LinkmlGenerator(models=models, enums=enums)
 
