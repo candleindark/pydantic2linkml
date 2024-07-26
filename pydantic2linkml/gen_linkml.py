@@ -37,6 +37,7 @@ from .tools import (
     FieldSchema,
     resolve_ref_schema,
     bucketize,
+    get_uuid_regex,
 )
 
 # The LinkML Any type
@@ -1031,7 +1032,13 @@ class SlotGenerator:
         self._shape_slot(resolve_ref_schema(schema, self._field_schema.context))
 
     def _uuid_schema(self, schema: core_schema.UuidSchema) -> None:
-        raise NotImplementedError("Method not yet implemented")
+        """
+        Shape the contained slot definition to match a UUID restriction
+
+        :param schema: The schema representing the UUID restriction
+        """
+        self._slot.range = "string"
+        self._slot.pattern = get_uuid_regex(schema.get("version"))
 
     def _model_field_schema(self, schema: core_schema.ModelField) -> None:
 

@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from functools import partial
 from datetime import date, time, datetime
 from enum import Enum
+from uuid import UUID
 
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
@@ -18,11 +19,13 @@ from pydantic import (
     PlainValidator,
     UrlConstraints,
     AnyUrl,
+    UUID3,
+    UUID4,
 )
 from typing_extensions import Annotated
 
 from pydantic2linkml.gen_linkml import SlotGenerator
-from pydantic2linkml.tools import get_field_schema
+from pydantic2linkml.tools import get_field_schema, get_uuid_regex
 
 TRANSLATOR_PACKAGE = "pydantic2linkml"
 
@@ -908,3 +911,21 @@ class TestSlotGenerator:
             "Unable to express the `default_path` option in LinkML.",
             default_path is not None,
         )
+
+    @pytest.mark.parametrize(
+        "uuid_type, expected_pattern",
+        [
+            (UUID, get_uuid_regex()),
+            (UUID3, get_uuid_regex(3)),
+            (UUID4, get_uuid_regex(4)),
+        ],
+    )
+    def test_uuid_schema(self, uuid_type, expected_pattern):
+        class Foo(BaseModel):
+            x: uuid_type
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert slot.range == "string"
+        assert slot.pattern == expected_pattern
