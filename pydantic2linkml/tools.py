@@ -377,7 +377,7 @@ def fetch_defs(
     return models, enums
 
 
-def get_uuid_regex(version: Optional[int]) -> str:
+def get_uuid_regex(version: Optional[int] = None) -> str:
     """
     Get the regular expression for UUIDs. If a version is provided, the regular
     expression will be specific to that version.
