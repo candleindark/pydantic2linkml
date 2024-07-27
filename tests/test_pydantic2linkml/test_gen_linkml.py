@@ -126,6 +126,7 @@ class TestLinkmlGenerator:
             ["aind_data_schema.core.rig"],
             ["aind_data_schema.core.session"],
             ["aind_data_schema.core.subject"],
+            # todo: Add test cases with list containing multiple module names
         ],
         indirect=True,
     )
