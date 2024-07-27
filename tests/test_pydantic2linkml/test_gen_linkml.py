@@ -100,8 +100,7 @@ def linkml_generator(models_and_enums) -> LinkmlGenerator:
     """
     Fixture to obtain a `LinkmlGenerator` object for named modules and their submodules
     """
-    models, enums = models_and_enums
-    return LinkmlGenerator(models=models, enums=enums)
+    return LinkmlGenerator(models=models_and_enums[0], enums=models_and_enums[1])
 
 
 class TestLinkmlGenerator:
@@ -135,8 +134,7 @@ class TestLinkmlGenerator:
         Test instantiation of a `LinkmlGenerator` object with Pydantic models and enums
             from named modules and their submodules
         """
-        models, enums = models_and_enums
-        LinkmlGenerator(models=models, enums=enums)
+        LinkmlGenerator(models=models_and_enums[0], enums=models_and_enums[1])
 
 
 class TestSlotGenerator:
