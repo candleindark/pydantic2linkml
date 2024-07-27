@@ -32,7 +32,6 @@ from pydantic2linkml.tools import (
     fetch_defs,
 )
 
-
 TRANSLATOR_PACKAGE = "pydantic2linkml"
 
 
@@ -112,8 +111,10 @@ class TestLinkmlGenerator:
             ["dandischema.models"],
             ["aind_data_schema.components.coordinates"],
             # Naming conflict at this one
-            # TODO: Re-enable this one once handling of the naming conflict is devised
-            # "aind_data_schema.components.devices",
+            # TODO: remove xfail mark once handling of the naming conflict is devised
+            pytest.param(
+                ["aind_data_schema.components.devices"], marks=pytest.mark.xfail
+            ),
             ["aind_data_schema.components.reagent"],
             ["aind_data_schema.components.stimulus"],
             ["aind_data_schema.components.tile"],
