@@ -137,6 +137,13 @@ class TestLinkmlGenerator:
         """
         LinkmlGenerator(models=models_and_enums[0], enums=models_and_enums[1])
 
+    # noinspection PyTestParametrized
+    @pytest.mark.parametrize(
+        "models_and_enums", [["dandischema.models"]], indirect=True
+    )
+    def test_generate(self, linkml_generator):
+        linkml_generator.generate()
+
 
 class TestSlotGenerator:
     def test_instantiation(self):
