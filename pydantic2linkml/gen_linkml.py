@@ -192,8 +192,8 @@ class LinkmlGenerator:
         """
         Add the classes construed from the models in `self._m_f_map` to the schema
         """
-        raise NotImplementedError("Method not yet implemented")
         # todo: Make sure to provide slot usage in the individual classes if needed
+        ...
 
     def _establish_supporting_defs(self):
         """
