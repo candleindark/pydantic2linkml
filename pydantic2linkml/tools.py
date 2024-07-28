@@ -214,12 +214,13 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
 
         assert model_field["type"] == "model-field"
 
+        model_pydantic_core_schema = model.__pydantic_core_schema__
         return FieldSchema(
             schema=resolve_ref_schema(
                 model_field["schema"],
-                context=model.__pydantic_core_schema__,
+                context=model_pydantic_core_schema,
             ),
-            context=model.__pydantic_core_schema__,
+            context=model_pydantic_core_schema,
             field_name=fn,
             field_info=field_info,
         )
