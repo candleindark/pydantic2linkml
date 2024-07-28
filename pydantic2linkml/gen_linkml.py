@@ -522,7 +522,7 @@ class SlotGenerator:
 
     def _bytes_schema(self, schema: core_schema.BytesSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
@@ -665,7 +665,7 @@ class SlotGenerator:
 
     def _timedelta_schema(self, schema: core_schema.TimedeltaSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
@@ -715,21 +715,21 @@ class SlotGenerator:
 
     def _is_instance_schema(self, schema: core_schema.IsInstanceSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _is_subclass_schema(self, schema: core_schema.IsSubclassSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _callable_schema(self, schema: core_schema.CallableSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
@@ -758,35 +758,35 @@ class SlotGenerator:
 
     def _tuple_schema(self, schema: core_schema.TupleSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _set_schema(self, schema: core_schema.SetSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _frozenset_schema(self, schema: core_schema.FrozenSetSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _generator_schema(self, schema: core_schema.GeneratorSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _dict_schema(self, schema: core_schema.DictSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
@@ -970,35 +970,35 @@ class SlotGenerator:
 
     def _chain_schema(self, schema: core_schema.ChainSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _lax_or_strict_schema(self, schema: core_schema.LaxOrStrictSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _json_or_python_schema(self, schema: core_schema.JsonOrPythonSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _typed_dict_schema(self, schema: core_schema.TypedDictSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _model_fields_schema(self, schema: core_schema.ModelFieldsSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
@@ -1014,42 +1014,42 @@ class SlotGenerator:
 
     def _dataclass_args_schema(self, schema: core_schema.DataclassArgsSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _dataclass_schema(self, schema: core_schema.DataclassSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _arguments_schema(self, schema: core_schema.ArgumentsSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _call_schema(self, schema: core_schema.CallSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _custom_error_schema(self, schema: core_schema.CustomErrorSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _json_schema(self, schema: core_schema.JsonSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
@@ -1088,7 +1088,7 @@ class SlotGenerator:
 
     def _multi_host_url_schema(self, schema: core_schema.MultiHostUrlSchema) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
@@ -1123,28 +1123,28 @@ class SlotGenerator:
 
     def _model_field_schema(self, schema: core_schema.ModelField) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _dataclass_field_schema(self, schema: core_schema.DataclassField) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _typed_dict_field_schema(self, schema: core_schema.TypedDictField) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
 
     def _computed_field_schema(self, schema: core_schema.ComputedField) -> None:
         raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema.__name__}, is not "
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
