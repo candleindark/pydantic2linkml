@@ -90,9 +90,8 @@ def resolve_ref_schema(
                 "or `DefinitionReferenceSchema`."
             )
 
-    context = cast(core_schema.DefinitionsSchema, context)
-
     if schema_type == "definition-ref":
+        context = cast(core_schema.DefinitionsSchema, context)
         ref = maybe_ref_schema["schema_ref"]
         for schema in context["definitions"]:
             if schema["ref"] == ref:
