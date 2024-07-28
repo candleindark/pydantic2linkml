@@ -126,9 +126,10 @@ def strip_function_schema(
         )
 
 
-# A mapping from unneeded wrapping schema types to functions that strip the outermost
-# unneeded wrapping schema. The set of schema types deemed as unneeded may change in
-# the future if we are able to harvest the information in any of the schema types.
+# A mapping from unneeded wrapping schema types around `ModelSchema` to functions that
+# strip the outermost unneeded wrapping schema. The set of schema types deemed as
+# unneeded may change in the future if we are able to harvest the information in any of
+# the wrapping schema types.
 UNNEEDED_WRAPPING_SCHEMA_TYPE_TO_STRIP_FUNC: dict[
     str, Callable[[core_schema.CoreSchema], core_schema.CoreSchema]
 ] = {
