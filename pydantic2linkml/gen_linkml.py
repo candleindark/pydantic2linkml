@@ -155,21 +155,14 @@ class LinkmlGenerator:
         warnings_msg: Optional[str] = None
         for f_name, schema_lst in buckets.items():
             if len(schema_lst) > 1:
-                # Construct the list of classes that define the fields corresponding
-                # to the field schemas in `schema_lst`
-                cls_lst = []
-                for s in schema_lst:
-                    # Resolve the context schema into a model schema
-                    model_schema = resolve_ref_schema(s.context, s.context)
-
-                    assert model_schema["type"] == "model"
-
-                    cls_lst.append(model_schema["cls"])
+                # Construct the list of Pydantic models that define the fields
+                # corresponding to the field schemas in `schema_lst`
+                model_lst = [s.model for s in schema_lst]
 
                 new_warnings_msg = (
-                    f"Field name collision @ {f_name} from {cls_lst!r}, "
-                    f"{f_name} field definition from {cls_lst[0]!r} is used to specify "
-                    f"slot {f_name}"
+                    f"Field name collision @ {f_name} from {model_lst!r}, "
+                    f"{f_name} field definition from {model_lst[0]!r} is used to "
+                    f"specify slot {f_name}"
                 )
                 warnings_msg = (
                     new_warnings_msg

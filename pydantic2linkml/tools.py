@@ -43,6 +43,9 @@ class FieldSchema(NamedTuple):
     # The `FieldInfo` object representing the field in the Pydantic model
     field_info: FieldInfo
 
+    # The Pydantic model in which the field is defined
+    model: type[BaseModel]
+
 
 def get_parent_models(model: type[BaseModel]) -> list[type[BaseModel]]:
     """
@@ -223,6 +226,7 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
             context=model_pydantic_core_schema,
             field_name=fn,
             field_info=field_info,
+            model=model,
         )
     else:
         raise NotImplementedError(
