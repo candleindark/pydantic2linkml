@@ -983,11 +983,17 @@ class SlotGenerator:
         )
 
     def _json_or_python_schema(self, schema: core_schema.JsonOrPythonSchema) -> None:
-        raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema['type']}, is not "
-            "implemented. If you encounter this error in translating your models, "
-            "consider filing an issue."
-        )
+        """
+        Shape the contained slot definition to match the restrictions specified by
+            a `core_schema.JsonOrPythonSchema`
+        :param schema: The `core_schema.JsonOrPythonSchema`
+
+        Note: Since the restrictions specified by the inner `json_schema` is more
+            readily translatable to LinkML in comparison to the restrictions specified
+            by the inner `python_schema`, the `json_schema` is used to continue shaping
+            the contained slot definition.
+        """
+        self._shape_slot(schema["json_schema"])
 
     def _typed_dict_schema(self, schema: core_schema.TypedDictSchema) -> None:
         raise TranslationNotImplementedError(
