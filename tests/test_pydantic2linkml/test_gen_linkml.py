@@ -668,6 +668,15 @@ class TestSlotGenerator:
             assert slot.maximum_cardinality == max_len
             assert slot.range == expected_range
 
+    def test_dict_schema(self):
+        class Foo(BaseModel):
+            x: dict[int, str]
+
+        field_schema = get_field_schema(Foo, "x")
+        slot = SlotGenerator(field_schema).generate()
+
+        assert in_exactly_one_string("`dict` types are yet to be supported", slot.notes)
+
     def test_function_after_schema(self):
         def validator_func(v):
             return v

@@ -785,10 +785,17 @@ class SlotGenerator:
         )
 
     def _dict_schema(self, schema: core_schema.DictSchema) -> None:
-        raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema['type']}, is not "
-            "implemented. If you encounter this error in translating your models, "
-            "consider filing an issue."
+        """
+        Shape the contained slot definition to match restrictions of a dictionary value
+
+        :param schema: The `core_schema.DictSchema` representing restrictions
+        """
+        # todo: the current implementation is just an annotation
+        #   A usable implementation is yet to be decided. Useful information
+        #   can be found at, https://github.com/orgs/linkml/discussions/2239
+        self._attach_note(
+            "Warning: The translation is incomplete. `dict` types are yet to be "
+            "supported."
         )
 
     def _function_schema(
