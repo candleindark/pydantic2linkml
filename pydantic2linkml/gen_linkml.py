@@ -162,12 +162,12 @@ class LinkmlGenerator:
                 new_warnings_msg = (
                     f"Field name collision @ {f_name} from {model_lst!r}, "
                     f"{f_name} field definition from {model_lst[0]!r} is used to "
-                    f"specify slot {f_name}"
+                    f"specify slot {f_name}."
                 )
                 warnings_msg = (
                     new_warnings_msg
                     if warnings_msg is None
-                    else f"{warnings_msg}; {new_warnings_msg}"
+                    else f"{warnings_msg}\n{new_warnings_msg}"
                 )
 
         if warnings_msg is not None:
