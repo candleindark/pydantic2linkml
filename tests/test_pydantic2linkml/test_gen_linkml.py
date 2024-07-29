@@ -4,6 +4,7 @@ from functools import partial
 from datetime import date, time, datetime
 from enum import Enum
 from uuid import UUID
+from unittest.mock import call
 
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
@@ -866,6 +867,29 @@ class TestSlotGenerator:
         assert in_exactly_one_string(
             "Tagged union types are yet to be supported", slot.notes
         )
+
+    def test_chain_schema(self, mocker):
+        class Foo(BaseModel):
+            x: Union[int, str] = Field(..., pattern=r"^[0-9a-z]+$")
+
+        field_schema = get_field_schema(Foo, "x")
+        slot_generator = SlotGenerator(field_schema)
+
+        # Initiate monitoring of the slot generation process
+        spy = mocker.spy(slot_generator, "_shape_slot")
+
+        slot = slot_generator.generate()
+
+        assert in_exactly_one_string(
+            "Warning: Pydantic core schema of type `'chain'` is encountered.",
+            slot.notes,
+        )
+
+        # Sure that translation is propagated to each schema in the chain
+        calls = (
+            call(schema_in_chain) for schema_in_chain in field_schema.schema["steps"]
+        )
+        spy.assert_has_calls(calls, any_order=True)
 
     def test_model_schema(self):
         class Bar(BaseModel):

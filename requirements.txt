@@ -5,3 +5,4 @@ pydantic
 typer
 pytest
 pytest-xdist
+pytest-mock

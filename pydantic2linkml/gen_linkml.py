@@ -969,11 +969,39 @@ class SlotGenerator:
         )
 
     def _chain_schema(self, schema: core_schema.ChainSchema) -> None:
-        raise TranslationNotImplementedError(
-            f"Translation of Pydantic core schema, {schema['type']}, is not "
-            "implemented. If you encounter this error in translating your models, "
-            "consider filing an issue."
+        """
+        Shape the contained slot definition to match the restrictions specified by
+            a `core_schema.ChainSchema`, which represents a chain of Pydantic core
+            schemas
+        :param schema: The `core_schema.ChainSchema`
+
+        Note: Models can often be defined to avoid having a field with a chain schema.
+            For example, in the following model, only field `y` has a chain schema.
+            The type annotation of field `y`, through examination of the
+            chain schema, can be argued incorrect; in the sense that no `int` can pass
+            the validation for field `y`. The annotation of field `z` is well suited for
+            field `y` for its intended purpose.
+
+            ```python
+            from typing import Union, Annotated
+
+            from pydantic import BaseModel, Field, StringConstraints
+
+
+            class Foo(BaseModel):
+                x: str = Field(..., pattern=r"^[0-9a-z]+$")
+                y: Union[int, str] = Field(..., pattern=r"^[0-9a-z]+$")
+                z: Union[int, Annotated[str, StringConstraints(pattern=r"^[0-9a-z]+$")]]
+            ```
+        """
+        self._attach_note(
+            "Warning: Pydantic core schema of type `'chain'` is encountered. "
+            "The translation may be less accurate. Often, the type annotation of the "
+            "corresponding field in the corresponding Pydantic model can be improved."
         )
+
+        for schema_in_chain in schema["steps"]:
+            self._shape_slot(schema_in_chain)
 
     def _lax_or_strict_schema(self, schema: core_schema.LaxOrStrictSchema) -> None:
         raise TranslationNotImplementedError(
