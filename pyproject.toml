@@ -46,6 +46,8 @@ python = "3.11"
 [tool.hatch.envs.test]
 python = "3.11"
 dependencies = [
+  "aind-data-schema>=0.38.6",
+  "dandischema>=0.10.2",
   "pytest",
   "pytest-cov",
   "pytest-mock",
