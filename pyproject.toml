@@ -43,6 +43,15 @@ path = "src/pydantic2linkml/__about__.py"
 [tool.hatch.envs.default]
 python = "3.11"
 
+[tool.hatch.envs.test]
+python = "3.11"
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "pytest-mock",
+  "pytest-xdist",
+]
+
 [tool.hatch.envs.types]
 pyhton = "3.11"
 extra-dependencies = [
