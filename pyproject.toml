@@ -37,6 +37,9 @@ Documentation = "https://github.com/DailyDreaming/linkml-aind-model#readme"
 Issues = "https://github.com/DailyDreaming/linkml-aind-model/issues"
 Source = "https://github.com/DailyDreaming/linkml-aind-model"
 
+[project.scripts]
+pydantic2linkml = "pydantic2linkml.cli:app"
+
 [tool.hatch.version]
 path = "src/pydantic2linkml/__about__.py"
 

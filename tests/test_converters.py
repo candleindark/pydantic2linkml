@@ -1,6 +1,4 @@
-import pytest
-
-from generate_linkml_from_pydantic import main
+from pydantic2linkml.cli import main
 
 
 def test_smoke():
