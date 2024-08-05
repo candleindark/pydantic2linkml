@@ -7,34 +7,44 @@ name = "pydantic2linkml"
 dynamic = ["version"]
 description = 'A tool for translating models expressed in Pydantic to LinkML'
 readme = "README.md"
-requires-python = ">=3.8"
-license = "MIT"
-keywords = []
+requires-python = ">=3.9"
+license = "MIT"  # todo: Is this the correct license?
+keywords = ["LinkML", "Pydantic"]
 authors = [
-  { name = "Isaac To", email = "candleindark@gmail.com" },
+  { name = "Lon Blauvelt", email = "blauvel@ucsc.edu" },
+  { name = "Sebastian Urchs", email = "sebastian.urchs@gmail.com" },
+  { name = "Satrajit Ghosh", email = "satra@mit.edu" },
+  { name = "Isaac To", email = "isaac.chun.to@gmail.com" },
+  { name = "Yaroslav Halchenko", email = "debian@onerussian.com" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "linkml~=1.8",
+  "pydantic~=2.7",
+  "typer",
+]
 
 [project.urls]
-Documentation = "https://github.com/Isaac To/pydantic2linkml#readme"
-Issues = "https://github.com/Isaac To/pydantic2linkml/issues"
-Source = "https://github.com/Isaac To/pydantic2linkml"
+Documentation = "https://github.com/DailyDreaming/linkml-aind-model#readme"
+Issues = "https://github.com/DailyDreaming/linkml-aind-model/issues"
+Source = "https://github.com/DailyDreaming/linkml-aind-model"
 
 [tool.hatch.version]
 path = "src/pydantic2linkml/__about__.py"
 
+[tool.hatch.envs.default]
+python = "3.11"
+
 [tool.hatch.envs.types]
+pyhton = "3.11"
 extra-dependencies = [
   "mypy>=1.0.0",
 ]
