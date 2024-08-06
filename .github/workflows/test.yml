@@ -19,27 +19,15 @@ jobs:
           - macos-latest
           - windows-latest
           - ubuntu-latest
-        python-version:
-          - '3.9'
-          - '3.10'
-          - '3.11'
-          - '3.12'
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip wheel
-          python -m pip install -r requirements.txt
+      - name: Install Hatch
+        uses: pypa/hatch@install
 
       - name: Run tests
-        run: python -m pytest --numprocesses=logical -s -v .
+        run: hatch run test:python -m pytest --numprocesses=logical -s -v tests
         env:
           # Needed for coveralls:
           GITHUB_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
