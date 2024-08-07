@@ -1,13 +1,22 @@
 import re
-from enum import Enum
-from typing import Optional, Callable, Any, Union
-from collections.abc import Iterable
 from collections import defaultdict
-from itertools import chain
-from warnings import warn
-from operator import itemgetter
+from collections.abc import Iterable
 from datetime import date
+from enum import Enum
+from itertools import chain
+from operator import itemgetter
+from typing import Any, Callable, Optional, Union
+from warnings import warn
 
+from linkml_runtime.linkml_model import (
+    ClassDefinition,
+    EnumDefinition,
+    PermissibleValue,
+    SchemaDefinition,
+    SlotDefinition,
+)
+from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
+from linkml_runtime.utils.schema_builder import SchemaBuilder
 from pydantic import BaseModel
 
 # noinspection PyProtectedMember
@@ -15,29 +24,19 @@ from pydantic._internal import _typing_extra
 
 # noinspection PyProtectedMember
 from pydantic._internal._core_utils import CoreSchemaOrField
-
 from pydantic.json_schema import CoreSchemaOrFieldType
 from pydantic_core import core_schema
-from linkml_runtime.utils.schema_builder import SchemaBuilder
-from linkml_runtime.linkml_model import (
-    SchemaDefinition,
-    ClassDefinition,
-    EnumDefinition,
-    PermissibleValue,
-    SlotDefinition,
-)
-from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 
-from .exceptions import UserError, TranslationNotImplementedError
+from .exceptions import TranslationNotImplementedError, UserError
 from .tools import (
-    ensure_unique_names,
-    normalize_whitespace,
-    get_locally_defined_fields,
-    LocallyDefinedFields,
     FieldSchema,
-    resolve_ref_schema,
+    LocallyDefinedFields,
     bucketize,
+    ensure_unique_names,
+    get_locally_defined_fields,
     get_uuid_regex,
+    normalize_whitespace,
+    resolve_ref_schema,
 )
 
 # The LinkML Any type
@@ -185,8 +184,7 @@ class LinkmlGenerator:
         """
         Add the classes construed from the models in `self._m_f_map` to the schema
         """
-        # todo: Make sure to provide slot usage in the individual classes if needed
-        ...
+        # TODO: Make sure to provide slot usage in the individual classes if needed
 
     def _establish_supporting_defs(self):
         """
@@ -408,7 +406,7 @@ class SlotGenerator:
         """
         self._slot.range = "decimal"
 
-        if "allow_inf_nan" in schema and schema["allow_inf_nan"]:
+        if schema.get("allow_inf_nan"):
             self._attach_note(
                 "LinkML does not have support for `'+inf'`, `'-inf'`, and `'NaN'` "
                 "values. Support for these values is not translated."
@@ -498,17 +496,17 @@ class SlotGenerator:
                 # Set the pattern to the length constraint
                 self._slot.pattern = length_constraint_regex
 
-        if "strip_whitespace" in schema and schema["strip_whitespace"]:
+        if schema.get("strip_whitespace"):
             self._attach_note(
                 "Unable to express the option of "
                 "stripping leading and trailing whitespace in LinkML."
             )
-        if "to_lower" in schema and schema["to_lower"]:
+        if schema.get("to_lower"):
             self._attach_note(
                 "Unable to express the option of converting the string to lowercase "
                 "in LinkML."
             )
-        if "to_upper" in schema and schema["to_upper"]:
+        if schema.get("to_upper"):
             self._attach_note(
                 "Unable to express the option of converting the string to uppercase "
                 "in LinkML."
@@ -790,7 +788,7 @@ class SlotGenerator:
 
         :param schema: The `core_schema.DictSchema` representing restrictions
         """
-        # todo: the current implementation is just an annotation
+        # TODO: the current implementation is just an annotation
         #   A usable implementation is yet to be decided. Useful information
         #   can be found at, https://github.com/orgs/linkml/discussions/2239
         self._attach_note(
@@ -952,7 +950,7 @@ class SlotGenerator:
 
         :param schema: The schema representing the union restriction
         """
-        # todo: the current implementation is just an annotation
+        # TODO: the current implementation is just an annotation
         #   A usable implementation is yet to be decided. Useful information
         #   can be found at, https://github.com/orgs/linkml/discussions/2154
         self._attach_note(
@@ -966,7 +964,7 @@ class SlotGenerator:
 
         :param schema: The schema representing the tagged union restriction
         """
-        # todo: the current implementation is just an annotation
+        # TODO: the current implementation is just an annotation
         #   A usable implementation is yet to be decided. Useful information
         #   can be found at, https://github.com/orgs/linkml/discussions/2154
         #   and https://linkml.io/linkml/schemas/type-designators.html

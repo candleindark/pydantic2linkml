@@ -9,6 +9,7 @@
 
 if __name__ == "__main__":
     import sys
+
     from pydantic2linkml.cli import app
 
     sys.exit(app())

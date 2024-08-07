@@ -3,8 +3,8 @@ from pathlib import Path
 import typer
 from linkml_runtime.dumpers import yaml_dumper
 
-from pydantic2linkml.tools import get_all_modules, fetch_defs
 from pydantic2linkml.gen_linkml import LinkmlGenerator
+from pydantic2linkml.tools import fetch_defs, get_all_modules
 
 app = typer.Typer()
 

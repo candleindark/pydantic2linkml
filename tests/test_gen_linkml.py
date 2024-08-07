@@ -1,36 +1,35 @@
-from typing import Literal, Union, Optional
 from collections.abc import Iterable
-from functools import partial
-from datetime import date, time, datetime
+from datetime import date, datetime, time
 from enum import Enum
-from uuid import UUID
+from functools import partial
+from typing import Annotated, Literal, Optional, Union
 from unittest.mock import call
+from uuid import UUID
 
 import pytest
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 from pydantic import (
-    BaseModel,
-    Field,
-    StringConstraints,
-    condate,
-    conlist,
-    AfterValidator,
-    BeforeValidator,
-    WrapValidator,
-    PlainValidator,
-    UrlConstraints,
-    AnyUrl,
     UUID3,
     UUID4,
+    AfterValidator,
+    AnyUrl,
+    BaseModel,
+    BeforeValidator,
+    Field,
+    PlainValidator,
+    StringConstraints,
+    UrlConstraints,
+    WrapValidator,
+    condate,
+    conlist,
 )
-from typing_extensions import Annotated
 
-from pydantic2linkml.gen_linkml import SlotGenerator, LinkmlGenerator
+from pydantic2linkml.gen_linkml import LinkmlGenerator, SlotGenerator
 from pydantic2linkml.tools import (
+    fetch_defs,
+    get_all_modules,
     get_field_schema,
     get_uuid_regex,
-    get_all_modules,
-    fetch_defs,
 )
 
 TRANSLATOR_PACKAGE = "pydantic2linkml"
@@ -127,7 +126,7 @@ class TestLinkmlGenerator:
             ["aind_data_schema.core.rig"],
             ["aind_data_schema.core.session"],
             ["aind_data_schema.core.subject"],
-            # todo: Add test cases with list containing multiple module names
+            # TODO: Add test cases with list containing multiple module names
         ],
         indirect=True,
     )

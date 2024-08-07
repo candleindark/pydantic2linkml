@@ -3,16 +3,12 @@ class NameCollisionError(Exception):
     Raise when there is a name collision
     """
 
-    pass
-
 
 class UserError(Exception):
     """
     Raise when an entity is not used correctly and other more precise exceptions
     are not appropriate
     """
-
-    pass
 
 
 class TranslationNotImplementedError(NotImplementedError):
@@ -24,5 +20,3 @@ class TranslationNotImplementedError(NotImplementedError):
       against the targeted models expressed in Pydantic. File an issue if this error is
       encountered.
     """
-
-    pass

@@ -1,5 +1,6 @@
-from pydantic import BaseModel, RootModel
 from enum import Enum
+
+from pydantic import BaseModel, RootModel
 
 
 class A(BaseModel):

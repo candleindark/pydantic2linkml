@@ -1,24 +1,24 @@
 from __future__ import annotations
 
 import importlib
-from typing import NamedTuple, Optional, cast, TypeVar
-from types import ModuleType
-import re
-from collections.abc import Iterable, Callable
-from collections import defaultdict
-from operator import attrgetter
-from enum import Enum
 import inspect
+import re
 import sys
+from collections import defaultdict
+from collections.abc import Callable, Iterable
+from enum import Enum
+from operator import attrgetter
+from types import ModuleType
+from typing import NamedTuple, Optional, TypeVar, cast
 
 from pydantic import BaseModel, RootModel
-from pydantic_core import core_schema
-
-# noinspection PyProtectedMember
-from pydantic.fields import FieldInfo
 
 # noinspection PyProtectedMember
 from pydantic._internal import _core_utils
+
+# noinspection PyProtectedMember
+from pydantic.fields import FieldInfo
+from pydantic_core import core_schema
 
 from .exceptions import NameCollisionError
 
@@ -99,10 +99,9 @@ def resolve_ref_schema(
         for schema in context["definitions"]:
             if schema["ref"] == ref:
                 return schema
-        else:
-            raise RuntimeError(
-                f"Referenced schema by {ref} not found in provided context"
-            )
+        raise RuntimeError(
+            f"Referenced schema by {ref} not found in provided context"
+        )
     elif schema_type == "definitions":
         return resolve_ref_schema(maybe_ref_schema["schema"], context)
     return maybe_ref_schema
@@ -323,7 +322,7 @@ def normalize_whitespace(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip())
 
 
-# todo: write tests for this function
+# TODO: write tests for this function
 def get_all_modules(module_names: Iterable[str]) -> set[ModuleType]:
     """
     Get the named modules and their submodules loaded to `sys.modules`

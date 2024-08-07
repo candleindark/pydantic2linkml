@@ -1,26 +1,26 @@
 from __future__ import annotations
 
 import re
-from typing import cast, Optional, ClassVar, Type
-from operator import itemgetter
 from enum import Enum, auto
+from operator import itemgetter
+from typing import ClassVar, Optional, Type, cast
 
 import pytest
 from pydantic import BaseModel, RootModel
 from pydantic_core import core_schema
 
+from pydantic2linkml.exceptions import NameCollisionError
 from pydantic2linkml.tools import (
-    get_uuid_regex,
-    resolve_ref_schema,
-    get_parent_models,
-    get_field_schema,
-    get_locally_defined_fields,
     bucketize,
     ensure_unique_names,
-    normalize_whitespace,
     fetch_defs,
+    get_field_schema,
+    get_locally_defined_fields,
+    get_parent_models,
+    get_uuid_regex,
+    normalize_whitespace,
+    resolve_ref_schema,
 )
-from pydantic2linkml.exceptions import NameCollisionError
 
 
 def test_get_parent_model():
