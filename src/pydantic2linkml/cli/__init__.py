@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 import typer
 from linkml_runtime.dumpers import yaml_dumper
@@ -16,7 +17,7 @@ app = typer.Typer()
 @app.command()
 def main(
     module_names: list[str],
-    output_file: Path = None,
+    output_file: Optional[Path] = None,
     log_level: LogLevel = LogLevel.WARNING,
 ):
     # Set log level of the CLI
