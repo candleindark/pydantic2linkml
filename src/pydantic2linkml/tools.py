@@ -103,9 +103,7 @@ def resolve_ref_schema(
         for schema in context["definitions"]:
             if schema["ref"] == ref:
                 return schema
-        raise RuntimeError(
-            f"Referenced schema by {ref} not found in provided context"
-        )
+        raise RuntimeError(f"Referenced schema by {ref} not found in provided context")
     elif schema_type == "definitions":
         return resolve_ref_schema(maybe_ref_schema["schema"], context)
     return maybe_ref_schema
