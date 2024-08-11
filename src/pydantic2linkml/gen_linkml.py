@@ -1,3 +1,4 @@
+import logging
 import re
 from collections import defaultdict
 from collections.abc import Iterable
@@ -6,7 +7,6 @@ from enum import Enum
 from itertools import chain
 from operator import itemgetter
 from typing import Any, Callable, Optional, Union
-from warnings import warn
 
 from linkml_runtime.linkml_model import (
     ClassDefinition,
@@ -38,6 +38,8 @@ from .tools import (
     normalize_whitespace,
     resolve_ref_schema,
 )
+
+logger = logging.getLogger(__name__)
 
 # The LinkML Any type
 # For more info, see https://linkml.io/linkml/schemas/advanced.html#linkml-any-type
@@ -151,26 +153,22 @@ class LinkmlGenerator:
             new_fields, key_func=itemgetter(0), value_func=itemgetter(1)
         )
 
-        warnings_msg: Optional[str] = None
         for f_name, schema_lst in buckets.items():
             if len(schema_lst) > 1:
                 # Construct the list of Pydantic models that define the fields
                 # corresponding to the field schemas in `schema_lst`
                 model_lst = [s.model for s in schema_lst]
 
-                new_warnings_msg = (
-                    f"Field name collision @ {f_name} from {model_lst!r}, "
-                    f"{f_name} field definition from {model_lst[0]!r} is used to "
-                    f"specify slot {f_name}."
+                logger.warning(
+                    "Field name collision @ %(f_name)s from %(model_lst)r. "
+                    "%(f_name)s field definition from %(first_model)r is used to "
+                    "specify slot %(f_name)s.",
+                    {
+                        "f_name": f_name,
+                        "model_lst": model_lst,
+                        "first_model": model_lst[0],
+                    },
                 )
-                warnings_msg = (
-                    new_warnings_msg
-                    if warnings_msg is None
-                    else f"{warnings_msg}\n{new_warnings_msg}"
-                )
-
-        if warnings_msg is not None:
-            warn(warnings_msg)
 
         # Add the slots to the schema
         for schema_lst in buckets.values():
