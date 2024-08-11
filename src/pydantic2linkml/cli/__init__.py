@@ -1,10 +1,13 @@
 from pathlib import Path
+import logging
 
 import typer
 from linkml_runtime.dumpers import yaml_dumper
 
 from pydantic2linkml.gen_linkml import LinkmlGenerator
 from pydantic2linkml.tools import fetch_defs, get_all_modules
+
+from .tools import LogLevel
 
 app = typer.Typer()
 
@@ -13,7 +16,11 @@ app = typer.Typer()
 def main(
     module_names: list[str],
     output_file: Path = None,
+    log_level: LogLevel = LogLevel.WARNING,
 ):
+    # Set log level of the CLI
+    logging.basicConfig(level=getattr(logging, log_level))
+
     # TODO: RF prints to log messages to stderr
     modules = get_all_modules(module_names)
     print(

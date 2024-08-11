@@ -23,6 +23,10 @@ from pydantic_core import core_schema
 from .exceptions import NameCollisionError
 
 
+class StrEnum(str, Enum):
+    pass
+
+
 class LocallyDefinedFields(NamedTuple):
     new: dict[str, FieldSchema]
     overriding: dict[str, FieldSchema]
