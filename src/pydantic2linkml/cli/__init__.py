@@ -5,8 +5,7 @@ from typing import Annotated, Optional
 import typer
 from linkml_runtime.dumpers import yaml_dumper
 
-from pydantic2linkml.gen_linkml import LinkmlGenerator
-from pydantic2linkml.tools import fetch_defs, get_all_modules
+from pydantic2linkml.gen_linkml import translate_defs
 
 from .tools import LogLevel
 
@@ -25,18 +24,7 @@ def main(
     # Set log level of the CLI
     logging.basicConfig(level=getattr(logging, log_level))
 
-    modules = get_all_modules(module_names)
-    logger.info(
-        "Considering %d modules for provided %d modules: %s",
-        len(modules),
-        len(module_names),
-        module_names,
-    )
-    models, enums = fetch_defs(modules)
-    logger.info("Fetched %d models and %d enums", len(models), len(enums))
-    generator = LinkmlGenerator(models=models, enums=enums)
-    logger.info("Generating schema")
-    schema = generator.generate()
+    schema = translate_defs(module_names)
     logger.info("Dumping schema")
     yml = yaml_dumper.dumps(schema)
     if not output_file:

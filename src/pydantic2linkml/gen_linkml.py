@@ -37,6 +37,8 @@ from .tools import (
     get_uuid_regex,
     normalize_whitespace,
     resolve_ref_schema,
+    get_all_modules,
+    fetch_defs,
 )
 
 logger = logging.getLogger(__name__)
@@ -1185,3 +1187,26 @@ class SlotGenerator:
             "implemented. If you encounter this error in translating your models, "
             "consider filing an issue."
         )
+
+
+def translate_defs(module_names) -> SchemaDefinition:
+    """
+    Translate Python objects, in the named modules and their submodules loaded to
+        `sys.modules`, to LinkML
+    :param module_names: The names to specify the modules and their submodules
+    :return: A `SchemaDefinition` object representing the expressions of the
+        Python objects in LinkML
+    """
+    modules = get_all_modules(module_names)
+    logger.info(
+        "Considering %d modules for provided %d modules: %s",
+        len(modules),
+        len(module_names),
+        module_names,
+    )
+    models, enums = fetch_defs(modules)
+    logger.info("Fetched %d models and %d enums", len(models), len(enums))
+    generator = LinkmlGenerator(models=models, enums=enums)
+    logger.info("Generating schema")
+    schema = generator.generate()
+    return schema
