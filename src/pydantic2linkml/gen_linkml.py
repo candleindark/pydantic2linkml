@@ -1197,6 +1197,10 @@ def translate_defs(module_names) -> SchemaDefinition:
     :return: A `SchemaDefinition` object representing the expressions of the
         Python objects in LinkML
     """
+    # Eliminate duplicates in the module names
+    if type(module_names) is not set:
+        module_names = set(module_names)
+
     modules = get_all_modules(module_names)
     logger.info(
         "Considering %d modules for provided %d modules: %s",
