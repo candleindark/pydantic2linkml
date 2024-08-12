@@ -332,6 +332,10 @@ def get_all_modules(module_names: Iterable[str]) -> set[ModuleType]:
     :param module_names: The names of the modules
     :return: The named modules and their submodules loaded to `sys.modules`
     """
+    # Eliminate duplicates in the module names
+    if type(module_names) is not set:
+        module_names = set(module_names)
+
     modules: list[ModuleType] = []
 
     # Pre-import all the modules of given names first, so we have no order effects
