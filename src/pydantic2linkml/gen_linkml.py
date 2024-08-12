@@ -1189,7 +1189,7 @@ class SlotGenerator:
         )
 
 
-def translate_defs(module_names) -> SchemaDefinition:
+def translate_defs(module_names: Iterable[str]) -> SchemaDefinition:
     """
     Translate Python objects, in the named modules and their submodules loaded to
         `sys.modules`, to LinkML
