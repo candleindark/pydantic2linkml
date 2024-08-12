@@ -44,7 +44,7 @@ pydantic2linkml = "pydantic2linkml.cli:app"
 path = "src/pydantic2linkml/__about__.py"
 
 [tool.hatch.envs.default]
-python = "3.11"
+python = "3.9"
 
 [tool.hatch.envs.test]
 dependencies = [
