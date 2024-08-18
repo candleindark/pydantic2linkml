@@ -416,3 +416,25 @@ def get_uuid_regex(version: Optional[int] = None) -> str:
         )
     else:
         raise ValueError("Invalid UUID version number")
+
+
+def force_to_set(iterable: Optional[Iterable[T]]) -> set[T]:
+    """
+    Force an iterable of elements to a set if it is not already a set
+
+    Note: If the input is `None`, an empty set is returned.
+
+    :param iterable: The iterable of elements or `None`
+
+    :return: The set of elements in the iterable or an empty set if the input is `None`
+            If the input is already a set, it is returned as is (for performance).
+
+    Usage: This function is useful to remove duplicates in an iterable.
+    """
+    if iterable is None:
+        result = set()
+    elif not isinstance(iterable, set):
+        result = set(iterable)
+    else:
+        result = iterable
+    return result

@@ -33,12 +33,13 @@ from .tools import (
     LocallyDefinedFields,
     bucketize,
     ensure_unique_names,
+    fetch_defs,
+    force_to_set,
+    get_all_modules,
     get_locally_defined_fields,
     get_uuid_regex,
     normalize_whitespace,
     resolve_ref_schema,
-    get_all_modules,
-    fetch_defs,
 )
 
 logger = logging.getLogger(__name__)
@@ -70,24 +71,24 @@ class LinkmlGenerator:
         :param name: The name of the LinkML schema to be generated
         :param id_: The ID of the LinkML schema to be generated
         :param models: An iterable of Pydantic models to be converted to LinkML classes
-            in the generated schema
+            in the generated schema. Note: Any duplicated models will be removed.
         :param enums: An iterable of Enums to be converted to LinkML enums in
-            the generated schema
+            the generated schema. Note: Any duplicated enums will be removed.
 
         raises NameCollisionError: If there are classes with the same name in the
             combined collection of `models` and `enums`
         """
-        models: Iterable[type[BaseModel]] = models if models is not None else set()
-        enums: Iterable[type[Enum]] = enums if enums is not None else set()
+        model_set = force_to_set(models)
+        enum_set = force_to_set(enums)
 
-        ensure_unique_names(*models, *enums)
+        ensure_unique_names(*model_set, *enum_set)
 
         # Map of models to their locally defined fields
         self._m_f_map: dict[type[BaseModel], LocallyDefinedFields] = {
-            m: get_locally_defined_fields(m) for m in models
+            m: get_locally_defined_fields(m) for m in model_set
         }
 
-        self._enums = enums
+        self._enums = enum_set
         self._sb = SchemaBuilder(name, id_)
 
         # This changes to True after this generator generates a schema

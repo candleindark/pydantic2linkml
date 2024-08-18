@@ -14,6 +14,7 @@ from pydantic2linkml.tools import (
     bucketize,
     ensure_unique_names,
     fetch_defs,
+    force_to_set,
     get_field_schema,
     get_locally_defined_fields,
     get_parent_models,
@@ -484,3 +485,20 @@ class TestGetUuidRegex:
             assert re.match(get_uuid_regex(version), text) is not None
         else:
             assert re.match(get_uuid_regex(version), text) is None
+
+
+@pytest.mark.parametrize(
+    "input_, expected_out",
+    [
+        (None, set()),
+        ([1, 2, 3], {1, 2, 3}),
+        ({1, 2, 3}, {1, 2, 3}),
+        (set(), None),
+        ({3, 4, 5}, None),
+    ],
+)
+def test_force_to_set(input_, expected_out):
+    if not isinstance(input_, set):
+        assert force_to_set(input_) == expected_out
+    else:
+        assert force_to_set(input_) is input_
