@@ -156,27 +156,9 @@ class LinkmlGenerator:
             new_fields, key_func=itemgetter(0), value_func=itemgetter(1)
         )
 
-        for f_name, schema_lst in buckets.items():
-            if len(schema_lst) > 1:
-                # Construct the list of Pydantic models that define the fields
-                # corresponding to the field schemas in `schema_lst`
-                model_lst = [s.model for s in schema_lst]
-
-                logger.warning(
-                    "Field name collision @ %(f_name)s from %(model_lst)r. "
-                    "%(f_name)s field definition from %(first_model)r is used to "
-                    "specify slot %(f_name)s.",
-                    {
-                        "f_name": f_name,
-                        "model_lst": model_lst,
-                        "first_model": model_lst[0],
-                    },
-                )
-
         # Add the slots to the schema
         for schema_lst in buckets.values():
-            # Use the first schema in `schema_lst` to generate the slot
-            slot = SlotGenerator(schema_lst[0]).generate()
+            self._add_slot(schema_lst)
 
     def _add_classes(self) -> None:
         """
@@ -184,7 +166,20 @@ class LinkmlGenerator:
         """
         # TODO: Make sure to provide slot usage in the individual classes if needed
 
-    def _establish_supporting_defs(self):
+    def _add_slot(self, field_schema_lst: list[FieldSchema]) -> None:
+        """
+        Add a slot to the schema
+
+        :param field_schema_lst: A non-empty list of schemas of fields with the same
+            name in different Pydantic models from which a slot is to be generated and
+            added
+        :raises ValueError: If `field_schema_lst` is empty
+
+        Note: The slot generated is one that contains the maximum set of properties with
+            a consistent value across the field schemas provided
+        """
+        raise NotImplementedError("This method is yet to be implemented.")
+
     def _establish_supporting_defs(self) -> None:
         """
         Establish the supporting definitions in the schema
