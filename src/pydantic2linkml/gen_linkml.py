@@ -120,7 +120,7 @@ class LinkmlGenerator:
 
         return self._sb.schema
 
-    def _add_enums(self):
+    def _add_enums(self) -> None:
         """
         Add LinkML enum representations of the enums in `self._enums` to the schema
         """
@@ -143,7 +143,7 @@ class LinkmlGenerator:
                 )
             )
 
-    def _add_slots(self):
+    def _add_slots(self) -> None:
         """
         Add the slots construed from the fields in `self._m_f_map` to the schema
         """
@@ -178,16 +178,14 @@ class LinkmlGenerator:
             # Use the first schema in `schema_lst` to generate the slot
             slot = SlotGenerator(schema_lst[0]).generate()
 
-            # Add the slot to the schema
-            self._sb.add_slot(slot)
-
-    def _add_classes(self):
+    def _add_classes(self) -> None:
         """
         Add the classes construed from the models in `self._m_f_map` to the schema
         """
         # TODO: Make sure to provide slot usage in the individual classes if needed
 
     def _establish_supporting_defs(self):
+    def _establish_supporting_defs(self) -> None:
         """
         Establish the supporting definitions in the schema
         """
