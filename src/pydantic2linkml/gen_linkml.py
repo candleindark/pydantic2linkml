@@ -2,6 +2,7 @@ import logging
 import re
 from collections import defaultdict
 from collections.abc import Iterable
+from dataclasses import fields
 from datetime import date
 from enum import Enum
 from itertools import chain
@@ -178,7 +179,43 @@ class LinkmlGenerator:
         Note: The slot generated is one that contains the maximum set of properties with
             a consistent value across the field schemas provided
         """
-        raise NotImplementedError("This method is yet to be implemented.")
+        field_schema_lst_len = len(field_schema_lst)
+
+        if field_schema_lst_len == 0:
+            raise ValueError("The provided list of field schemas is empty.")
+
+        slot_to_add: SlotDefinition
+        if field_schema_lst_len == 1:
+            slot_to_add = SlotGenerator(field_schema_lst[0]).generate()
+        else:
+            # Slots generated from the field schemas respectively
+            slots = [SlotGenerator(schema).generate() for schema in field_schema_lst]
+            first_slot = slots[0]
+
+            # === Here, a property is a field in the context of a dataclass and a meta
+            # slot in the context of a LinkML entity ===
+
+            slot_properties = {f.name for f in fields(SlotDefinition)}
+
+            # Find the set of properties that have a consistent value across all slots
+            # generated from the field schemas
+            inconsistent_properties = set()
+            for p in slot_properties:
+                # Determine if the property is inconsistent across the slots
+                first_p_value = getattr(first_slot, p)
+                for s in slots[1:]:
+                    if getattr(s, p) != first_p_value:
+                        inconsistent_properties.add(p)
+                        break
+
+            consistent_properties = slot_properties.difference(inconsistent_properties)
+
+            slot_to_add = SlotDefinition(
+                **{p: getattr(first_slot, p) for p in consistent_properties}
+            )
+
+        # Add the slot to the schema
+        self._sb.add_slot(slot_to_add)
 
     def _establish_supporting_defs(self) -> None:
         """
