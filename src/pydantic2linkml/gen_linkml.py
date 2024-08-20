@@ -79,17 +79,28 @@ class LinkmlGenerator:
         raises NameCollisionError: If there are classes with the same name in the
             combined collection of `models` and `enums`
         """
-        model_set = force_to_set(models)
-        enum_set = force_to_set(enums)
 
-        ensure_unique_names(*model_set, *enum_set)
+        def get_case_insensitive_name(cls) -> str:
+            return cls.__name__.casefold()
+
+        def to_sorted_lst(
+            iterable: Optional[Iterable[Union[type[Enum], type[BaseModel]]]]
+        ) -> list[Union[type[Enum], type[BaseModel]]]:
+            return sorted(force_to_set(iterable), key=get_case_insensitive_name)
+
+        # Turn models and enums to lists of unique elements sorted by name
+        # case-insensitively
+        model_lst = to_sorted_lst(models)
+        enum_lst = to_sorted_lst(enums)
+
+        ensure_unique_names(*model_lst, *enum_lst)
 
         # Map of models to their locally defined fields
         self._m_f_map: dict[type[BaseModel], LocallyDefinedFields] = {
-            m: get_locally_defined_fields(m) for m in model_set
+            m: get_locally_defined_fields(m) for m in model_lst
         }
 
-        self._enums = enum_set
+        self._enums = enum_lst
         self._sb = SchemaBuilder(name, id_)
 
         # This changes to True after this generator generates a schema
