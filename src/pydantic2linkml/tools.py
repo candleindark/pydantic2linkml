@@ -7,9 +7,9 @@ import sys
 from collections import defaultdict
 from collections.abc import Callable, Iterable
 from enum import Enum
-from operator import attrgetter
+from operator import attrgetter, itemgetter
 from types import ModuleType
-from typing import NamedTuple, Optional, TypeVar, cast
+from typing import Any, NamedTuple, Optional, TypeVar, cast
 
 from pydantic import BaseModel, RootModel
 
@@ -438,3 +438,19 @@ def force_to_set(iterable: Optional[Iterable[T]]) -> set[T]:
     else:
         result = iterable
     return result
+
+
+def sort_dict(
+    d: dict[K, V], key_func: Callable[[tuple[K, V]], Any] = itemgetter(0)
+) -> dict[K, V]:
+    """
+    Sort a dictionary by the key defined by a given key function
+
+    :param d: The dictionary to be sorted
+    :param key_func: The key function defining the key used to sort on the key-value
+        pairs of the dictionary. If not provided, this defaults to the function that
+        returns the key of each key-value pair. I.e., the dictionary is sorted by the
+        key of each key-value pair.
+    :return: A new dictionary that is the sorted version of the provided dictionary
+    """
+    return dict(sorted(d.items(), key=key_func))

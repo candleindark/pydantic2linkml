@@ -21,6 +21,7 @@ from pydantic2linkml.tools import (
     get_uuid_regex,
     normalize_whitespace,
     resolve_ref_schema,
+    sort_dict,
 )
 
 
@@ -502,3 +503,25 @@ def test_force_to_set(input_, expected_out):
         assert force_to_set(input_) == expected_out
     else:
         assert force_to_set(input_) is input_
+
+
+@pytest.mark.parametrize(
+    ("input_dict", "key_func", "expected_sorted_dict_items"),
+    [
+        ({"a": 1, "c": -1, "b": 2}, None, [("a", 1), ("b", 2), ("c", -1)]),
+        ({"a": 1, "c": -1, "b": 2}, itemgetter(1), [("c", -1), ("a", 1), ("b", 2)]),
+        ({"Ab": 3, "a": 1}, None, [("Ab", 3), ("a", 1)]),
+        (
+            {"Ab": 3, "a": 1},
+            lambda t: itemgetter(0)(t).casefold(),
+            [("a", 1), ("Ab", 3)],
+        ),
+    ],
+)
+def test_sort_dict(input_dict, key_func, expected_sorted_dict_items):
+    result = (
+        sort_dict(input_dict, key_func)
+        if key_func is not None
+        else sort_dict(input_dict)
+    )
+    assert list(result.items()) == expected_sorted_dict_items
