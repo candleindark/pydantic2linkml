@@ -41,6 +41,7 @@ from .tools import (
     get_uuid_regex,
     normalize_whitespace,
     resolve_ref_schema,
+    sort_dict,
 )
 
 logger = logging.getLogger(__name__)
@@ -168,8 +169,11 @@ class LinkmlGenerator:
             new_fields, key_func=itemgetter(0), value_func=itemgetter(1)
         )
 
+        # Sort the buckets by field name case-insensitively
+        sorted_buckets = sort_dict(buckets, lambda t: itemgetter(0)(t).casefold())
+
         # Add the slots to the schema
-        for schema_lst in buckets.values():
+        for schema_lst in sorted_buckets.values():
             self._add_slot(schema_lst)
 
     def _add_classes(self) -> None:
