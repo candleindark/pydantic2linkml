@@ -176,12 +176,6 @@ class LinkmlGenerator:
         for schema_lst in sorted_buckets.values():
             self._add_slot(schema_lst)
 
-    def _add_classes(self) -> None:
-        """
-        Add the classes construed from the models in `self._m_f_map` to the schema
-        """
-        # TODO: Make sure to provide slot usage in the individual classes if needed
-
     def _add_slot(self, field_schema_lst: list[FieldSchema]) -> None:
         """
         Add a slot to the schema
@@ -231,6 +225,13 @@ class LinkmlGenerator:
 
         # Add the slot to the schema
         self._sb.add_slot(slot_to_add)
+
+    def _add_classes(self) -> None:
+        """
+        Add the classes construed from the models in `self._m_f_map` to the schema
+        """
+        # TODO: Make sure to provide slot usage in the individual classes if needed
+
 
     def _establish_supporting_defs(self) -> None:
         """
