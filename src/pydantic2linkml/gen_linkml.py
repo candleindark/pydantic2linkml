@@ -230,8 +230,19 @@ class LinkmlGenerator:
         """
         Add the classes construed from the models in `self._m_f_map` to the schema
         """
-        # TODO: Make sure to provide slot usage in the individual classes if needed
+        for model in self._m_f_map:
+            self._sb.add_class(self._generate_class(model))
 
+    def _generate_class(self, model: type[BaseModel]) -> ClassDefinition:
+        """
+        Generate a LinkML class from a given Pydantic model
+
+        :param model: The given Pydantic model
+        :return: A LinkML class representing the given Pydantic model in the context
+            of the LinkML schema being generated
+        """
+        # TODO: To be further expanded
+        return ClassDefinition(model.__name__)
 
     def _establish_supporting_defs(self) -> None:
         """
