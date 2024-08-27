@@ -5,9 +5,8 @@ from typing import Annotated, Optional
 import typer
 from linkml_runtime.dumpers import yaml_dumper
 
+from pydantic2linkml.cli.tools import LogLevel
 from pydantic2linkml.gen_linkml import translate_defs
-
-from .tools import LogLevel
 
 logger = logging.getLogger(__name__)
 app = typer.Typer()

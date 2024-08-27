@@ -250,7 +250,7 @@ def test_get_locally_defined_fields():
 
 
 @pytest.mark.parametrize(
-    "items, key_func, value_func, expected",
+    ("items", "key_func", "value_func", "expected"),
     [
         (
             list(range(10)),
@@ -345,7 +345,7 @@ def test_ensure_unique_names():
 
 
 @pytest.mark.parametrize(
-    "input_str, expected",
+    ("input_str", "expected"),
     [
         ("", ""),
         ("  ", ""),
@@ -386,7 +386,7 @@ def test_fetch_defs():
 
 class TestGetUuidRegex:
     @pytest.mark.parametrize(
-        "version, expected_output",
+        ("version", "expected_output"),
         [
             (
                 1,
@@ -436,7 +436,7 @@ class TestGetUuidRegex:
             get_uuid_regex(version)
 
     @pytest.mark.parametrize(
-        "text, version, match_expected",
+        ("text", "version", "match_expected"),
         [
             ("60c32af6-4b10-11ef-9ab2-0ecb4bcddcb5", 1, True),
             ("3f46ae03-c654-36b0-a55d-cd0aa042c9f2", 3, True),
@@ -489,7 +489,7 @@ class TestGetUuidRegex:
 
 
 @pytest.mark.parametrize(
-    "input_, expected_out",
+    ("input_", "expected_out"),
     [
         (None, set()),
         ([1, 2, 3], {1, 2, 3}),

@@ -1,4 +1,4 @@
-from ..tools import StrEnum
+from pydantic2linkml.tools import StrEnum
 
 
 class LogLevel(StrEnum):
