@@ -198,7 +198,7 @@ class TestSlotGenerator:
         assert slot.range == "boolean"
 
     @pytest.mark.parametrize(
-        "multiple_of, le, lt, ge, gt, expected_max, expected_min",
+        ("multiple_of", "le", "lt", "ge", "gt", "expected_max", "expected_min"),
         [
             (2, 100, 101, 0, -1, 100, 0),
             (2, 100, 200, -10, -100, 100, -10),
@@ -261,7 +261,7 @@ class TestSlotGenerator:
         verify_notes(f"greater than {gt}", gt is not None)
 
     @pytest.mark.parametrize(
-        "allow_inf_nan, max_digits, decimal_places",
+        ("allow_inf_nan", "max_digits", "decimal_places"),
         [(True, None, None), (False, 3, 42), (None, 2, 4), (False, None, 2)],
     )
     @pytest.mark.parametrize("multiple_of", [2, 42, None])
@@ -307,7 +307,7 @@ class TestSlotGenerator:
         verify_notes(f"greater than {gt}", gt is not None)
 
     @pytest.mark.parametrize(
-        "pattern, max_length, min_length, output_pattern",
+        ("pattern", "max_length", "min_length", "output_pattern"),
         [
             (None, 10, 4, r"^(?=.{4,10}$)"),
             (None, None, 4, r"^(?=.{4,}$)"),
@@ -554,7 +554,7 @@ class TestSlotGenerator:
         )
 
     @pytest.mark.parametrize(
-        "literal_specs, are_literals_supported, any_of_slot_value",
+        ("literal_specs", "are_literals_supported", "any_of_slot_value"),
         [
             (
                 Literal[4, "hello", 1, "you"],
@@ -602,7 +602,7 @@ class TestSlotGenerator:
             assert len(slot.any_of) == 0
 
     @pytest.mark.parametrize(
-        "enum_cls, missing_call_back",
+        ("enum_cls", "missing_call_back"),
         [
             (Enum("Greeting", "HELLO GOODBYE"), None),
             (Enum("Color", "GREEN BLUE RED"), lambda x: x + 1),
@@ -631,7 +631,7 @@ class TestSlotGenerator:
         )
 
     @pytest.mark.parametrize(
-        "item_type, is_item_type_list_type, expected_range",
+        ("item_type", "is_item_type_list_type", "expected_range"),
         [
             (int, False, "integer"),
             (list[int], True, None),
@@ -640,7 +640,7 @@ class TestSlotGenerator:
         ],
     )
     @pytest.mark.parametrize(
-        "min_len, max_len", [(1, 10), (0, 5), (None, 11), (3, None), (None, None)]
+        ("min_len", "max_len"), [(1, 10), (0, 5), (None, 11), (3, None), (None, None)]
     )
     def test_list_schema(
         self, item_type, is_item_type_list_type, expected_range, min_len, max_len
@@ -732,8 +732,15 @@ class TestSlotGenerator:
             assert slot.range is None
 
     @pytest.mark.parametrize(
-        "apply_optional, default, default_type, type_supported, "
-        "default_factory, expected_ifabsent, expected_range",
+        (
+            "apply_optional",
+            "default",
+            "default_type",
+            "type_supported",
+            "default_factory",
+            "expected_ifabsent",
+            "expected_range",
+        ),
         [
             (False, True, bool, True, None, "True", "boolean"),
             (True, False, bool, True, None, "False", "boolean"),
@@ -912,7 +919,7 @@ class TestSlotGenerator:
         assert slot.range == "Bar"
 
     @pytest.mark.parametrize(
-        "max_length, allowed_schemes, expected_pattern",
+        ("max_length", "allowed_schemes", "expected_pattern"),
         [
             (100, ["http", "https"], r"^(?=.{,100}$)(?i:http|https)://[^\s]+$"),
             (42, ["http"], r"^(?=.{,42}$)(?i:http)://[^\s]+$"),
@@ -972,7 +979,7 @@ class TestSlotGenerator:
         )
 
     @pytest.mark.parametrize(
-        "uuid_type, expected_pattern",
+        ("uuid_type", "expected_pattern"),
         [
             (UUID, get_uuid_regex()),
             (UUID3, get_uuid_regex(3)),
