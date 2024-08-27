@@ -1,3 +1,7 @@
+# noinspection PyProtectedMember
+from pydantic._internal._core_utils import CoreSchemaOrField
+
+
 class NameCollisionError(Exception):
     """
     Raise when there is a name collision
@@ -34,3 +38,14 @@ class TranslationNotImplementedError(NotImplementedError):
       against the targeted models expressed in Pydantic. File an issue if this error is
       encountered.
     """
+
+    def __init__(self, schema: CoreSchemaOrField):
+        """
+        :param schema: The Pydantic core schema of which translation to LinkML is not
+            implemented
+        """
+        super().__init__(
+            f"Translation of Pydantic core schema, {schema['type']}, is not "
+            "implemented. If you encounter this error in translating your models, "
+            "consider filing an issue."
+        )
