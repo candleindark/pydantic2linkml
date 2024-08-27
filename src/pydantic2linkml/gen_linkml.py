@@ -28,8 +28,8 @@ from pydantic._internal._core_utils import CoreSchemaOrField
 from pydantic.json_schema import CoreSchemaOrFieldType
 from pydantic_core import core_schema
 
-from .exceptions import TranslationNotImplementedError, UserError
-from .tools import (
+from pydantic2linkml.exceptions import TranslationNotImplementedError, UserError
+from pydantic2linkml.tools import (
     FieldSchema,
     LocallyDefinedFields,
     bucketize,

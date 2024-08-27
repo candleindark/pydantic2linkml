@@ -20,7 +20,7 @@ from pydantic._internal import _core_utils
 from pydantic.fields import FieldInfo
 from pydantic_core import core_schema
 
-from .exceptions import NameCollisionError
+from pydantic2linkml.exceptions import NameCollisionError
 
 
 class StrEnum(str, Enum):
