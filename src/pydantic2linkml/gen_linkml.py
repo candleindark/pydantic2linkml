@@ -28,7 +28,10 @@ from pydantic._internal._core_utils import CoreSchemaOrField
 from pydantic.json_schema import CoreSchemaOrFieldType
 from pydantic_core import core_schema
 
-from pydantic2linkml.exceptions import TranslationNotImplementedError, UserError
+from pydantic2linkml.exceptions import (
+    GeneratorReuseError,
+    TranslationNotImplementedError,
+)
 from pydantic2linkml.tools import (
     FieldSchema,
     LocallyDefinedFields,
@@ -116,11 +119,7 @@ class LinkmlGenerator:
         :return: The generated LinkML schema
         """
         if self._used:
-            raise UserError(
-                f"This {type(self).__name__} instance has already been used to generate"
-                " a LinkML schema. You must create a new instance of "
-                f"{type(self).__name__} to generate another schema."
-            )
+            raise GeneratorReuseError(self)
         else:
             self._used = True
 
@@ -303,11 +302,7 @@ class SlotGenerator:
         :return: The generated LinkML slot schema
         """
         if self._used:
-            raise UserError(
-                f"This {type(self).__name__} instance has already been used to generate"
-                " a slot schema. You must create a new instance of "
-                f"{type(self).__name__} to generate another schema."
-            )
+            raise GeneratorReuseError(self)
 
         # Initialized the `required` meta slot to `True` since all
         # Pydantic fields are required unless a default value is provided

@@ -11,6 +11,20 @@ class UserError(Exception):
     """
 
 
+class GeneratorReuseError(UserError):
+    """
+    Raise when a generator object is reused
+    """
+
+    def __init__(self, generator):
+        """
+        :param generator: The generator object that is reused
+        """
+        super().__init__(
+            f"{type(generator).__name__} generator object cannot be reused"
+        )
+
+
 class TranslationNotImplementedError(NotImplementedError):
     """
     Raise when the translation of a Pydantic core schema to LinkMK is not implemented
