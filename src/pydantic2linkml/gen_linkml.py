@@ -243,8 +243,12 @@ class LinkmlGenerator:
         # TODO: Take care of inheritance
         #   TODO: Set parent class (a parent is a subclass of `BaseModel`)
         #   TODO: Set mixins (Attached a note if mixins are used)
-        # TODO: Take care of newly defined fields
-        #   TODO: Set slots with newly defined fields' names (sorted)
+
+        # === Handle newly defined fields in the model ===
+        # Set slots with the names of newly defined fields in the model in sorted order
+        slots: list[str] = sorted(
+            self._m_f_map[model].new.keys(), key=lambda s: s.casefold()
+        )
         #   TODO: Initialize slot usages for newly defined fields that have a slot
         #       representation that is different than the global slot representation
         # TODO: Take care of overriding fields
@@ -262,7 +266,7 @@ class LinkmlGenerator:
         # TODO: sort slot usages by slot name
         # TODO: return the `ClassDefinition` object using the above information
 
-        return ClassDefinition(model.__name__)
+        return ClassDefinition(model.__name__, slots=slots)
 
     def _establish_supporting_defs(self) -> None:
         """
