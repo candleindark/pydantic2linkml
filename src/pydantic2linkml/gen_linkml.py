@@ -240,7 +240,28 @@ class LinkmlGenerator:
         :return: A LinkML class representing the given Pydantic model in the context
             of the LinkML schema being generated
         """
-        # TODO: To be further expanded
+        # TODO: Take care of inheritance
+        #   TODO: Set parent class (a parent is a subclass of `BaseModel`)
+        #   TODO: Set mixins (Attached a note if mixins are used)
+        # TODO: Take care of newly defined fields
+        #   TODO: Set slots with newly defined fields' names (sorted)
+        #   TODO: Initialize slot usages for newly defined fields that have a slot
+        #       representation that is different than the global slot representation
+        # TODO: Take care of overriding fields
+        #   TODO: Check the following conditions
+        #       - The properties of the slot representation of the overriding field,
+        #           set B, is a super set of the properties of the slot representation
+        #           of the field being overridden, set A.
+        #       - The values for the properties in the intersection of set A and set B
+        #           are the same in the slot representations of both fields.
+        #   TODO:
+        #       - If both conditions are met, add to slot usages for each property in
+        #           B - A with the corresponding value in the slot representation of the
+        #           overriding field.
+        #       - Otherwise, add a note for each condition that is not met.
+        # TODO: sort slot usages by slot name
+        # TODO: return the `ClassDefinition` object using the above information
+
         return ClassDefinition(model.__name__)
 
     def _establish_supporting_defs(self) -> None:
