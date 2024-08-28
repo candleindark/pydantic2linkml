@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import importlib
 import inspect
 import re
@@ -27,11 +25,6 @@ class StrEnum(str, Enum):
     pass
 
 
-class LocallyDefinedFields(NamedTuple):
-    new: dict[str, FieldSchema]
-    overriding: dict[str, FieldSchema]
-
-
 class FieldSchema(NamedTuple):
     # The resolved Pydantic core schema of the field
     schema: core_schema.CoreSchema
@@ -49,6 +42,11 @@ class FieldSchema(NamedTuple):
 
     # The Pydantic model in which the field is defined
     model: type[BaseModel]
+
+
+class LocallyDefinedFields(NamedTuple):
+    new: dict[str, FieldSchema]
+    overriding: dict[str, FieldSchema]
 
 
 def get_parent_models(model: type[BaseModel]) -> list[type[BaseModel]]:

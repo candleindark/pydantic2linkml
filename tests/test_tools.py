@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 from enum import Enum, auto
 from operator import itemgetter
@@ -69,7 +67,7 @@ class TestResolveRefSchema:
         class B(BaseModel):
             x: A
             y: Optional[A]
-            z: B
+            z: "B"
 
         a_schema = A.__pydantic_core_schema__
         b_schema = B.__pydantic_core_schema__
@@ -122,7 +120,7 @@ class TestResolveRefSchema:
 
         class B(A):
             x: A
-            y: B
+            y: "B"
 
         with pytest.raises(
             ValueError, match="`context` must be a `DefinitionsSchema` object"
@@ -140,11 +138,11 @@ class TestResolveRefSchema:
 
         class B(BaseModel):
             x: A
-            y: B
+            y: "B"
 
         class C(BaseModel):
             a: A
-            c: C
+            c: "C"
 
         with pytest.raises(RuntimeError, match="not found in provided context"):
             resolve_ref_schema(C.__pydantic_core_schema__, B.__pydantic_core_schema__)
@@ -162,7 +160,7 @@ class TestGetFieldSchema:
 
         class B(A):
             x: A
-            y: B
+            y: "B"
 
         a_schema = A.__pydantic_core_schema__
         b_schema = B.__pydantic_core_schema__
