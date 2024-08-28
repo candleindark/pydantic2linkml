@@ -1,13 +1,13 @@
 import logging
 import re
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import fields
 from datetime import date
 from enum import Enum
 from itertools import chain
 from operator import itemgetter
-from typing import Any, Callable, Optional, Union
+from typing import Any, Optional, Union, cast
 
 from linkml_runtime.linkml_model import (
     ClassDefinition,
@@ -247,7 +247,8 @@ class LinkmlGenerator:
         # === Handle newly defined fields in the model ===
         # Set slots with the names of newly defined fields in the model in sorted order
         slots: list[str] = sorted(
-            self._m_f_map[model].new.keys(), key=lambda s: s.casefold()
+            self._m_f_map[model].new.keys(),
+            key=cast(Callable[[str], str], str.casefold),
         )
         #   TODO: Initialize slot usages for newly defined fields that have a slot
         #       representation that is different than the global slot representation
