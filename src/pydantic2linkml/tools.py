@@ -14,7 +14,6 @@ from pydantic import BaseModel, RootModel
 # noinspection PyProtectedMember
 from pydantic._internal import _core_utils
 
-# noinspection PyProtectedMember
 from pydantic.fields import FieldInfo
 from pydantic_core import core_schema
 
