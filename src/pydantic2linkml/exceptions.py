@@ -69,15 +69,25 @@ class SlotExtensionError(Exception):
             but not in the target slot definition
         :param varied_meta_slots: The meta slots that exist in both the base and target
             slot definitions but have different values
+        :raises ValueError: If both `missing_meta_slots` and `varied_meta_slots` are
+            empty
         """
+        if missing_meta_slots is None:
+            missing_meta_slots = []
+        if varied_meta_slots is None:
+            varied_meta_slots = []
+
+        if len(missing_meta_slots) + len(varied_meta_slots) == 0:
+            error_msg = (
+                "At least one of `missing_meta_slots` and `varied_meta_slots` "
+                "must be non-empty."
+            )
+            raise ValueError(error_msg)
+
         super().__init__()
 
-        self.missing_meta_slots: list[str] = (
-            missing_meta_slots if missing_meta_slots is not None else []
-        )
-        self.varied_meta_slots: list[str] = (
-            varied_meta_slots if varied_meta_slots is not None else []
-        )
+        self.missing_meta_slots: list[str] = missing_meta_slots
+        self.varied_meta_slots: list[str] = varied_meta_slots
 
     def __str__(self):
         return (
