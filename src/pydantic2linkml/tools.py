@@ -19,7 +19,7 @@ from pydantic._internal import _core_utils
 from pydantic.fields import FieldInfo
 from pydantic_core import core_schema
 
-from pydantic2linkml.exceptions import NameCollisionError
+from pydantic2linkml.exceptions import NameCollisionError, SlotExtensionError
 
 
 class StrEnum(str, Enum):
@@ -468,3 +468,51 @@ def get_non_empty_meta_slots(slot: SlotDefinition) -> set[str]:
         if not is_empty(getattr(slot, meta_slot_name)):
             non_empty_meta_slots.add(meta_slot_name)
     return non_empty_meta_slots
+
+
+def get_slot_usage_entry(
+    base: SlotDefinition, target: SlotDefinition
+) -> Optional[SlotDefinition]:
+    """
+    Obtain a slot usage entry that extends (refines) the base slot definition,
+    in a class definition, to achieve the behavior of the target slot definition
+
+    :param base: The base slot definition
+    :param target: The target slot definition
+
+    :return: The slot usage entry that extends the base slot definition to achieve the
+        behavior of the target slot definition. If the base slot definition doesn't
+        need an extension to achieve the behavior of the target slot definition, i.e.,
+        the base slot definition and the target slot definition are identical, `None` is
+        returned.
+
+    :raises SlotExtensionError: If the given base slot definition cannot be extended to
+        achieve the behavior of the given target slot definition through a slot usage
+        entry in a class definition
+    """
+    base_properties = get_non_empty_meta_slots(base)
+    target_properties = get_non_empty_meta_slots(target)
+
+    missing_properties = base_properties - target_properties
+    common_properties = base_properties & target_properties
+
+    varied_properties = set()
+    for p in common_properties:
+        if getattr(base, p) != getattr(target, p):
+            varied_properties.add(p)
+
+    if missing_properties or varied_properties:
+        raise SlotExtensionError(
+            missing_meta_slots=sorted(missing_properties, key=str.casefold),
+            varied_meta_slots=sorted(varied_properties, key=str.casefold),
+        )
+
+    extended_properties = target_properties - base_properties
+
+    if not extended_properties:
+        return None
+
+    # Note: A `name` argument is provided because the `SlotDefinition` class requires it
+    return SlotDefinition(
+        name=base.name, **{p: getattr(target, p) for p in extended_properties}
+    )

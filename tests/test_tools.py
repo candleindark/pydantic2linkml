@@ -8,7 +8,7 @@ from linkml_runtime.linkml_model import SlotDefinition
 from pydantic import BaseModel, RootModel
 from pydantic_core import core_schema
 
-from pydantic2linkml.exceptions import NameCollisionError
+from pydantic2linkml.exceptions import NameCollisionError, SlotExtensionError
 from pydantic2linkml.tools import (
     bucketize,
     ensure_unique_names,
@@ -18,6 +18,7 @@ from pydantic2linkml.tools import (
     get_locally_defined_fields,
     get_non_empty_meta_slots,
     get_parent_models,
+    get_slot_usage_entry,
     get_uuid_regex,
     normalize_whitespace,
     resolve_ref_schema,
@@ -551,3 +552,70 @@ def test_sort_dict(input_dict, key_func, expected_sorted_dict_items):
 )
 def test_get_non_empty_meta_slots(slot, expected_non_empty_meta_slots):
     assert get_non_empty_meta_slots(slot) == expected_non_empty_meta_slots
+
+
+@pytest.mark.parametrize(
+    ("base", "target", "expected_missing", "expected_varied", "expected_return"),
+    [
+        # Base and target are the same
+        (SlotDefinition("a"), SlotDefinition("a"), [], [], None),
+        (
+            SlotDefinition("a", required=True, range="integer"),
+            SlotDefinition("a", required=True, range="integer"),
+            [],
+            [],
+            None,
+        ),
+        # Target is missing some required meta slots
+        (
+            SlotDefinition("a", required=True, range="integer"),
+            SlotDefinition("a"),
+            ["range", "required"],
+            [],
+            None,
+        ),
+        # Values in some meta slots in target are varied
+        (SlotDefinition("a"), SlotDefinition("b"), [], ["name"], None),
+        # Target is missing some required meta slots, and values in some meta slots in
+        # target are varied
+        (
+            SlotDefinition("a", required=True, range="integer"),
+            SlotDefinition("b"),
+            ["range", "required"],
+            ["name"],
+            None,
+        ),
+        # Target extends base
+        (
+            SlotDefinition("a", range="integer"),
+            SlotDefinition(
+                "a",
+                range="integer",
+                required=True,
+                multivalued=False,
+                mixins=["b"],
+                description="Hello, world!",
+            ),
+            [],
+            [],
+            SlotDefinition(
+                "a",
+                required=True,
+                multivalued=False,
+                mixins=["b"],
+                description="Hello, world!",
+            ),
+        ),
+    ],
+)
+def test_get_slot_usage_entry(
+    base, target, expected_missing, expected_varied, expected_return
+):
+    if expected_missing or expected_varied:
+        with pytest.raises(SlotExtensionError) as exc_info:
+            get_slot_usage_entry(base, target)
+        error = exc_info.value
+        assert error.missing_meta_slots == expected_missing
+        assert error.varied_meta_slots == expected_varied
+    else:
+        assert get_slot_usage_entry(base, target) == expected_return
