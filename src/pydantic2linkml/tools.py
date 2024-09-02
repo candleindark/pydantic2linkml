@@ -4,16 +4,18 @@ import re
 import sys
 from collections import defaultdict
 from collections.abc import Callable, Iterable
+from dataclasses import fields
 from enum import Enum
 from operator import attrgetter, itemgetter
 from types import ModuleType
 from typing import Any, NamedTuple, Optional, TypeVar, cast
 
+from linkml_runtime.linkml_model import SlotDefinition
+from linkml_runtime.utils.formatutils import is_empty
 from pydantic import BaseModel, RootModel
 
 # noinspection PyProtectedMember
 from pydantic._internal import _core_utils
-
 from pydantic.fields import FieldInfo
 from pydantic_core import core_schema
 
@@ -451,3 +453,18 @@ def sort_dict(
     :return: A new dictionary that is the sorted version of the provided dictionary
     """
     return dict(sorted(d.items(), key=key_func))
+
+
+def get_non_empty_meta_slots(slot: SlotDefinition) -> set[str]:
+    """
+    Get the names of the non-empty meta slots of a slot definition
+
+    :param slot: The slot definition
+    :return: The names of the non-empty meta slots of the slot definition
+    """
+    non_empty_meta_slots = set()
+    for f in fields(SlotDefinition):
+        meta_slot_name = f.name
+        if not is_empty(getattr(slot, meta_slot_name)):
+            non_empty_meta_slots.add(meta_slot_name)
+    return non_empty_meta_slots

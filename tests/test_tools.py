@@ -4,6 +4,7 @@ from operator import itemgetter
 from typing import ClassVar, Optional, Type, cast
 
 import pytest
+from linkml_runtime.linkml_model import SlotDefinition
 from pydantic import BaseModel, RootModel
 from pydantic_core import core_schema
 
@@ -15,6 +16,7 @@ from pydantic2linkml.tools import (
     force_to_set,
     get_field_schema,
     get_locally_defined_fields,
+    get_non_empty_meta_slots,
     get_parent_models,
     get_uuid_regex,
     normalize_whitespace,
@@ -523,3 +525,29 @@ def test_sort_dict(input_dict, key_func, expected_sorted_dict_items):
         else sort_dict(input_dict)
     )
     assert list(result.items()) == expected_sorted_dict_items
+
+
+@pytest.mark.parametrize(
+    ("slot", "expected_non_empty_meta_slots"),
+    [
+        (SlotDefinition(name="Foo"), {"name"}),
+        (
+            SlotDefinition(name="Foo", range="integer", multivalued=True),
+            {"name", "range", "multivalued"},
+        ),
+        (
+            SlotDefinition(name="Foo", pattern="", required=False, multivalued=None),
+            {"name", "pattern", "required"},
+        ),
+        (
+            SlotDefinition(name="Foo", pattern="", mixins=[], multivalued=None),
+            {"name", "pattern"},
+        ),
+        (
+            SlotDefinition(name="Foo", mixins=["bar"], multivalued=None),
+            {"name", "mixins"},
+        ),
+    ],
+)
+def test_get_non_empty_meta_slots(slot, expected_non_empty_meta_slots):
+    assert get_non_empty_meta_slots(slot) == expected_non_empty_meta_slots
