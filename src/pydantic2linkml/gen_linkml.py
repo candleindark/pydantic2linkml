@@ -8,7 +8,7 @@ from enum import Enum
 from functools import partial
 from itertools import chain
 from operator import itemgetter
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 from linkml_runtime.linkml_model import (
     ClassDefinition,
@@ -42,6 +42,7 @@ from pydantic2linkml.tools import (
     force_to_set,
     get_all_modules,
     get_locally_defined_fields,
+    get_slot_usage_entry,
     get_uuid_regex,
     normalize_whitespace,
     resolve_ref_schema,
@@ -250,6 +251,8 @@ class LinkmlGenerator:
         #   TODO: Set parent class (a parent is a subclass of `BaseModel`)
         #   TODO: Set mixins (Attached a note if mixins are used)
 
+        slot_usage: list[SlotDefinition] = []
+
         # === Handle newly defined fields in the model ===
         # Slot representations of the newly defined fields in the model
         new_field_slot_reps = sort_dict_by_ikeys(
@@ -261,8 +264,19 @@ class LinkmlGenerator:
         # Set slots with the names of newly defined fields in the model in sorted order
         slots: list[str] = list(new_field_slot_reps.keys())
 
-        #   TODO: Initialize slot usages for newly defined fields that have a slot
-        #       representation that is different than the global slot representation
+        # Add slot usage entries for newly defined fields that have a slot
+        # representation that is different than the corresponding global slot
+        # representation
+        for name, target_slot in new_field_slot_reps.items():
+            # Get the global slot representation of the field
+            global_slot = self._sb.schema.slots[name]
+
+            if global_slot != target_slot:
+                # Create a slot usage entry for the field
+                entry = get_slot_usage_entry(global_slot, target_slot)
+                assert entry is not None
+                slot_usage.append(entry)
+
         # TODO: Take care of overriding fields
         #   TODO: Check the following conditions
         #       - The properties of the slot representation of the overriding field,
@@ -278,7 +292,7 @@ class LinkmlGenerator:
         # TODO: sort slot usages by slot name
         # TODO: return the `ClassDefinition` object using the above information
 
-        return ClassDefinition(model.__name__, slots=slots)
+        return ClassDefinition(model.__name__, slots=slots, slot_usage=slot_usage)
 
     def _establish_supporting_defs(self) -> None:
         """
