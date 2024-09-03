@@ -255,12 +255,11 @@ class LinkmlGenerator:
 
         # === Handle newly defined fields in the model ===
         # Slot representations of the newly defined fields in the model
-        new_field_slot_reps = sort_dict_by_ikeys(
-            {
-                field_name: SlotGenerator(schema).generate()
-                for field_name, schema in local_fields.new.items()
-            }
-        )
+        new_field_slot_reps = {
+            field_name: SlotGenerator(schema).generate()
+            for field_name, schema in local_fields.new.items()
+        }
+
         # Set slots with the names of newly defined fields in the model in sorted order
         slots: list[str] = list(new_field_slot_reps.keys())
 
@@ -292,7 +291,8 @@ class LinkmlGenerator:
         # TODO: sort slot usages by slot name
         # TODO: return the `ClassDefinition` object using the above information
 
-        # Ensure slot usage entries are sorted by slot name case-insensitively
+        # Ensure collections in class definition are sorted by name case-insensitively
+        slots.sort(key=str.casefold)
         slot_usage.sort(key=lambda s: s.name.casefold())
 
         return ClassDefinition(model.__name__, slots=slots, slot_usage=slot_usage)
