@@ -244,16 +244,23 @@ class LinkmlGenerator:
         :return: A LinkML class representing the given Pydantic model in the context
             of the LinkML schema being generated
         """
+        local_fields = self._m_f_map[model]
+
         # TODO: Take care of inheritance
         #   TODO: Set parent class (a parent is a subclass of `BaseModel`)
         #   TODO: Set mixins (Attached a note if mixins are used)
 
         # === Handle newly defined fields in the model ===
-        # Set slots with the names of newly defined fields in the model in sorted order
-        slots: list[str] = sorted(
-            self._m_f_map[model].new.keys(),
-            key=cast(Callable[[str], str], str.casefold),
+        # Slot representations of the newly defined fields in the model
+        new_field_slot_reps = sort_dict_by_ikeys(
+            {
+                field_name: SlotGenerator(schema).generate()
+                for field_name, schema in local_fields.new.items()
+            }
         )
+        # Set slots with the names of newly defined fields in the model in sorted order
+        slots: list[str] = list(new_field_slot_reps.keys())
+
         #   TODO: Initialize slot usages for newly defined fields that have a slot
         #       representation that is different than the global slot representation
         # TODO: Take care of overriding fields
