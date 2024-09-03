@@ -292,6 +292,9 @@ class LinkmlGenerator:
         # TODO: sort slot usages by slot name
         # TODO: return the `ClassDefinition` object using the above information
 
+        # Ensure slot usage entries are sorted by slot name case-insensitively
+        slot_usage.sort(key=lambda s: s.name.casefold())
+
         return ClassDefinition(model.__name__, slots=slots, slot_usage=slot_usage)
 
     def _establish_supporting_defs(self) -> None:
