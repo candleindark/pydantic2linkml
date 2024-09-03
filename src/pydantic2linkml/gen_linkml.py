@@ -266,13 +266,13 @@ class LinkmlGenerator:
         # Add slot usage entries for newly defined fields that have a slot
         # representation that is different than the corresponding global slot
         # representation
-        for name, target_slot in new_field_slot_reps.items():
+        for name, new_field_slot_rep in new_field_slot_reps.items():
             # Get the global slot representation of the field
             global_slot = self._sb.schema.slots[name]
 
-            if global_slot != target_slot:
+            if global_slot != new_field_slot_rep:
                 # Create a slot usage entry for the field
-                entry = get_slot_usage_entry(global_slot, target_slot)
+                entry = get_slot_usage_entry(global_slot, new_field_slot_rep)
                 assert entry is not None
                 slot_usage.append(entry)
 
