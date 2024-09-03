@@ -5,6 +5,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import fields
 from datetime import date
 from enum import Enum
+from functools import partial
 from itertools import chain
 from operator import itemgetter
 from typing import Any, Optional, Union, cast
@@ -48,6 +49,9 @@ from pydantic2linkml.tools import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Callable to sort a dictionary by its keys case-insensitively
+sort_dict_by_ikeys = partial(sort_dict, key_func=lambda t: itemgetter(0)(t).casefold())
 
 # The LinkML Any type
 # For more info, see https://linkml.io/linkml/schemas/advanced.html#linkml-any-type
@@ -169,7 +173,7 @@ class LinkmlGenerator:
         )
 
         # Sort the buckets by field name case-insensitively
-        sorted_buckets = sort_dict(buckets, lambda t: itemgetter(0)(t).casefold())
+        sorted_buckets = sort_dict_by_ikeys(buckets)
 
         # Add the slots to the schema
         for schema_lst in sorted_buckets.values():
