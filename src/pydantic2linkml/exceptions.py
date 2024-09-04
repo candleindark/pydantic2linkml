@@ -66,9 +66,11 @@ class SlotExtensionError(Exception):
     ):
         """
         :param missing_meta_slots: The meta slots that exist in the base slot definition
-            but not in the target slot definition
+            but not in the target slot definition. If None or not provided, an empty
+            list is used.
         :param varied_meta_slots: The meta slots that exist in both the base and target
-            slot definitions but have different values
+            slot definitions but have different values. If None or not provided, an
+            empty list is used.
         :raises ValueError: If both `missing_meta_slots` and `varied_meta_slots` are
             empty
         """
