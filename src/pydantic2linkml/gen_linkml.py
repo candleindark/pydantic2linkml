@@ -257,10 +257,13 @@ class LinkmlGenerator:
             """
             notes.append(f"{__package__}: {note}")
 
+        parents = get_parent_models(model)
         local_fields = self._m_f_map[model]
 
         # TODO: Take care of inheritance
-        #   TODO: Set parent class (a parent is a subclass of `BaseModel`)
+        # Set parent class
+        is_a = parents[0].__name__ if parents else None
+
         #   TODO: Set mixins (Attached a note if mixins are used)
 
         slot_usage: list[SlotDefinition] = []
@@ -294,7 +297,6 @@ class LinkmlGenerator:
             field_name: SlotGenerator(schema).generate()
             for field_name, schema in local_fields.overriding.items()
         }
-        parents = get_parent_models(model)
 
         for name, overriding_field_slot_rep in overriding_field_slot_reps.items():
             for parent in parents:
@@ -343,7 +345,7 @@ class LinkmlGenerator:
         slot_usage.sort(key=lambda s: s.name.casefold())
 
         return ClassDefinition(
-            model.__name__, slots=slots, slot_usage=slot_usage, notes=notes
+            model.__name__, is_a=is_a, slots=slots, slot_usage=slot_usage, notes=notes
         )
 
     def _establish_supporting_defs(self) -> None:
