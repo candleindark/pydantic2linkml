@@ -26,7 +26,7 @@ from pydantic2linkml.tools import (
 )
 
 
-def test_get_parent_model():
+def test_get_parent_models():
     class Foo:
         pass
 
