@@ -31,6 +31,7 @@ from pydantic_core import core_schema
 
 from pydantic2linkml.exceptions import (
     GeneratorReuseError,
+    SlotExtensionError,
     TranslationNotImplementedError,
 )
 from pydantic2linkml.tools import (
@@ -41,7 +42,9 @@ from pydantic2linkml.tools import (
     fetch_defs,
     force_to_set,
     get_all_modules,
+    get_field_schema,
     get_locally_defined_fields,
+    get_parent_models,
     get_slot_usage_entry,
     get_uuid_regex,
     normalize_whitespace,
@@ -245,6 +248,15 @@ class LinkmlGenerator:
         :return: A LinkML class representing the given Pydantic model in the context
             of the LinkML schema being generated
         """
+
+        def attach_note(note: str) -> None:
+            """
+            Attach a note to the class definition
+
+            :param note: The note to attach
+            """
+            notes.append(f"{__package__}: {note}")
+
         local_fields = self._m_f_map[model]
 
         # TODO: Take care of inheritance
@@ -252,6 +264,7 @@ class LinkmlGenerator:
         #   TODO: Set mixins (Attached a note if mixins are used)
 
         slot_usage: list[SlotDefinition] = []
+        notes: list[str] = []
 
         # === Handle newly defined fields in the model ===
         # Slot representations of the newly defined fields in the model
@@ -276,26 +289,62 @@ class LinkmlGenerator:
                 assert entry is not None
                 slot_usage.append(entry)
 
-        # TODO: Take care of overriding fields
-        #   TODO: Check the following conditions
-        #       - The properties of the slot representation of the overriding field,
-        #           set B, is a super set of the properties of the slot representation
-        #           of the field being overridden, set A.
-        #       - The values for the properties in the intersection of set A and set B
-        #           are the same in the slot representations of both fields.
-        #   TODO:
-        #       - If both conditions are met, add to slot usages for each property in
-        #           B - A with the corresponding value in the slot representation of the
-        #           overriding field.
-        #       - Otherwise, add a note for each condition that is not met.
-        # TODO: sort slot usages by slot name
-        # TODO: return the `ClassDefinition` object using the above information
+        # === Handle overriding fields in the model ===
+        overriding_field_slot_reps = {
+            field_name: SlotGenerator(schema).generate()
+            for field_name, schema in local_fields.overriding.items()
+        }
+        parents = get_parent_models(model)
+
+        for name, overriding_field_slot_rep in overriding_field_slot_reps.items():
+            for parent in parents:
+                if name in parent.model_fields:
+                    overridden_field_slot_rep = SlotGenerator(
+                        get_field_schema(parent, name)
+                    ).generate()
+                    break
+            else:
+                # This block should not be reached
+                err_msg = (
+                    f"Unable to locate a {name} field in any of the parents, {parents}"
+                )
+                raise RuntimeError(err_msg)
+
+            # At this point, `overridden_field_slot_rep` must be set
+
+            try:
+                entry = get_slot_usage_entry(
+                    overridden_field_slot_rep, overriding_field_slot_rep
+                )
+            except SlotExtensionError as e:
+                # Attache needed note
+                missing_substr = (
+                    f"lacks meta slots: {e.missing_meta_slots} "
+                    if e.missing_meta_slots
+                    else ""
+                )
+                varied_substr = (
+                    f"has changes in value in meta slots: {e.varied_meta_slots} "
+                    if e.varied_meta_slots
+                    else ""
+                )
+                substr = "and ".join(s for s in [missing_substr, varied_substr] if s)
+                attach_note(
+                    f"Impossible to generate slot usage entry for the {name} slot. "
+                    f"The slot representation of the {name} field in the "
+                    f"{model.__name__} Pydantic model {substr}."
+                )
+            else:
+                if entry is not None:
+                    slot_usage.append(entry)
 
         # Ensure collections in class definition are sorted by name case-insensitively
         slots.sort(key=str.casefold)
         slot_usage.sort(key=lambda s: s.name.casefold())
 
-        return ClassDefinition(model.__name__, slots=slots, slot_usage=slot_usage)
+        return ClassDefinition(
+            model.__name__, slots=slots, slot_usage=slot_usage, notes=notes
+        )
 
     def _establish_supporting_defs(self) -> None:
         """
