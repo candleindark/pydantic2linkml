@@ -259,15 +259,20 @@ class LinkmlGenerator:
 
         parents = get_parent_models(model)
         local_fields = self._m_f_map[model]
+        slot_usage: list[SlotDefinition] = []
+        notes: list[str] = []
 
-        # TODO: Take care of inheritance
+        # === Handle in heritance specifications ===
         # Set parent class
         is_a = parents[0].__name__ if parents else None
 
-        #   TODO: Set mixins (Attached a note if mixins are used)
-
-        slot_usage: list[SlotDefinition] = []
-        notes: list[str] = []
+        # Set mixins
+        mixins = [parent.__name__ for parent in parents[1:]]
+        for m in mixins:
+            attach_note(
+                f"Warning: LinkML doesn't support multiple inheritance. {m} is not "
+                f"specified as a parent, through the `is_a` meta slot, but as a mixin."
+            )
 
         # === Handle newly defined fields in the model ===
         # Slot representations of the newly defined fields in the model
@@ -345,7 +350,12 @@ class LinkmlGenerator:
         slot_usage.sort(key=lambda s: s.name.casefold())
 
         return ClassDefinition(
-            model.__name__, is_a=is_a, slots=slots, slot_usage=slot_usage, notes=notes
+            model.__name__,
+            is_a=is_a,
+            mixins=mixins,
+            slots=slots,
+            slot_usage=slot_usage,
+            notes=notes,
         )
 
     def _establish_supporting_defs(self) -> None:
