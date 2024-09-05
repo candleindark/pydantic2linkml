@@ -51,8 +51,9 @@ def test_get_parent_models():
     class Z(X, Baz, C):
         pass
 
-    assert len(get_parent_models(BaseModel)) == 0
-    assert get_parent_models(A) == [BaseModel]
+    with pytest.raises(ValueError, match="`model` cannot be `pydantic.BaseModel`"):
+        get_parent_models(BaseModel)
+    assert get_parent_models(A) == []
     assert get_parent_models(B) == [A]
     assert get_parent_models(C) == [B]
     assert get_parent_models(Z) == [X, C]

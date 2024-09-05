@@ -54,15 +54,24 @@ def get_parent_models(model: type[BaseModel]) -> list[type[BaseModel]]:
     """
     Get the parent Pydantic models of a Pydantic model
 
-    :param model: The Pydantic model
-    :return: The list of parent Pydantic models of the input model
+    :param model: The Pydantic model. Note: This can't be `pydantic.BaseModel`.
+        `pydantic.BaseModel` is really an empty model and shouldn't be translated to a
+        LinkML class.
+    :return: The list of parent Pydantic models of the input model.
+        Note: `pydantic.BaseModel` is not considered to be a parent model for it is
+            really an empty model.
+
+    raises ValueError: If the input model is `pydantic.BaseModel`
 
     Note: The order of the parent models returned is the models' order in the definition
         of the input model.
-    Note: The input Pydantic model of `pydantic.BaseModel` produces a result of an empty
-        list.
     """
-    return [b for b in model.__bases__ if issubclass(b, BaseModel)]
+    if model is BaseModel:
+        msg = "`model` cannot be `pydantic.BaseModel`"
+        raise ValueError(msg)
+    return [
+        b for b in model.__bases__ if issubclass(b, BaseModel) and b is not BaseModel
+    ]
 
 
 def resolve_ref_schema(
