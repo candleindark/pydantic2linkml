@@ -270,7 +270,7 @@ class LinkmlGenerator:
         mixins = [parent.__name__ for parent in parents[1:]]
         for m in mixins:
             attach_note(
-                f"Warning: LinkML doesn't support multiple inheritance. {m} is not "
+                f"Warning: LinkML does not support multiple inheritance. {m} is not "
                 f"specified as a parent, through the `is_a` meta slot, but as a mixin."
             )
 
