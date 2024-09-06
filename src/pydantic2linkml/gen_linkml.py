@@ -1252,6 +1252,9 @@ class SlotGenerator:
         self._slot.range = "string"
         self._slot.pattern = get_uuid_regex(schema.get("version"))
 
+    def _complex_schema(self, schema: core_schema.ComplexSchema) -> None:
+        raise TranslationNotImplementedError(schema)
+
     def _model_field_schema(self, schema: core_schema.ModelField) -> None:
         raise TranslationNotImplementedError(schema)
 
