@@ -33,9 +33,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/DailyDreaming/linkml-aind-model#readme"
-Issues = "https://github.com/DailyDreaming/linkml-aind-model/issues"
-Source = "https://github.com/DailyDreaming/linkml-aind-model"
+Documentation = "https://github.com/dandi/pydantic2linkml#readme"
+Issues = "https://github.com/dandi/pydantic2linkml/issues"
+Source = "https://github.com/dandi/pydantic2linkml"
 
 [project.scripts]
 pydantic2linkml = "pydantic2linkml.cli:app"
