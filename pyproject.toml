@@ -50,7 +50,6 @@ python = "3.9"
 dependencies = [
   "aind-data-schema>=0.38.6",
   "dandischema>=0.10.2",
-  "pydantic~=2.9",
   "pytest",
   "pytest-cov",
   "pytest-mock",

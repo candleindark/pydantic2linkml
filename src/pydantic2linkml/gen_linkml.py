@@ -10,6 +10,7 @@ from itertools import chain
 from operator import itemgetter
 from typing import Any, Optional, Union
 
+import pydantic
 from linkml_runtime.linkml_model import (
     ClassDefinition,
     EnumDefinition,
@@ -19,6 +20,7 @@ from linkml_runtime.linkml_model import (
 )
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 from linkml_runtime.utils.schema_builder import SchemaBuilder
+from packaging import version
 from pydantic import BaseModel
 
 # noinspection PyProtectedMember
@@ -1252,9 +1254,6 @@ class SlotGenerator:
         self._slot.range = "string"
         self._slot.pattern = get_uuid_regex(schema.get("version"))
 
-    def _complex_schema(self, schema: core_schema.ComplexSchema) -> None:
-        raise TranslationNotImplementedError(schema)
-
     def _model_field_schema(self, schema: core_schema.ModelField) -> None:
         raise TranslationNotImplementedError(schema)
 
@@ -1266,6 +1265,11 @@ class SlotGenerator:
 
     def _computed_field_schema(self, schema: core_schema.ComputedField) -> None:
         raise TranslationNotImplementedError(schema)
+
+    if version.parse(pydantic.__version__) >= version.parse("2.9"):
+        # Methods define when Pydantic version is 2.9 or later
+        def _complex_schema(self, schema: core_schema.ComplexSchema) -> None:
+            raise TranslationNotImplementedError(schema)
 
 
 def translate_defs(module_names: Iterable[str]) -> SchemaDefinition:
