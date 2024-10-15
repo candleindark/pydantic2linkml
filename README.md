@@ -1,14 +1,12 @@
-# linkml-model-generator
-Translate pydantic-based schemas from python modules to LinkML.
+# pydantic2linkml
+A tool for translating models expressed in Pydantic to LinkML
 
-### Run
+[![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
-To run the program, use:
+-----
 
+### Sample Run
+
+```console
+pydantic2linkml -o o.yml -l INFO dandischema.models
 ```
-  python3 generate_linkml_from_aind.py --root_module_name="aind_data_schema.models" --output_file="aind.yml"
-```
-
-### Limitations
-
-1. Supports only Pydantic models with maximum of one immediate parent that is a Pydantic model. 

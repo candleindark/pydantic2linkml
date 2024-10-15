@@ -1,0 +1,35 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on:
+          - macos-latest
+          - windows-latest
+          - ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Hatch
+        uses: pypa/hatch@install
+
+      - name: Run tests
+        run: hatch run test:python -m pytest --numprocesses=logical -s -v tests
+        env:
+          # Needed for coveralls:
+          GITHUB_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+# vim:set et sts=2:

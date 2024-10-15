@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pydantic2linkml"
+dynamic = ["version"]
+description = 'A tool for translating models expressed in Pydantic to LinkML'
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"  # todo: Is this the correct license?
+keywords = ["LinkML", "Pydantic"]
+authors = [
+  { name = "Lon Blauvelt", email = "blauvel@ucsc.edu" },
+  { name = "Sebastian Urchs", email = "sebastian.urchs@gmail.com" },
+  { name = "Satrajit Ghosh", email = "satra@mit.edu" },
+  { name = "Isaac To", email = "isaac.chun.to@gmail.com" },
+  { name = "Yaroslav Halchenko", email = "debian@onerussian.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = [
+  "linkml~=1.8",
+  "pydantic~=2.7",
+  "typer",
+]
+
+[project.urls]
+Documentation = "https://github.com/dandi/pydantic2linkml#readme"
+Issues = "https://github.com/dandi/pydantic2linkml/issues"
+Source = "https://github.com/dandi/pydantic2linkml"
+
+[project.scripts]
+pydantic2linkml = "pydantic2linkml.cli:app"
+
+[tool.hatch.version]
+path = "src/pydantic2linkml/__about__.py"
+
+[tool.hatch.envs.default]
+python = "3.9"
+
+[tool.hatch.envs.test]
+dependencies = [
+  "aind-data-schema>=0.38.6",
+  "dandischema>=0.10.2",
+  "pytest",
+  "pytest-cov",
+  "pytest-mock",
+  "pytest-xdist",
+]
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/pydantic2linkml tests}"
+
+[tool.coverage.run]
+source_pkgs = ["pydantic2linkml", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/pydantic2linkml/__about__.py",
+]
+
+[tool.coverage.paths]
+pydantic2linkml = ["src/pydantic2linkml", "*/pydantic2linkml/src/pydantic2linkml"]
+tests = ["tests", "*/pydantic2linkml/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
