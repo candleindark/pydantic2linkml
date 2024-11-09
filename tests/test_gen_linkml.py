@@ -7,6 +7,7 @@ from unittest.mock import call
 from uuid import UUID
 
 import pytest
+from linkml_runtime.linkml_model import SlotDefinition
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 from pydantic import (
     UUID3,
@@ -84,6 +85,16 @@ def verify_str_lst(
         assert in_exactly_one_string(substr, str_lst)
     else:
         assert in_no_string(substr, str_lst)
+
+
+def translate_field_to_slot(model: type[BaseModel], fn: str) -> SlotDefinition:
+    """
+    Translate a field of a Pydantic model to a LinkML slot definition
+
+    :param model: The Pydantic model
+    :param fn: The field name of the field to be translated
+    """
+    return SlotGenerator(get_field_schema(model, fn)).generate()
 
 
 @pytest.fixture
