@@ -7,6 +7,7 @@ from unittest.mock import call
 from uuid import UUID
 
 import pytest
+from linkml_runtime.linkml_model import SlotDefinition
 from linkml_runtime.linkml_model.meta import AnonymousSlotExpression
 from pydantic import (
     UUID3,
@@ -24,7 +25,7 @@ from pydantic import (
     conlist,
 )
 
-from pydantic2linkml.gen_linkml import LinkmlGenerator, SlotGenerator
+from pydantic2linkml.gen_linkml import LinkmlGenerator, SlotGenerator, any_class_def
 from pydantic2linkml.tools import (
     fetch_defs,
     get_all_modules,
@@ -84,6 +85,16 @@ def verify_str_lst(
         assert in_exactly_one_string(substr, str_lst)
     else:
         assert in_no_string(substr, str_lst)
+
+
+def translate_field_to_slot(model: type[BaseModel], fn: str) -> SlotDefinition:
+    """
+    Translate a field of a Pydantic model to a LinkML slot definition
+
+    :param model: The Pydantic model
+    :param fn: The field name of the field to be translated
+    """
+    return SlotGenerator(get_field_schema(model, fn)).generate()
 
 
 @pytest.fixture
@@ -852,13 +863,55 @@ class TestSlotGenerator:
         assert slot.range == "integer"
 
     def test_union_schema(self):
-        class Foo(BaseModel):
+        class Bar1(BaseModel):
+            y: int
+
+        class Bar2(BaseModel):
+            z: str
+
+        class Foo0(BaseModel):
             x: Union[int, str]
 
-        field_schema = get_field_schema(Foo, "x")
+        # === A case, customized, of type choices expressed as tuples ===
+        field_schema = get_field_schema(Foo0, "x")
+        field_schema.schema["choices"] = [
+            (c, "label")
+            for c in field_schema.schema["choices"]
+            if not isinstance(c, tuple)
+        ]
         slot = SlotGenerator(field_schema).generate()
 
-        assert in_exactly_one_string("Union types are yet to be supported", slot.notes)
+        assert slot.range is None
+        assert in_exactly_one_string(
+            "The union core schema contains a tuple as a choice. "
+            "Tuples as choices are yet to be supported.",
+            slot.notes,
+        )
+
+        # === Union of base types and models ===
+        class Foo1(BaseModel):
+            x: Union[int, Bar1, str]
+
+        slot = translate_field_to_slot(Foo1, "x")
+
+        assert slot.range is None
+        assert in_exactly_one_string(
+            "The union core schema contains a choice of type int. "
+            "The choice type is yet to be supported.",
+            slot.notes,
+        )
+
+        # === Unions of two models ===
+        class Foo2(BaseModel):
+            x: Union[Bar1, Bar2]
+
+        slot = translate_field_to_slot(Foo2, "x")
+
+        assert slot.range == any_class_def.name
+        assert slot.any_of == [
+            AnonymousSlotExpression(range="Bar1"),
+            AnonymousSlotExpression(range="Bar2"),
+        ]
 
     def test_tagged_union_schema(self):
         class Cat(BaseModel):

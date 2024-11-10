@@ -1084,13 +1084,54 @@ class SlotGenerator:
 
         :param schema: The schema representing the union restriction
         """
-        # TODO: the current implementation is just an annotation
-        #   A usable implementation is yet to be decided. Useful information
+        # TODO: the current implementation doesn't address all cases of `Union` partly
+        #   due to limitation of LinkML. Useful information
         #   can be found at, https://github.com/orgs/linkml/discussions/2154
-        self._attach_note(
-            "Warning: The translation is incomplete. Union types are yet to be "
-            "supported."
-        )
+
+        def get_model_slot_expression(
+            schema_: core_schema.CoreSchema,
+        ) -> AnonymousSlotExpression:
+            return AnonymousSlotExpression(
+                range=schema_["cls"].__name__,
+            )
+
+        # A map of supported type choices to the functions for generating the
+        # corresponding slot expression
+        supported_type_choices: dict[
+            str, Callable[[core_schema.CoreSchema], AnonymousSlotExpression]
+        ] = {"model": get_model_slot_expression}
+
+        choices = schema["choices"]
+
+        choice_slot_expressions = []
+        for c in choices:
+            # Exits early if a choice is a tuple
+            if isinstance(c, tuple):
+                self._attach_note(
+                    f"Warning: The translation is incomplete. The union core schema "
+                    f"contains a tuple as a choice. Tuples as choices are yet to be "
+                    f"supported. (core schema: {schema})."
+                )
+                return
+
+            # Exits early if a choice is of unsupported type
+            c_type = c["type"]
+            if c_type not in supported_type_choices:
+                self._attach_note(
+                    f"Warning: The translation is incomplete. The union core schema "
+                    f"contains a choice of type {c_type}. The choice type is yet to be "
+                    f"supported. (core schema: {schema})."
+                )
+                return
+
+            choice_slot_expressions.append(supported_type_choices[c_type](c))
+
+        self._slot.any_of = choice_slot_expressions
+
+        # This is needed because of the monotonicity nature of constraints
+        #   in LinkML. For more information,
+        #   see https://linkml.io/linkml/schemas/advanced.html#unions-as-ranges
+        self._slot.range = any_class_def.name
 
     def _tagged_union_schema(self, schema: core_schema.TaggedUnionSchema) -> None:
         """
