@@ -182,8 +182,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: Any
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         assert slot.range == "Any"
 
     def test_none_schema(self):
@@ -191,8 +190,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: None
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         assert len(slot.notes) == 1
         assert (
             slot.notes[0] == f"{TRANSLATOR_PACKAGE}: LinkML does not have null values. "
@@ -204,8 +202,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: bool
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         assert slot.range == "boolean"
 
     @pytest.mark.parametrize(
@@ -224,8 +221,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: int = Field(..., multiple_of=multiple_of, le=le, ge=ge, lt=lt, gt=gt)
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
 
         assert slot.range == "integer"
 
@@ -256,8 +252,7 @@ class TestSlotGenerator:
                 gt=gt,
             )
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         assert slot.range == "float"
@@ -298,8 +293,7 @@ class TestSlotGenerator:
                 decimal_places=decimal_places,
             )
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         assert slot.range == "decimal"
@@ -361,8 +355,7 @@ class TestSlotGenerator:
                 ),
             ]
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         assert slot.range == "string"
@@ -595,8 +588,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: literal_specs
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         verify_notes(
@@ -659,8 +651,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: conlist(item_type, min_length=min_len, max_length=max_len)
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
 
         if is_item_type_list_type:
             assert in_exactly_one_string("Translation is incomplete", slot.notes)
@@ -682,8 +673,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: dict[int, str]
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
 
         assert in_exactly_one_string("`dict` types are yet to be supported", slot.notes)
 
@@ -726,8 +716,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: Annotated[int, validator]
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
 
         assert in_exactly_one_string(
             "Unable to translate the logic contained "
@@ -849,8 +838,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: Optional[int] = field_specs
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         verify_notes(
@@ -929,8 +917,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             pet: Union[Cat, Dog, Lizard] = Field(..., discriminator="pet_type")
 
-        field_schema = get_field_schema(Foo, "pet")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "pet")
 
         assert in_exactly_one_string(
             "Tagged union types are yet to be supported", slot.notes
@@ -966,8 +953,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: Bar
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
 
         assert slot.range == "Bar"
 
@@ -1008,8 +994,7 @@ class TestSlotGenerator:
                 ),
             ]
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
         verify_notes = partial(verify_str_lst, str_lst=slot.notes)
 
         assert slot.range == "uri"
@@ -1043,8 +1028,7 @@ class TestSlotGenerator:
         class Foo(BaseModel):
             x: uuid_type
 
-        field_schema = get_field_schema(Foo, "x")
-        slot = SlotGenerator(field_schema).generate()
+        slot = translate_field_to_slot(Foo, "x")
 
         assert slot.range == "string"
         assert slot.pattern == expected_pattern
