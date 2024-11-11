@@ -85,6 +85,13 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '.git*'
+check-hidden = true
+# ignore-regex = ''
+# ignore-words-list = ''
+
 [tool.ruff]
 line-length = 88
 indent-width = 4
@@ -103,7 +110,6 @@ ignore = [
   "PLR6301",
   "S",
   "TID252",
-
   # Allow access to protected members in tests
   "SLF001",
 ]
