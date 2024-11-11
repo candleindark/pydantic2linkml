@@ -98,7 +98,7 @@ indent-width = 4
 [tool.ruff.lint]
 ignore = [
   # Avoid use of `from __future__ import annotations`
-  # becauses it causes problem with Typer
+  # because it causes problem with Typer
   "FA100"
 ]
 [tool.ruff.lint.per-file-ignores]
