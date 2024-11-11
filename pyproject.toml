@@ -84,3 +84,26 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+[tool.ruff.lint]
+ignore = [
+  # Avoid use of `from __future__ import annotations`
+  # becaues it causes problem with Typer
+  "FA100"
+]
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*" = [
+  # === defaults recommended by hatch ===
+  # https://hatch.pypa.io/latest/config/internal/static-analysis/#per-file-ignored-rules
+  "PLC1901",
+  "PLR2004",
+  "PLR6301",
+  "S",
+  "TID252",
+
+  # Allow access to protected members in tests
+  "SLF001",
+]
