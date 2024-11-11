@@ -118,7 +118,7 @@ class LinkmlGenerator:
         self._sb = SchemaBuilder(name, id_)
 
         # This changes to True after this generator generates a schema
-        # (for preventing issues caused by accidental re-use
+        # (for preventing issues caused by accidental reuse
         # of this generator). See class docstring for more info.
         self._used = False
 
@@ -326,7 +326,7 @@ class LinkmlGenerator:
                     overridden_field_slot_rep, overriding_field_slot_rep
                 )
             except SlotExtensionError as e:
-                # Attache needed note
+                # Attach needed note
                 missing_substr = (
                     f"lacks meta slots: {e.missing_meta_slots} "
                     if e.missing_meta_slots
@@ -387,7 +387,7 @@ class SlotGenerator:
         self._schema_type_to_method = self._build_schema_type_to_method()
 
         # This changes to True after this generator generates a slot schema
-        # (for preventing issues caused by accidental re-use
+        # (for preventing issues caused by accidental reuse
         # of this generator). See class docstring for more info.
         self._used: bool = False
 

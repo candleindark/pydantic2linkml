@@ -85,13 +85,20 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '.git*'
+check-hidden = true
+# ignore-regex = ''
+# ignore-words-list = ''
+
 [tool.ruff]
 line-length = 88
 indent-width = 4
 [tool.ruff.lint]
 ignore = [
   # Avoid use of `from __future__ import annotations`
-  # becaues it causes problem with Typer
+  # because it causes problem with Typer
   "FA100"
 ]
 [tool.ruff.lint.per-file-ignores]
@@ -103,7 +110,6 @@ ignore = [
   "PLR6301",
   "S",
   "TID252",
-
   # Allow access to protected members in tests
   "SLF001",
 ]
