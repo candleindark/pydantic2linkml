@@ -10,7 +10,8 @@ from operator import attrgetter, itemgetter
 from types import ModuleType
 from typing import Any, NamedTuple, Optional, TypeVar, cast
 
-from linkml_runtime.linkml_model import SlotDefinition
+from linkml_runtime.linkml_model import SlotDefinition, Definition
+from linkml_runtime.linkml_model.meta import AnonymousExpression
 from linkml_runtime.utils.formatutils import is_empty
 from pydantic import BaseModel, RootModel
 
@@ -525,3 +526,12 @@ def get_slot_usage_entry(
     return SlotDefinition(
         name=base.name, **{p: getattr(target, p) for p in extended_properties}
     )
+
+
+def def_to_anonymous_expr(
+    def_: type[Definition], expr_cls: type[AnonymousExpression]
+) -> AnonymousExpression:
+    """
+    Convert an instance of a subclass of `Definition` to an instance of a subclass of
+    `AnonymousExpression`
+    """
