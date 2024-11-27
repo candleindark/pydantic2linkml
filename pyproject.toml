@@ -28,7 +28,7 @@ classifiers = [
 ]
 dependencies = [
   "linkml @ git+https://github.com/candleindark/linkml.git@bundle-error",
-  "pydantic~=2.7",
+  "pydantic>=2.7,<2.10",
   "typer",
 ]
 
