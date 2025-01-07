@@ -119,24 +119,35 @@ class TestLinkmlGenerator:
         "models_and_enums",
         [
             ["dandischema.models"],
-            ["aind_data_schema.components.coordinates"],
+            # === Remove all tests associated with aind_data_schema until works for
+            # dandischema is complete ===
+            pytest.param(
+                ["aind_data_schema.components.coordinates"], marks=pytest.mark.xfail
+            ),
             # Naming conflict at this one
-            # TODO: remove xfail mark once handling of the naming conflict is devised
             pytest.param(
                 ["aind_data_schema.components.devices"], marks=pytest.mark.xfail
             ),
-            ["aind_data_schema.components.reagent"],
-            ["aind_data_schema.components.stimulus"],
-            ["aind_data_schema.components.tile"],
-            ["aind_data_schema.core.acquisition"],
-            ["aind_data_schema.core.data_description"],
-            ["aind_data_schema.core.instrument"],
-            ["aind_data_schema.core.metadata"],
-            ["aind_data_schema.core.procedures"],
-            ["aind_data_schema.core.processing"],
-            ["aind_data_schema.core.rig"],
-            ["aind_data_schema.core.session"],
-            ["aind_data_schema.core.subject"],
+            pytest.param(
+                ["aind_data_schema.components.reagent"], marks=pytest.mark.xfail
+            ),
+            pytest.param(
+                ["aind_data_schema.components.stimulus"], marks=pytest.mark.xfail
+            ),
+            pytest.param(["aind_data_schema.components.tile"], marks=pytest.mark.xfail),
+            pytest.param(
+                ["aind_data_schema.core.acquisition"], marks=pytest.mark.xfail
+            ),
+            pytest.param(
+                ["aind_data_schema.core.data_description"], marks=pytest.mark.xfail
+            ),
+            pytest.param(["aind_data_schema.core.instrument"], marks=pytest.mark.xfail),
+            pytest.param(["aind_data_schema.core.metadata"], marks=pytest.mark.xfail),
+            pytest.param(["aind_data_schema.core.procedures"], marks=pytest.mark.xfail),
+            pytest.param(["aind_data_schema.core.processing"], marks=pytest.mark.xfail),
+            pytest.param(["aind_data_schema.core.rig"], marks=pytest.mark.xfail),
+            pytest.param(["aind_data_schema.core.session"], marks=pytest.mark.xfail),
+            pytest.param(["aind_data_schema.core.subject"], marks=pytest.mark.xfail),
             # TODO: Add test cases with list containing multiple module names
         ],
         indirect=True,
