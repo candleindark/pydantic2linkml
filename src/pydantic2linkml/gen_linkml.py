@@ -470,6 +470,11 @@ class SlotGenerator:
         """
         self._slot.notes.append(f"{__package__}: {note}")
 
+    if pydantic_version >= version.parse("2.10"):
+
+        def _invalid_schema(self, schema: core_schema.InvalidSchema) -> None:
+            raise TranslationNotImplementedError(schema)
+
     def _any_schema(self, _schema: core_schema.AnySchema) -> None:
         """
         Shape the contained slot definition to match any value
