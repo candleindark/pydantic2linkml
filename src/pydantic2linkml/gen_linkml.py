@@ -54,6 +54,13 @@ from pydantic2linkml.tools import (
     sort_dict,
 )
 
+pydantic_version = version.parse(pydantic.__version__)
+
+if pydantic_version >= version.parse("2.10"):
+    literal_values = _typing_extra.literal_values
+else:
+    literal_values = _typing_extra.all_literal_values
+
 logger = logging.getLogger(__name__)
 
 # Callable to sort a dictionary by its keys case-insensitively
@@ -406,9 +413,7 @@ class SlotGenerator:
                 for one of the schema or field types
         """
         mapping: dict[CoreSchemaOrFieldType, Callable[[CoreSchemaOrField], None]] = {}
-        core_schema_types: list[
-            CoreSchemaOrFieldType
-        ] = _typing_extra.all_literal_values(
+        core_schema_types: list[CoreSchemaOrFieldType] = literal_values(
             CoreSchemaOrFieldType  # type: ignore
         )
         for key in core_schema_types:
@@ -464,6 +469,11 @@ class SlotGenerator:
         :param note: The note to attach
         """
         self._slot.notes.append(f"{__package__}: {note}")
+
+    if pydantic_version >= version.parse("2.10"):
+
+        def _invalid_schema(self, schema: core_schema.InvalidSchema) -> None:
+            raise TranslationNotImplementedError(schema)
 
     def _any_schema(self, _schema: core_schema.AnySchema) -> None:
         """
@@ -1307,7 +1317,7 @@ class SlotGenerator:
     def _computed_field_schema(self, schema: core_schema.ComputedField) -> None:
         raise TranslationNotImplementedError(schema)
 
-    if version.parse(pydantic.__version__) >= version.parse("2.9"):
+    if pydantic_version >= version.parse("2.9"):
         # Methods define when Pydantic version is 2.9 or later
         def _complex_schema(self, schema: core_schema.ComplexSchema) -> None:
             raise TranslationNotImplementedError(schema)
