@@ -8,9 +8,11 @@ from enum import Enum
 from functools import partial
 from itertools import chain
 from operator import itemgetter
+from pathlib import Path
 from typing import Any, Optional, Union
 
 import pydantic
+import yaml
 from linkml_runtime.linkml_model import (
     ClassDefinition,
     EnumDefinition,
@@ -105,7 +107,7 @@ class LinkmlGenerator:
             return cls.__name__.casefold()
 
         def to_sorted_lst(
-            iterable: Optional[Iterable[Union[type[Enum], type[BaseModel]]]]
+            iterable: Optional[Iterable[Union[type[Enum], type[BaseModel]]]],
         ) -> list[Union[type[Enum], type[BaseModel]]]:
             return sorted(force_to_set(iterable), key=get_case_insensitive_name)
 
@@ -1350,4 +1352,39 @@ def translate_defs(module_names: Iterable[str]) -> SchemaDefinition:
     generator = LinkmlGenerator(models=models, enums=enums)
     logger.info("Generating schema")
     schema = generator.generate()
+    return schema
+
+
+def apply_overlay(schema: SchemaDefinition, overlay_file: Path) -> SchemaDefinition:
+    """
+    Overlay a (partial) schema on top of a given schema
+
+    :param schema: The given schema
+    :param overlay_file: The path to the file specifying the overlay schema
+    :return: A new schema with the overlay applied
+    :raises ValueError: If the overlay file does not contain a valid YAML mapping
+    """
+    logger.info("Applying overlay from %s", overlay_file)
+
+    if not overlay_file.is_file():
+        msg = f"Overlay file {overlay_file} does not exist or is not a file"
+        raise ValueError(msg)
+
+    with overlay_file.open("r") as f:
+        overlay = yaml.safe_load(f)
+
+    if not isinstance(overlay, dict):
+        msg = f"Overlay file {overlay_file} must contain a YAML mapping (dictionary)"
+        raise ValueError(msg)  # noqa: TRY004
+
+    # Apply the overlay to the schema
+    for k, v in overlay.items():
+        if hasattr(schema, k):
+            setattr(schema, k, v)
+        else:
+            logger.warning(
+                "Overlay key '%s' does not exist in the schema. Skipping.", k
+            )
+
+    logger.info("Overlay applied successfully")
     return schema

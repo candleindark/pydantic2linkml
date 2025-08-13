@@ -29,6 +29,7 @@ classifiers = [
 dependencies = [
   "linkml @ git+https://github.com/candleindark/linkml.git@bundle-error",
   "pydantic~=2.7,<2.11",
+  "PyYAML",
   "typer",
 ]
 
@@ -57,11 +58,13 @@ dependencies = [
   "pytest-cov",
   "pytest-mock",
   "pytest-xdist",
+  "types-PyYAML",
 ]
 
 [tool.hatch.envs.types]
 extra-dependencies = [
   "mypy>=1.0.0",
+  "types-PyYAML",
 ]
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/pydantic2linkml tests}"
