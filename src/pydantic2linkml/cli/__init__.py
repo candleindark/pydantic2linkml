@@ -15,6 +15,15 @@ app = typer.Typer()
 @app.command()
 def main(
     module_names: list[str],
+    overlay_file: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--overlay-file",
+            "-O",
+            help="An overlay file, specifying a (partial) schema, to be applied on top "
+            "of the generated schema.",
+        ),
+    ] = None,
     output_file: Annotated[Optional[Path], typer.Option("--output-file", "-o")] = None,
     log_level: Annotated[
         LogLevel, typer.Option("--log-level", "-l")
