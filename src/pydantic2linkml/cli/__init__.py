@@ -32,7 +32,7 @@ def main(
     # Set log level of the CLI
     logging.basicConfig(level=getattr(logging, log_level))
 
-    schema = translate_defs(module_names)
+    schema = translate_defs(module_names, overlay_file)
     logger.info("Dumping schema")
     yml = yaml_dumper.dumps(schema)
     if not output_file:

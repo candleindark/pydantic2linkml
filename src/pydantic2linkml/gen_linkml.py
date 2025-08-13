@@ -1325,12 +1325,16 @@ class SlotGenerator:
             raise TranslationNotImplementedError(schema)
 
 
-def translate_defs(module_names: Iterable[str]) -> SchemaDefinition:
+def translate_defs(
+    module_names: Iterable[str], overlay_file: Optional[Path] = None
+) -> SchemaDefinition:
     """
     Translate Python objects, in the named modules and their submodules loaded to
-    `sys.modules`, to LinkML
+    `sys.modules`, to LinkML and apply an overlay schema on top of it if provided
 
     :param module_names: The names to specify the modules and their submodules
+    :param overlay_file: The path to the file specifying the overlay schema, if any.
+        None if no overlay is provided.
     :return: A `SchemaDefinition` object representing the expressions of the
         Python objects in LinkML
 
@@ -1352,6 +1356,10 @@ def translate_defs(module_names: Iterable[str]) -> SchemaDefinition:
     generator = LinkmlGenerator(models=models, enums=enums)
     logger.info("Generating schema")
     schema = generator.generate()
+
+    if overlay_file is not None:
+        schema = apply_overlay(schema, overlay_file)
+
     return schema
 
 
