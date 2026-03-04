@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Keeping Documentation Up to Date
+
+- Whenever you notice that any documentation — `CLAUDE.md`, `README.md`, or any other
+  docs for human or machine consumption — is outdated or incorrect (e.g., Python
+  versions, dependencies, commands, architecture descriptions), update it immediately.
+- Before submitting a PR, review **all project documentation** and ensure everything
+  is accurate and up to date.
+- Wrap all prose in documentation files at ~79 characters so they read well as
+  plain text. Code blocks and long URLs are exempt.
+
 ## Project Overview
 
 `pydantic2linkml` is a CLI tool and library that translates [Pydantic](https://docs.pydantic.dev/) v2 models to [LinkML](https://linkml.io/) schemas. It works by introspecting Pydantic's internal `core_schema` objects rather than the higher-level model API.
@@ -11,20 +21,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This project uses [Hatch](https://hatch.pypa.io/) for environment and build management.
 
 ```bash
-# Install Hatch
-pip install hatch
+# Check if Hatch is already installed (it may be installed via Homebrew, pipx, pip, etc.)
+hatch --version
 
-# Run tests (in the test environment)
-hatch run test:pytest tests/
+# If not installed, see https://hatch.pypa.io/latest/install/ for options, e.g.:
+#   brew install hatch        # macOS/Linux via Homebrew
+#   pipx install hatch        # isolated pip install (recommended)
+#   pip install hatch         # plain pip
+
+# Run tests in a specific Python environment
+hatch run test.py3.10:pytest tests/
 
 # Run a single test file
-hatch run test:pytest tests/test_gen_linkml.py
+hatch run test.py3.10:pytest tests/test_gen_linkml.py
 
 # Run a single test by name
-hatch run test:pytest tests/test_gen_linkml.py::test_name
+hatch run test.py3.10:pytest tests/test_gen_linkml.py::test_name
 
 # Run tests with coverage
-hatch run test:pytest --cov tests/
+hatch run test.py3.10:pytest --cov tests/
+
+# Run tests across all Python matrix environments
+hatch run test:python -m pytest --numprocesses=logical -s -v tests
 
 # Type checking
 hatch run types:check
@@ -37,7 +55,7 @@ ruff format .
 codespell
 ```
 
-The default hatch environment uses Python 3.9. The `test` environment adds `aind-data-schema`, `dandischema`, `pytest`, `pytest-cov`, `pytest-mock`, and `pytest-xdist`.
+The default hatch environment uses Python 3.10. The `test` environment matrix covers Python 3.10–3.13 and adds `aind-data-schema`, `dandischema`, `pytest`, `pytest-cov`, `pytest-mock`, and `pytest-xdist`.
 
 ## CLI Usage
 
