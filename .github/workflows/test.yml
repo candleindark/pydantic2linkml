@@ -19,6 +19,11 @@ jobs:
           - macos-latest
           - windows-latest
           - ubuntu-latest
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -27,9 +32,8 @@ jobs:
         uses: pypa/hatch@install
 
       - name: Run tests
-        run: hatch run test:python -m pytest --numprocesses=logical -s -v tests
+        run: hatch run test.py${{ matrix.python-version }}:python -m pytest --numprocesses=logical -s -v tests
         env:
-          # Needed for coveralls:
           GITHUB_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
 # vim:set et sts=2:

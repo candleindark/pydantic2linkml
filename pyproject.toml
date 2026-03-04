@@ -7,7 +7,7 @@ name = "pydantic2linkml"
 dynamic = ["version"]
 description = 'A tool for translating models expressed in Pydantic to LinkML'
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"  # todo: Is this the correct license?
 keywords = ["LinkML", "Pydantic"]
 authors = [
@@ -20,10 +20,10 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
 dependencies = [
@@ -47,7 +47,10 @@ path = "src/pydantic2linkml/__about__.py"
 allow-direct-references = true
 
 [tool.hatch.envs.default]
-python = "3.9"
+python = "3.10"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.test]
 dependencies = [
