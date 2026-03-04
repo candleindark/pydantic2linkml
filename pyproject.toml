@@ -27,7 +27,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
 ]
 dependencies = [
-  "linkml @ git+https://github.com/candleindark/linkml.git@bundle-error",
+  "linkml",
   "pydantic~=2.7,<2.11",
   "typer",
 ]
@@ -42,9 +42,6 @@ pydantic2linkml = "pydantic2linkml.cli:app"
 
 [tool.hatch.version]
 path = "src/pydantic2linkml/__about__.py"
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [tool.hatch.envs.default]
 installer = "uv"
