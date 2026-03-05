@@ -8,11 +8,9 @@ from enum import Enum
 from functools import partial
 from itertools import chain
 from operator import itemgetter
-from pathlib import Path
 from typing import Any, Optional, Union
 
 import pydantic
-import yaml
 from linkml_runtime.linkml_model import (
     ClassDefinition,
     EnumDefinition,
@@ -1325,16 +1323,12 @@ class SlotGenerator:
             raise TranslationNotImplementedError(schema)
 
 
-def translate_defs(
-    module_names: Iterable[str], overlay_file: Optional[Path] = None
-) -> SchemaDefinition:
+def translate_defs(module_names: Iterable[str]) -> SchemaDefinition:
     """
     Translate Python objects, in the named modules and their submodules loaded to
-    `sys.modules`, to LinkML and apply an overlay schema on top of it if provided
+    `sys.modules`, to LinkML
 
     :param module_names: The names to specify the modules and their submodules
-    :param overlay_file: The path to the file specifying the overlay schema, if any.
-        None if no overlay is provided.
     :return: A `SchemaDefinition` object representing the expressions of the
         Python objects in LinkML
 
@@ -1355,44 +1349,4 @@ def translate_defs(
     logger.info("Fetched %d models and %d enums", len(models), len(enums))
     generator = LinkmlGenerator(models=models, enums=enums)
     logger.info("Generating schema")
-    schema = generator.generate()
-
-    if overlay_file is not None:
-        schema = apply_overlay(schema, overlay_file)
-
-    return schema
-
-
-def apply_overlay(schema: SchemaDefinition, overlay_file: Path) -> SchemaDefinition:
-    """
-    Overlay a (partial) schema on top of a given schema
-
-    :param schema: The given schema
-    :param overlay_file: The path to the file specifying the overlay schema
-    :return: A new schema with the overlay applied
-    :raises ValueError: If the overlay file does not contain a valid YAML mapping
-    """
-    logger.info("Applying overlay from %s", overlay_file)
-
-    if not overlay_file.is_file():
-        msg = f"Overlay file {overlay_file} does not exist or is not a file"
-        raise ValueError(msg)
-
-    with overlay_file.open("r") as f:
-        overlay = yaml.safe_load(f)
-
-    if not isinstance(overlay, dict):
-        msg = f"Overlay file {overlay_file} must contain a YAML mapping (dictionary)"
-        raise ValueError(msg)  # noqa: TRY004
-
-    # Apply the overlay to the schema
-    for k, v in overlay.items():
-        if hasattr(schema, k):
-            setattr(schema, k, v)
-        else:
-            logger.warning(
-                "Overlay key '%s' does not exist in the schema. Skipping.", k
-            )
-
-    logger.info("Overlay applied successfully")
-    return schema
+    return generator.generate()
