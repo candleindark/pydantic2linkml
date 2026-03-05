@@ -1,5 +1,6 @@
 import importlib
 import inspect
+import logging
 import re
 import sys
 from collections import defaultdict
@@ -10,16 +11,23 @@ from operator import attrgetter, itemgetter
 from types import ModuleType
 from typing import Any, NamedTuple, Optional, TypeVar, cast
 
-from linkml_runtime.linkml_model import SlotDefinition
+import yaml
+from linkml_runtime.linkml_model import SchemaDefinition, SlotDefinition
 from linkml_runtime.utils.formatutils import is_empty
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel, FilePath, RootModel, validate_call
 
 # noinspection PyProtectedMember
 from pydantic._internal import _core_utils
 from pydantic.fields import FieldInfo
 from pydantic_core import core_schema
 
-from pydantic2linkml.exceptions import NameCollisionError, SlotExtensionError
+from pydantic2linkml.exceptions import (
+    NameCollisionError,
+    OverlayContentError,
+    SlotExtensionError,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class StrEnum(str, Enum):
@@ -525,3 +533,49 @@ def get_slot_usage_entry(
     return SlotDefinition(
         name=base.name, **{p: getattr(target, p) for p in extended_properties}
     )
+
+
+@validate_call
+def apply_schema_overlay(schema_yml: str, overlay_file: FilePath) -> str:
+    """Apply an overlay YAML file onto a serialized schema YAML string.
+
+    :param schema_yml: YAML string of a serialized SchemaDefinition
+    :param overlay_file: Path to an existing overlay YAML file
+    :return: YAML string with the overlay applied, keys ordered to match
+        SchemaDefinition field order
+    :raises ValueError: If ``schema_yml`` does not deserialize to a dict
+    :raises OverlayContentError: If the overlay file does not contain a YAML
+        mapping
+    """
+    schema_dict = yaml.safe_load(schema_yml)
+    if not isinstance(schema_dict, dict):
+        raise ValueError(
+            f"schema_yml did not deserialize to a dict: {type(schema_dict)}"
+        )
+
+    with overlay_file.open() as f:
+        overlay = yaml.safe_load(f)
+
+    if not isinstance(overlay, dict):
+        raise OverlayContentError(
+            f"Overlay file {overlay_file} must contain a YAML mapping"
+        )
+
+    # Ordered list of valid SchemaDefinition field names
+    sd_field_names = [f.name for f in fields(SchemaDefinition)]
+    sd_field_set = set(sd_field_names)
+
+    # Apply overlay, skipping keys that are not SchemaDefinition fields
+    for k, v in overlay.items():
+        if k not in sd_field_set:
+            logger.warning(
+                "Overlay key '%s' is not a field of SchemaDefinition. Skipping.",
+                k,
+            )
+        else:
+            schema_dict[k] = v
+
+    # Rebuild dict in SchemaDefinition field order
+    ordered = {k: schema_dict[k] for k in sd_field_names if k in schema_dict}
+
+    return yaml.dump(ordered, allow_unicode=True, sort_keys=False)

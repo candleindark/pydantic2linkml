@@ -1,15 +1,23 @@
+import logging
 import re
 from enum import Enum, auto
 from operator import itemgetter
+from pathlib import Path
 from typing import ClassVar, Optional, Type, cast
 
 import pytest
+import yaml
 from linkml_runtime.linkml_model import SlotDefinition
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel, RootModel, ValidationError
 from pydantic_core import core_schema
 
-from pydantic2linkml.exceptions import NameCollisionError, SlotExtensionError
+from pydantic2linkml.exceptions import (
+    NameCollisionError,
+    OverlayContentError,
+    SlotExtensionError,
+)
 from pydantic2linkml.tools import (
+    apply_schema_overlay,
     bucketize,
     ensure_unique_names,
     fetch_defs,
@@ -24,6 +32,9 @@ from pydantic2linkml.tools import (
     resolve_ref_schema,
     sort_dict,
 )
+
+# A minimal YAML dict suitable as schema_yml input for apply_schema_overlay tests
+SAMPLE_SCHEMA_YML = "id: https://example.com/test\nname: original-name\n"
 
 
 def test_get_parent_models():
@@ -620,3 +631,96 @@ def test_get_slot_usage_entry(
         assert error.varied_meta_slots == expected_varied
     else:
         assert get_slot_usage_entry(base, target) == expected_return
+
+
+class TestApplySchemaOverlay:
+    @pytest.mark.parametrize(
+        "overlay_content, expected_overrides",
+        [
+            pytest.param("name: new-name\n", {"name": "new-name"}, id="single_field"),
+            pytest.param(
+                "name: new-name\ntitle: My Title\n",
+                {"name": "new-name", "title": "My Title"},
+                id="multiple_fields",
+            ),
+        ],
+    )
+    def test_valid_fields_applied(
+        self, tmp_path: Path, overlay_content, expected_overrides
+    ):
+        overlay_file = tmp_path / "overlay.yaml"
+        overlay_file.write_text(overlay_content)
+        result = apply_schema_overlay(
+            schema_yml=SAMPLE_SCHEMA_YML, overlay_file=overlay_file
+        )
+        assert (
+            yaml.safe_load(result)
+            == yaml.safe_load(SAMPLE_SCHEMA_YML) | expected_overrides
+        )
+
+    @pytest.mark.parametrize(
+        "get_path",
+        [
+            pytest.param(lambda p: p / "no-such-file.yaml", id="nonexistent_file"),
+            pytest.param(lambda p: p, id="directory"),
+        ],
+    )
+    def test_invalid_overlay_file_raises_validation_error(
+        self, tmp_path: Path, get_path
+    ):
+        with pytest.raises(ValidationError):
+            apply_schema_overlay(
+                schema_yml=SAMPLE_SCHEMA_YML, overlay_file=get_path(tmp_path)
+            )
+
+    @pytest.mark.parametrize(
+        "overlay_content",
+        [
+            pytest.param("- item1\n- item2\n", id="list"),
+            pytest.param("", id="null"),
+        ],
+    )
+    def test_non_dict_overlay_raises_overlay_content_error(
+        self, tmp_path: Path, overlay_content
+    ):
+        overlay_file = tmp_path / "overlay.yaml"
+        overlay_file.write_text(overlay_content)
+        with pytest.raises(OverlayContentError):
+            apply_schema_overlay(
+                schema_yml=SAMPLE_SCHEMA_YML, overlay_file=overlay_file
+            )
+
+    def test_schema_yml_not_dict_raises_value_error(self, tmp_path: Path):
+        overlay_file = tmp_path / "overlay.yaml"
+        overlay_file.write_text("name: new-name\n")
+        with pytest.raises(ValueError):
+            apply_schema_overlay(
+                schema_yml="- item1\n- item2\n", overlay_file=overlay_file
+            )
+
+    def test_unknown_key_logged_and_skipped(self, tmp_path: Path, caplog):
+        overlay_file = tmp_path / "overlay.yaml"
+        overlay_file.write_text("not_a_field: some_value\n")
+        with caplog.at_level(logging.WARNING, logger="pydantic2linkml.tools"):
+            result = apply_schema_overlay(
+                schema_yml=SAMPLE_SCHEMA_YML, overlay_file=overlay_file
+            )
+        assert "not_a_field" in caplog.text
+        assert "not_a_field" not in yaml.safe_load(result)
+
+    def test_output_follows_schema_definition_field_order(self, tmp_path: Path):
+        # description comes after name in SchemaDefinition; supply them reversed
+        schema_yml = "description: some desc\nname: test-name\n"
+        overlay_file = tmp_path / "overlay.yaml"
+        overlay_file.write_text("title: My Title\n")
+        result = apply_schema_overlay(schema_yml=schema_yml, overlay_file=overlay_file)
+        keys = list(yaml.safe_load(result).keys())
+        assert keys.index("name") < keys.index("description") < keys.index("title")
+
+    def test_unicode_content_preserved(self, tmp_path: Path):
+        overlay_file = tmp_path / "overlay.yaml"
+        overlay_file.write_text("title: \u00dc n\u00ef c\u00f6d\u00e9\n")
+        result = apply_schema_overlay(
+            schema_yml=SAMPLE_SCHEMA_YML, overlay_file=overlay_file
+        )
+        assert yaml.safe_load(result)["title"] == "\u00dc n\u00ef c\u00f6d\u00e9"

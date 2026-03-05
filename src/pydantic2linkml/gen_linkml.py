@@ -105,7 +105,7 @@ class LinkmlGenerator:
             return cls.__name__.casefold()
 
         def to_sorted_lst(
-            iterable: Optional[Iterable[Union[type[Enum], type[BaseModel]]]]
+            iterable: Optional[Iterable[Union[type[Enum], type[BaseModel]]]],
         ) -> list[Union[type[Enum], type[BaseModel]]]:
             return sorted(force_to_set(iterable), key=get_case_insensitive_name)
 
@@ -1349,5 +1349,4 @@ def translate_defs(module_names: Iterable[str]) -> SchemaDefinition:
     logger.info("Fetched %d models and %d enums", len(models), len(enums))
     generator = LinkmlGenerator(models=models, enums=enums)
     logger.info("Generating schema")
-    schema = generator.generate()
-    return schema
+    return generator.generate()

@@ -104,3 +104,9 @@ class SlotExtensionError(Exception):
             f"(missing_meta_slots={self.missing_meta_slots!r}, "
             f"varied_meta_slots={self.varied_meta_slots!r})"
         )
+
+
+class OverlayContentError(ValueError):
+    """
+    Raise when the content of an overlay file is not a valid YAML mapping
+    """
