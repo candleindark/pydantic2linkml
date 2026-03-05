@@ -102,3 +102,8 @@ Options: `--output-file`/`-o` (path), `--log-level`/`-l` (default: WARNING).
 ### Test Assets
 
 `tests/assets/mock_module0.py` and `mock_module1.py` define Pydantic models used across test files to exercise the translator with realistic model hierarchies.
+
+## Test Writing Conventions
+
+- Group related tests into a class.
+- Use parametrization to reduce code duplication.
