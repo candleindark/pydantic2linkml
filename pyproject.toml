@@ -96,6 +96,9 @@ check-hidden = true
 # ignore-regex = ''
 # ignore-words-list = ''
 
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
 [tool.ruff]
 line-length = 88
 indent-width = 4
