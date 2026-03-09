@@ -99,11 +99,6 @@ check-hidden = true
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 
-[tool.pydantic-mypy]
-init_forbid_extra = true
-init_typed = true
-warn_required_dynamic_aliases = true
-
 [tool.ruff]
 line-length = 88
 indent-width = 4
