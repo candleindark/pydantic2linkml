@@ -25,7 +25,7 @@ from pydantic import (
     conlist,
 )
 
-from pydantic2linkml.gen_linkml import LinkmlGenerator, SlotGenerator, any_class_def
+from pydantic2linkml.gen_linkml import LinkmlGenerator, SlotGenerator, ANY_CLASS_DEF
 from pydantic2linkml.tools import (
     fetch_defs,
     get_all_modules,
@@ -906,7 +906,7 @@ class TestSlotGenerator:
 
         slot = translate_field_to_slot(Foo2, "x")
 
-        assert slot.range == any_class_def.name
+        assert slot.range == ANY_CLASS_DEF.name
         assert slot.any_of == [
             AnonymousSlotExpression(range="Bar1"),
             AnonymousSlotExpression(range="Bar2"),

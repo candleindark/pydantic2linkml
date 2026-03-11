@@ -68,7 +68,7 @@ sort_dict_by_ikeys = partial(sort_dict, key_func=lambda t: itemgetter(0)(t).case
 
 # The LinkML Any type
 # For more info, see https://linkml.io/linkml/schemas/advanced.html#linkml-any-type
-any_class_def = ClassDefinition(
+ANY_CLASS_DEF = ClassDefinition(
     name="Any", description="Any object", class_uri="linkml:Any"
 )
 
@@ -372,7 +372,7 @@ class LinkmlGenerator:
         Establish the supporting definitions in the schema
         """
         # Add an `linkml:Any` class
-        self._sb.add_class(any_class_def)
+        self._sb.add_class(ANY_CLASS_DEF)
 
 
 class SlotGenerator:
@@ -481,7 +481,7 @@ class SlotGenerator:
 
         :param _schema: The core schema
         """
-        self._slot.range = any_class_def.name
+        self._slot.range = ANY_CLASS_DEF.name
 
     def _none_schema(self, _schema: core_schema.NoneSchema) -> None:
         """
@@ -1141,7 +1141,7 @@ class SlotGenerator:
         # This is needed because of the monotonicity nature of constraints
         #   in LinkML. For more information,
         #   see https://linkml.io/linkml/schemas/advanced.html#unions-as-ranges
-        self._slot.range = any_class_def.name
+        self._slot.range = ANY_CLASS_DEF.name
 
     def _tagged_union_schema(self, schema: core_schema.TaggedUnionSchema) -> None:
         """
