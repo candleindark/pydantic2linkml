@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from pydantic2linkml.cli.tools import LogLevel
 from pydantic2linkml.exceptions import OverlayContentError
 from pydantic2linkml.gen_linkml import translate_defs
-from pydantic2linkml.tools import apply_schema_overlay
+from pydantic2linkml.tools import apply_schema_overlay, remove_schema_key_duplication
 
 logger = logging.getLogger(__name__)
 app = typer.Typer()
@@ -41,7 +41,7 @@ def main(
 
     schema = translate_defs(module_names)
     logger.info("Dumping schema")
-    yml = yaml_dumper.dumps(schema)
+    yml = remove_schema_key_duplication(yaml_dumper.dumps(schema))
     if overlay_file is not None:
         logger.info("Applying overlay from %s", overlay_file)
         try:

@@ -902,7 +902,7 @@ class SlotGenerator:
         if self._slot.multivalued:
             # === This must be a nested list type ===
             self._attach_note(
-                "Translation is incomplete." "Nested list types are not yet supported."
+                "Translation is incomplete.Nested list types are not yet supported."
             )
             return
 

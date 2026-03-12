@@ -201,9 +201,9 @@ def get_model_schema(model: type[BaseModel]) -> core_schema.ModelSchema:
         else:
             model_schema = inner_schema
 
-    assert (
-        model_schema["type"] == "model"
-    ), "Assumption about how model schema is stored is wrong."
+    assert model_schema["type"] == "model", (
+        "Assumption about how model schema is stored is wrong."
+    )
 
     return cast(core_schema.ModelSchema, model_schema)
 
@@ -248,7 +248,7 @@ def get_field_schema(model: type[BaseModel], fn: str) -> FieldSchema:
     else:
         raise NotImplementedError(
             f"This function currently doesn't support the inner schema of "
-            f"a `ModelSchema` being the type of \"{model_schema['schema']['type']}\""
+            f'a `ModelSchema` being the type of "{model_schema["schema"]["type"]}"'
         )
 
 
@@ -390,7 +390,6 @@ def fetch_defs(
 
     for module in modules:
         for _, cls in inspect.getmembers(module, inspect.isclass):
-
             if (
                 issubclass(cls, BaseModel)
                 and cls is not BaseModel
@@ -579,3 +578,32 @@ def apply_schema_overlay(schema_yml: str, overlay_file: FilePath) -> str:
     ordered = {k: schema_dict[k] for k in sd_field_names if k in schema_dict}
 
     return yaml.dump(ordered, allow_unicode=True, sort_keys=False)
+
+
+def remove_schema_key_duplication(yml: str) -> str:
+    """Remove redundant name/text fields from a valid serialized LinkML schema.
+
+    In LinkML's serialized YAML, dictionary keys already serve as
+    identifiers for classes, slots, enums, slot_usage entries, and
+    permissible values. This function strips the redundant ``name`` and
+    ``text`` fields that the linkml-runtime YAML dumper includes alongside
+    those keys.
+
+    :param yml: A YAML string representing a **valid** LinkML schema.
+    """
+    schema = yaml.safe_load(yml)
+
+    for cls in schema.get("classes", {}).values():
+        cls.pop("name", None)
+        for su in cls.get("slot_usage", {}).values():
+            su.pop("name", None)
+
+    for slot in schema.get("slots", {}).values():
+        slot.pop("name", None)
+
+    for enum in schema.get("enums", {}).values():
+        enum.pop("name", None)
+        for pv in enum.get("permissible_values", {}).values():
+            pv.pop("text", None)
+
+    return yaml.dump(schema, allow_unicode=True, sort_keys=False)

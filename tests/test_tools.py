@@ -29,6 +29,7 @@ from pydantic2linkml.tools import (
     get_slot_usage_entry,
     get_uuid_regex,
     normalize_whitespace,
+    remove_schema_key_duplication,
     resolve_ref_schema,
     sort_dict,
 )
@@ -724,3 +725,78 @@ class TestApplySchemaOverlay:
             schema_yml=SAMPLE_SCHEMA_YML, overlay_file=overlay_file
         )
         assert yaml.safe_load(result)["title"] == "\u00dc n\u00ef c\u00f6d\u00e9"
+
+
+class TestRemoveSchemaKeyDuplication:
+    def test_classes_name_removed(self):
+        schema = {"classes": {"Person": {"name": "Person", "description": "A person"}}}
+        result = yaml.safe_load(remove_schema_key_duplication(yaml.dump(schema)))
+        assert "name" not in result["classes"]["Person"]
+        assert result["classes"]["Person"]["description"] == "A person"
+
+    def test_slots_name_removed(self):
+        schema = {"slots": {"age": {"name": "age", "range": "integer"}}}
+        result = yaml.safe_load(remove_schema_key_duplication(yaml.dump(schema)))
+        assert "name" not in result["slots"]["age"]
+        assert result["slots"]["age"]["range"] == "integer"
+
+    def test_enums_name_removed(self):
+        schema = {"enums": {"Status": {"name": "Status"}}}
+        result = yaml.safe_load(remove_schema_key_duplication(yaml.dump(schema)))
+        assert "name" not in result["enums"]["Status"]
+
+    def test_slot_usage_name_removed(self):
+        schema = {
+            "classes": {
+                "Employee": {
+                    "name": "Employee",
+                    "slot_usage": {"age": {"name": "age", "required": True}},
+                }
+            }
+        }
+        result = yaml.safe_load(remove_schema_key_duplication(yaml.dump(schema)))
+        assert "name" not in result["classes"]["Employee"]["slot_usage"]["age"]
+        assert result["classes"]["Employee"]["slot_usage"]["age"]["required"] is True
+
+    def test_permissible_values_text_removed(self):
+        schema = {
+            "enums": {
+                "Status": {
+                    "name": "Status",
+                    "permissible_values": {
+                        "ACTIVE": {"text": "ACTIVE", "description": "Currently active"}
+                    },
+                }
+            }
+        }
+        result = yaml.safe_load(remove_schema_key_duplication(yaml.dump(schema)))
+        pv = result["enums"]["Status"]["permissible_values"]["ACTIVE"]
+        assert "text" not in pv
+        assert pv["description"] == "Currently active"
+
+    def test_missing_sections_no_error(self):
+        schema = {"id": "https://example.com/test", "name": "test-schema"}
+        result = yaml.safe_load(remove_schema_key_duplication(yaml.dump(schema)))
+        assert result["id"] == "https://example.com/test"
+
+    def test_round_trip(self):
+        from linkml_runtime.dumpers import yaml_dumper
+        from tests.assets import mock_module0, mock_module1
+
+        from pydantic2linkml.gen_linkml import translate_defs
+
+        schema = translate_defs([mock_module0.__name__, mock_module1.__name__])
+        raw_yml = yaml_dumper.dumps(schema)
+        result_yml = remove_schema_key_duplication(raw_yml)
+        result = yaml.safe_load(result_yml)
+
+        for cls in result.get("classes", {}).values():
+            assert "name" not in cls
+            for su in cls.get("slot_usage", {}).values():
+                assert "name" not in su
+        for slot in result.get("slots", {}).values():
+            assert "name" not in slot
+        for enum in result.get("enums", {}).values():
+            assert "name" not in enum
+            for pv in enum.get("permissible_values", {}).values():
+                assert "text" not in pv
