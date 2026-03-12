@@ -437,8 +437,7 @@ class TestSlotGenerator:
             now_op is not None,
         )
         verify_notes(
-            "Unable to express the utc offset of the current date "
-            "in the restriction",
+            "Unable to express the utc offset of the current date in the restriction",
             now_utc_offset is not None,
         )
 
@@ -673,9 +672,7 @@ class TestSlotGenerator:
                 # This is needed due to Pydantic's behavior:
                 # The any argument for `min_length` of `conlist` that is less than
                 # or equal to 0 is ignored.
-                None
-                if (min_len is not None and min_len <= 0)
-                else min_len
+                None if (min_len is not None and min_len <= 0) else min_len
             )
             assert slot.maximum_cardinality == max_len
             assert slot.range == expected_range
