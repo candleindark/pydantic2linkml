@@ -166,6 +166,24 @@ class TestLinkmlGenerator:
     def test_generate(self, linkml_generator):
         linkml_generator.generate()
 
+    def test_class_description_from_docstring(self):
+        """
+        Test that a model with a docstring produces a ClassDefinition with the
+        correct description, and a model without a docstring produces
+        description=None.
+        """
+        from tests.assets.mock_module0 import A, B
+
+        models = [A, B]
+        generator = LinkmlGenerator(models=models, enums=[])
+        schema = generator.generate()
+
+        class_a = schema.classes["A"]
+        assert class_a.description == "Model A docstring."
+
+        class_b = schema.classes["B"]
+        assert class_b.description is None
+
 
 class TestSlotGenerator:
     def test_instantiation(self):

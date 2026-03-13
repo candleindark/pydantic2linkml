@@ -360,6 +360,9 @@ class LinkmlGenerator:
 
         return ClassDefinition(
             model.__name__,
+            description=(
+                normalize_whitespace(model.__doc__) if model.__doc__ else None
+            ),
             is_a=is_a,
             mixins=mixins,
             slots=slots,
