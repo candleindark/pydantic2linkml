@@ -9,7 +9,11 @@ from pydantic import ValidationError
 from pydantic2linkml.cli.tools import LogLevel
 from pydantic2linkml.exceptions import OverlayContentError
 from pydantic2linkml.gen_linkml import translate_defs
-from pydantic2linkml.tools import apply_schema_overlay, remove_schema_key_duplication
+from pydantic2linkml.tools import (
+    add_section_breaks,
+    apply_schema_overlay,
+    remove_schema_key_duplication,
+)
 
 logger = logging.getLogger(__name__)
 app = typer.Typer()
@@ -56,6 +60,7 @@ def main(
                 f"The overlay file does not contain a valid YAML mapping: {e}",
                 param_hint="'--overlay-file'",
             ) from e
+    yml = add_section_breaks(yml)
     if not output_file:
         print(yml)  # noqa: T201
     else:
