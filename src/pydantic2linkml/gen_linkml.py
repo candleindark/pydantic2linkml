@@ -367,7 +367,7 @@ class LinkmlGenerator:
             mixins=mixins,
             slots=slots,
             slot_usage=slot_usage,
-            notes=notes,
+            notes=sorted(notes),
         )
 
     def _establish_supporting_defs(self) -> None:
