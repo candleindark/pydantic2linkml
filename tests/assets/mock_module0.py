@@ -4,6 +4,8 @@ from pydantic import BaseModel, RootModel
 
 
 class A(BaseModel):
+    """Model A docstring."""
+
     pass
 
 
