@@ -17,6 +17,7 @@ from pydantic2linkml.exceptions import (
     SlotExtensionError,
 )
 from pydantic2linkml.tools import (
+    add_section_breaks,
     apply_schema_overlay,
     bucketize,
     ensure_unique_names,
@@ -800,3 +801,55 @@ class TestRemoveSchemaKeyDuplication:
             assert "name" not in enum
             for pv in enum.get("permissible_values", {}).values():
                 assert "text" not in pv
+
+
+class TestAddSectionBreaks:
+    @pytest.mark.parametrize(
+        "yml, kwargs, expected",
+        [
+            # blank line inserted before a mid-string key (default keys)
+            (
+                "id: schema\nclasses:\n  Foo: {}\n",
+                {},
+                "id: schema\n\nclasses:\n  Foo: {}\n",
+            ),
+            # no break added when key is at position 0
+            (
+                "classes:\n  Foo: {}\n",
+                {},
+                "classes:\n  Foo: {}\n",
+            ),
+            # all three default keys receive breaks
+            (
+                "id: s\nenums:\n  E: {}\nslots:\n  s: {}\nclasses:\n  C: {}\n",
+                {},
+                "id: s\n\nenums:\n  E: {}\n\nslots:\n  s: {}\n\nclasses:\n  C: {}\n",
+            ),
+            # custom keys
+            (
+                "id: s\nsubsets:\n  sub: {}\n",
+                {"keys": ("subsets",)},
+                "id: s\n\nsubsets:\n  sub: {}\n",
+            ),
+            # custom break_str
+            (
+                "id: s\nclasses:\n  C: {}\n",
+                {"break_str": "\n# ---\n"},
+                "id: s\n\n# ---\nclasses:\n  C: {}\n",
+            ),
+            # indented occurrence of a key name is not matched
+            (
+                "classes:\n  Foo:\n    slots:\n      - bar\n",
+                {},
+                "classes:\n  Foo:\n    slots:\n      - bar\n",
+            ),
+            # empty keys tuple — string unchanged
+            (
+                "id: s\nclasses:\n  C: {}\n",
+                {"keys": ()},
+                "id: s\nclasses:\n  C: {}\n",
+            ),
+        ],
+    )
+    def test_add_section_breaks(self, yml, kwargs, expected):
+        assert add_section_breaks(yml, **kwargs) == expected

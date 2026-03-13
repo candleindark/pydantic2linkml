@@ -607,3 +607,29 @@ def remove_schema_key_duplication(yml: str) -> str:
             pv.pop("text", None)
 
     return yaml.dump(schema, allow_unicode=True, sort_keys=False)
+
+
+def add_section_breaks(
+    yml: str,
+    keys: tuple[str, ...] = ("enums", "slots", "classes"),
+    break_str: str = "\n",
+) -> str:
+    """Insert a break string before selected top-level keys in a YAML string.
+
+    :param yml: A YAML string.
+    :param keys: Top-level keys to precede with a break. Defaults to
+        ``("enums", "slots", "classes")``.
+    :param break_str: String prepended before each matched key line.
+        Defaults to ``"\\n"``, producing a blank line.
+    """
+    if not keys:
+        return yml
+
+    pattern = r"^(" + "|".join(re.escape(k) for k in keys) + r"):"
+
+    def replacement(m: re.Match) -> str:
+        if m.start() == 0:
+            return m.group(0)
+        return break_str + m.group(0)
+
+    return re.sub(pattern, replacement, yml, flags=re.MULTILINE)
