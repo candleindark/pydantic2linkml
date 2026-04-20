@@ -43,3 +43,29 @@ let's use `^` for mating the start of the string then. Please check the result a
 ---
 
 Let's add a class to the schema that is a container containing a array of things. So that we can combine all the examples instances into just a instance of the container class containing the instances of things.
+
+---
+
+With what we have learned, let's post an answer to `https://github.com/dandi/dandi-schema/issues/395` to demo the use of the `all_of` meta slot to represent the max/min length restriction. However, if the command to run validations of instances against a demo schema, we must not include specific hatch env name.
+
+---
+
+We will still drop the notes. This solution is in addition to dropping the notes.
+
+Please also wrap any code in `<details>` HTML tags with the `<summary>` tags within.
+
+---
+
+sure
+
+---
+
+Is there a better method in translating the length contraints of a Pydantic model field to  contraints in a LinkML slot?
+
+---
+
+Let's go ahead, and implement the translation of the min/max translation ing pydantic2linkml using `all_of` in LinkML. (Make sure to update all the notes and documentation).
+
+---
+
+Let's go ahead, and implement the translation of the min/max translation ing pydantic2linkml using `all_of` in LinkML. (Make sure to update all the notes and documentation).
