@@ -1,0 +1,67 @@
+{
+  "cli_version": "0.5.4",
+  "checkpoint_id": "dd3c67ec0806",
+  "session_id": "507e946d-4407-4c42-8bde-54e88e0a7a7a",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-20T17:03:32.684586Z",
+  "branch": "docs/python-language-usage",
+  "checkpoints_count": 5,
+  "files_touched": [],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-7",
+  "turn_id": "c61d1307414a",
+  "token_usage": {
+    "input_tokens": 132,
+    "cache_creation_tokens": 451580,
+    "cache_read_tokens": 3017844,
+    "output_tokens": 35298,
+    "api_call_count": 63
+  },
+  "session_metrics": {
+    "turn_count": 11
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 26,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 31,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 32,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 5,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 32,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 6,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 40,
+      "agent_lines_removed": 0
+    }
+  ]
+}

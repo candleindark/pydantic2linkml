@@ -1,0 +1,45 @@
+I think the current translation of the `max_length` and `min_length` attributes in a `core_schema.StringSchema` is not ideal.
+
+  Can that translation really work when there is already an existing pattern?
+
+  Don't you think that we can use the `all_of` metadata slot, https://linkml.io/linkml-model/latest/docs/all_of/, in LinkML to express the `max_length` and `min_length` contraint better?
+
+  I am concerned that the current setup doesn't allow us to handle situations where the provided string spans multiple lines.
+
+---
+
+Can you verify that `min_length`/`max_length` constraints in Pydantic model fields are indeed handles situations where the string span multiple lines by using a test script or finding the support in official documentation?
+
+Do you think is a good idea to combine `min_length` and  `max_length` constraints into one pattern constraints in an `all_of` entry instead of spliting them into two entries?
+
+Can you also test the use of `all_of` with an entry expressing length limiting pattern in a slot definitino that already has a value for the `pattern` meta slot? (Please provide write a YAML file with a simple LinkML schema to use for the test).
+
+---
+
+Does the pattern of `^[\s\S]+$` only allow printable characters? How is it different from `^.+$`?
+
+What is the `\Z` in `^[\s\S]{4,10}\Z}`?
+
+---
+
+Is `[\d\D]+` exactly the same as `[\s\S]+`, with `[\s\S]+` being just the standard expression?
+
+Can you modify `scratch/allof_test/schema.yaml` so that the pattern in the slot is more restrictive so that it can actually fail some of the test instances? (Please update some of the test instances accordingly).
+
+Can you specify the slot definition as an entry of `slots` in the schema level?
+
+---
+
+make the pattern in slot to allow multi-line strings so that it doesn't fail because of the present of a newline character.
+
+---
+
+why do you use `\A` in the slot pattern instead of `^` as in the pattern specified in the `any_of` entry?
+
+---
+
+let's use `^` for mating the start of the string then. Please check the result again as well.
+
+---
+
+Let's add a class to the schema that is a container containing a array of things. So that we can combine all the examples instances into just a instance of the container class containing the instances of things.
