@@ -1,0 +1,57 @@
+{
+  "cli_version": "0.5.4",
+  "checkpoint_id": "dd3c67ec0806",
+  "session_id": "113fd986-fa8b-4ba8-9219-faaa1c95bdec",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-20T17:03:32.492455Z",
+  "branch": "docs/python-language-usage",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "CLAUDE.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-7",
+  "turn_id": "b83b3d7fe7e8",
+  "token_usage": {
+    "input_tokens": 17,
+    "cache_creation_tokens": 16215,
+    "cache_read_tokens": 194558,
+    "output_tokens": 1721,
+    "api_call_count": 7
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-20T17:03:32.438413Z",
+    "agent_lines": 9,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 9,
+    "total_lines_changed": 9,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 40,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "scratch/allof_test/container.yaml": 7,
+        "scratch/allof_test/schema.yaml": 33
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 49,
+      "agent_lines_removed": 0
+    }
+  ]
+}
