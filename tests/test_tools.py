@@ -603,7 +603,7 @@ class TestGetSlotUsageEntry:
             "base",
             "target",
             "expected_missing",
-            "expected_constraint_varied",
+            "expected_disallowed_varied_constraint",
             "expected_return",
         ),
         [
@@ -661,7 +661,31 @@ class TestGetSlotUsageEntry:
                 [],
                 SlotDefinition("a", title="T2", required=True),
             ),
-            # Constraint varied property still raises
+            # Allowed monotonic refinement: required False -> True
+            (
+                SlotDefinition("a", required=False),
+                SlotDefinition("a", required=True),
+                [],
+                [],
+                SlotDefinition("a", required=True),
+            ),
+            # Allowed refinement combined with extended + overridable changes
+            (
+                SlotDefinition("a", required=False, description="old"),
+                SlotDefinition("a", required=True, description="new", title="T"),
+                [],
+                [],
+                SlotDefinition("a", required=True, description="new", title="T"),
+            ),
+            # Disallowed: required True -> False (loosening)
+            (
+                SlotDefinition("a", required=True),
+                SlotDefinition("a", required=False),
+                [],
+                ["required"],
+                None,
+            ),
+            # Other constraint varied property still raises
             (
                 SlotDefinition("a", range="integer"),
                 SlotDefinition("a", range="string"),
@@ -669,10 +693,20 @@ class TestGetSlotUsageEntry:
                 ["range"],
                 None,
             ),
-            # Mixed constraint + non-constraint varied: only constraint reported
+            # Mixed disallowed constraint + non-constraint varied:
+            # only the disallowed constraint change is reported
             (
                 SlotDefinition("a", range="integer", description="old"),
                 SlotDefinition("a", range="string", description="new"),
+                [],
+                ["range"],
+                None,
+            ),
+            # Mixed: allowed `required` refinement coexists with a disallowed
+            # `range` change. Only the disallowed one is reported.
+            (
+                SlotDefinition("a", required=False, range="integer"),
+                SlotDefinition("a", required=True, range="string"),
                 [],
                 ["range"],
                 None,
@@ -684,15 +718,18 @@ class TestGetSlotUsageEntry:
         base,
         target,
         expected_missing,
-        expected_constraint_varied,
+        expected_disallowed_varied_constraint,
         expected_return,
     ):
-        if expected_missing or expected_constraint_varied:
+        if expected_missing or expected_disallowed_varied_constraint:
             with pytest.raises(SlotUsageGenerationError) as exc_info:
                 get_slot_usage_entry(base, target)
             error = exc_info.value
             assert error.missing_meta_slots == expected_missing
-            assert error.varied_constraint_meta_slots == expected_constraint_varied
+            assert (
+                error.disallowed_varied_constraint_meta_slots
+                == expected_disallowed_varied_constraint
+            )
         else:
             assert get_slot_usage_entry(base, target) == expected_return
 

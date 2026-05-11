@@ -7,7 +7,12 @@ class TestSlotUsageGenerationError:
     """Tests for SlotUsageGenerationError sorting behavior."""
 
     @pytest.mark.parametrize(
-        ("missing", "constraint", "expected_missing", "expected_constraint"),
+        (
+            "missing",
+            "disallowed",
+            "expected_missing",
+            "expected_disallowed",
+        ),
         [
             (["Zeta", "alpha", "Beta"], None, ["alpha", "Beta", "Zeta"], []),
             (None, ["Zeta", "alpha", "Beta"], [], ["alpha", "Beta", "Zeta"]),
@@ -21,19 +26,20 @@ class TestSlotUsageGenerationError:
         ],
     )
     def test_sorts_inputs(
-        self, missing, constraint, expected_missing, expected_constraint
+        self, missing, disallowed, expected_missing, expected_disallowed
     ):
         err = SlotUsageGenerationError(
             missing_meta_slots=missing,
-            varied_constraint_meta_slots=constraint,
+            disallowed_varied_constraint_meta_slots=disallowed,
         )
         assert err.missing_meta_slots == expected_missing
-        assert err.varied_constraint_meta_slots == expected_constraint
+        assert err.disallowed_varied_constraint_meta_slots == expected_disallowed
 
     def test_raises_value_error_when_both_empty(self):
         with pytest.raises(ValueError, match="must be non-empty"):
             SlotUsageGenerationError(
-                missing_meta_slots=[], varied_constraint_meta_slots=[]
+                missing_meta_slots=[],
+                disallowed_varied_constraint_meta_slots=[],
             )
 
     def test_raises_value_error_when_both_none(self):
@@ -41,39 +47,40 @@ class TestSlotUsageGenerationError:
             SlotUsageGenerationError()
 
     @pytest.mark.parametrize(
-        ("missing", "constraint"),
+        ("missing", "disallowed"),
         [
             (["c", "a"], None),
             (None, ["z", "x"]),
         ],
     )
-    def test_str(self, missing, constraint):
+    def test_str(self, missing, disallowed):
         err = SlotUsageGenerationError(
             missing_meta_slots=missing,
-            varied_constraint_meta_slots=constraint,
+            disallowed_varied_constraint_meta_slots=disallowed,
         )
         expected = (
             f"Target slot definition has missing meta slots, "
-            f"{err.missing_meta_slots}, and varied constraint meta slots, "
-            f"{err.varied_constraint_meta_slots}"
+            f"{err.missing_meta_slots}, and disallowed varied constraint "
+            f"meta slots, {err.disallowed_varied_constraint_meta_slots}"
         )
         assert str(err) == expected
 
     @pytest.mark.parametrize(
-        ("missing", "constraint"),
+        ("missing", "disallowed"),
         [
             (["c", "a"], None),
             (None, ["z", "x"]),
         ],
     )
-    def test_repr(self, missing, constraint):
+    def test_repr(self, missing, disallowed):
         err = SlotUsageGenerationError(
             missing_meta_slots=missing,
-            varied_constraint_meta_slots=constraint,
+            disallowed_varied_constraint_meta_slots=disallowed,
         )
         expected = (
             f"SlotUsageGenerationError"
             f"(missing_meta_slots={err.missing_meta_slots!r}, "
-            f"varied_constraint_meta_slots={err.varied_constraint_meta_slots!r})"
+            f"disallowed_varied_constraint_meta_slots="
+            f"{err.disallowed_varied_constraint_meta_slots!r})"
         )
         assert repr(err) == expected
