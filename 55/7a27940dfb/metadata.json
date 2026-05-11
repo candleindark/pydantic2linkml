@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.5.5",
+  "checkpoint_id": "557a27940dfb",
+  "strategy": "manual-commit",
+  "branch": "slot-usage-allow-required-false-to-true",
+  "checkpoints_count": 14,
+  "files_touched": [
+    "CLAUDE.md",
+    "src/pydantic2linkml/exceptions.py",
+    "src/pydantic2linkml/gen_linkml.py",
+    "src/pydantic2linkml/tools.py",
+    "tests/test_exceptions.py",
+    "tests/test_tools.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/55/7a27940dfb/0/metadata.json",
+      "transcript": "/55/7a27940dfb/0/full.jsonl",
+      "content_hash": "/55/7a27940dfb/0/content_hash.txt",
+      "prompt": "/55/7a27940dfb/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 183,
+    "cache_creation_tokens": 235520,
+    "cache_read_tokens": 6901623,
+    "output_tokens": 52277,
+    "api_call_count": 84
+  }
+}

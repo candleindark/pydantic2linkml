@@ -1,0 +1,90 @@
+Take a look at the "dandischema/models.yaml" in "/Users/isaac/Developer/Dartmouth/dandi-schema". It is the output of converting `dandischema.models` using pydantic2linkml and some scripts, particularly for sanitization.
+
+I am looking for a solution to handle the problem indicated by the note of "'pydantic2linkml: Impossible to generate slot usage entry for the id slot. The
+      slot representation of the id field in the Dandiset Pydantic model has changes
+      in value in constraint meta slots: [''required''] .'" in "dandischema/models.yaml".
+
+I want to check if the `required` meta slot in linkML can be overriden in some situation in effect, if not in concept. For example, if the inherited or schema level slot has `required` being `false`, can the corresponding `slot_usage` definition specify that `required` being `true`?
+
+---
+
+Your finding is a surprise to me. I didn't expect the overriding can be done in both directions, from `required` being `false` to `required` being `true` and the other way around, and in other meta slots. Additionally, this finding seems to contradict with the documentation regarding the monotonic property of LinkML schemas as specfied in `https://linkml.io/linkml/schemas/slots.html#slot-usage`.  Can we confirm if you finding is the result of the intended behavior of LinkML or a bug in implementation?
+
+---
+
+Are you sure your finding regarding `pattern` is right? I don't think `pattern` in a `slot_usage` entry can override the `pattern` the corresponding slot in the containing class. My experience is that `pattern` in a `slot_usage` entry is always additive never overriding. Can you double check?
+
+---
+
+Can you search the LinkML repo on github, https://github.com/linkml/linkml, and check if there have been issues filed or PRs created because of the spec and implementation mismatch regarding the monotonicity behavior in LinkML?
+
+---
+
+I intend to only allow change from `required: false` to `required: true` in a usage slot entry. This is the only change, I feel that I can safely make.
+
+However, before we make that change, let's file an issue in `pydantic2linkml` to keep track of the documented/intended behavior and current behaviror of LinkML, particulary involving the meta slots in translating `dandischema.models`.
+
+By the way, I don't think `pattern` can be removed if monotonicity is properly implemented since a `slot_entry` is always additive in  that case. I don't `multivalued` can be overriden in either direction either since when `multivalued: true` a collecton is expected when `multivalued: false` a scalar value is expected, the expected value is of a different structure.
+
+You can link the issue to https://github.com/linkml/linkml/issues/1508, to which I just submitted an updated post.
+
+In filing the issue to pydantic2linkml, please include the snippets you have used to assess the current behaviors of `slot_usage` entry.
+
+---
+
+At this point, I am only confortable allowing the change from `required: false` to `required: true`. For other changes in a constrained meta slot, I would still want to raise a `SlotUsageGenerationError`. Please implement this allowance. However, in the process, I think we should change the naming of `varied_constraint_meta_slots` in `SlotUsageGenerationError` to more appropriately describe the situiation since not all changes in constraint meta slots triggers such an error. Additionally, please update the related documentation and tests.
+
+---
+
+Do you think my request to `raises ValueError if called
+  with equal values` in `_is_allowed_constraint_refinement` is good?
+
+---
+
+But isn't that putting in the guard ensure the function is used correctly down the road if it can be potientially used by a different caller in the future/
+
+---
+
+OK. let's drop the raising of `ValueError`. However, I don't think we need "Must differ from base_value" in the docstring since semantically, `_is_allowed_constraint_refinement` should be able to handle such a case.
+
+---
+
+I think we can add a note that the function return false when the base and target values are equal just for clarity.
+
+---
+
+do you think the added note is a good idea?
+
+---
+
+revert it
+
+---
+
+Add to my user level `CLAUDE.md` the following note.
+
+voice/push back honestly whenever you think my request or suggestion is not a good idea.
+
+---
+
+I think we can refine the documention in `SlotUsageGenerationError` so that it doesn't explicitly specify what refinement of constraint properties are allow but just reference `_is_allowed_constraint_refinement` for definition.
+
+---
+
+I think we should do same to the documentation of `get_slot_usage_entry` and possible other entities. No specific description about what constrain property refinement is allowed except in the documentation of `_is_allowed_constraint_refinement`.
+
+---
+
+I did some small adjustment in tools.py. Please take a look.
+
+---
+
+take the third one
+
+---
+
+I also made changes in line 592.
+
+---
+
+everything LGTM. Let's run the tests, static type check, and lining once again. After than we can do a commit and submit it for a PR.
