@@ -57,16 +57,24 @@ class TranslationNotImplementedError(NotImplementedError):
 class SlotUsageGenerationError(Exception):
     """
     Raise when a slot usage entry cannot be generated to make a given base slot
-    definition function like a given target slot definition. A slot usage entry can
-    only extend the base with new properties (meta slots) or override non-constraint
-    properties of the base; it cannot remove properties from the base nor override
-    its constraint properties (those defined in ``SlotExpression``).
+    definition function like a given target slot definition.
+
+    A ``slot_usage`` entry can extend the base slot with new properties (meta
+    slots), override the base slot's non-constraint properties (e.g.,
+    ``title``, ``description``), and refine the base slot's constraint
+    properties (those defined in ``SlotExpression``) in ways that are
+    recognized as safe monotonic tightenings. The set of recognized
+    refinements is defined by ``_is_allowed_constraint_refinement`` in
+    ``pydantic2linkml.tools``. Any other change in a constraint property,
+    or any meta slot that exists in the base but not in the target, makes
+    the situation unrepresentable as a ``slot_usage`` entry and triggers
+    this error.
     """
 
     def __init__(
         self,
         missing_meta_slots: Optional[Iterable[str]] = None,
-        varied_constraint_meta_slots: Optional[Iterable[str]] = None,
+        disallowed_varied_constraint_meta_slots: Optional[Iterable[str]] = None,
     ):
         """
         :param missing_meta_slots: The input for setting
@@ -75,48 +83,58 @@ class SlotUsageGenerationError(Exception):
             are the meta slots that exist in the base slot definition but
             not in the target slot definition. If None or not provided,
             an empty list is used.
-        :param varied_constraint_meta_slots: The input for setting
-            ``self.varied_constraint_meta_slots``, which is a list of the
-            items provided in this input sorted case-insensitively. These
-            items are the constraint meta slots (i.e., those defined in
-            ``SlotExpression``) that exist in both the base and target
-            slot definitions but have different values. If None or not
-            provided, an empty list is used.
+        :param disallowed_varied_constraint_meta_slots: The input for
+            setting ``self.disallowed_varied_constraint_meta_slots``,
+            which is a list of the items provided in this input sorted
+            case-insensitively. These items are the constraint meta slots
+            (i.e., those defined in ``SlotExpression``) that exist in
+            both the base and target slot definitions, have different
+            values, and whose (base, target) change is not one of the
+            allowed monotonic refinements that can be safely emitted as a
+            ``slot_usage`` entry. (Constraint meta slots whose change
+            is an allowed refinement, as defined by
+            ``_is_allowed_constraint_refinement`` in
+            ``pydantic2linkml.tools``, do not appear here.) If None or
+            not provided, an empty list is used.
         :raises ValueError: If both `missing_meta_slots` and
-            `varied_constraint_meta_slots` are empty
+            `disallowed_varied_constraint_meta_slots` are empty
         """
 
         def _sort(items: Optional[Iterable[str]]) -> list[str]:
             return sorted(items, key=str.casefold) if items is not None else []
 
         sorted_missing: list[str] = _sort(missing_meta_slots)
-        sorted_constraint: list[str] = _sort(varied_constraint_meta_slots)
+        sorted_disallowed_varied_constraint: list[str] = _sort(
+            disallowed_varied_constraint_meta_slots
+        )
 
-        if len(sorted_missing) + len(sorted_constraint) == 0:
+        if len(sorted_missing) + len(sorted_disallowed_varied_constraint) == 0:
             error_msg = (
                 "At least one of `missing_meta_slots` and "
-                "`varied_constraint_meta_slots` must be non-empty."
+                "`disallowed_varied_constraint_meta_slots` must be non-empty."
             )
             raise ValueError(error_msg)
 
         super().__init__()
 
         self.missing_meta_slots: list[str] = sorted_missing
-        self.varied_constraint_meta_slots: list[str] = sorted_constraint
+        self.disallowed_varied_constraint_meta_slots: list[str] = (
+            sorted_disallowed_varied_constraint
+        )
 
     def __str__(self):
         return (
             f"Target slot definition has missing meta slots, "
-            f"{self.missing_meta_slots}, and varied constraint meta slots, "
-            f"{self.varied_constraint_meta_slots}"
+            f"{self.missing_meta_slots}, and disallowed varied constraint "
+            f"meta slots, {self.disallowed_varied_constraint_meta_slots}"
         )
 
     def __repr__(self):
         return (
             f"{type(self).__name__}"
             f"(missing_meta_slots={self.missing_meta_slots!r}, "
-            f"varied_constraint_meta_slots="
-            f"{self.varied_constraint_meta_slots!r})"
+            f"disallowed_varied_constraint_meta_slots="
+            f"{self.disallowed_varied_constraint_meta_slots!r})"
         )
 
 

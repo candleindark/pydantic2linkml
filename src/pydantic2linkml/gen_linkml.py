@@ -342,9 +342,9 @@ class LinkmlGenerator:
                     else ""
                 )
                 varied_substr = (
-                    f"has changes in value in constraint meta slots: "
-                    f"{e.varied_constraint_meta_slots} "
-                    if e.varied_constraint_meta_slots
+                    f"has disallowed changes in value in constraint meta "
+                    f"slots: {e.disallowed_varied_constraint_meta_slots} "
+                    if e.disallowed_varied_constraint_meta_slots
                     else ""
                 )
                 substr = "and ".join(s for s in [missing_substr, varied_substr] if s)

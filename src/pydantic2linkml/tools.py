@@ -35,11 +35,42 @@ from pydantic2linkml.exceptions import (
 
 logger = logging.getLogger(__name__)
 
-# The set of field names defined in SlotExpression. These represent constraint
-# properties that cannot be overridden in a slot_usage entry.
+# The set of field names defined in SlotExpression. These represent
+# constraint properties of a slot. A change in such a property between a base
+# slot and a target slot can only be expressed in a slot_usage entry when the
+# change is one of the allowed monotonic refinements; see
+# ``_is_allowed_constraint_refinement``.
 SLOT_EXPRESSION_FIELD_NAMES: frozenset[str] = frozenset(
     f.name for f in fields(SlotExpression)
 )
+
+
+def _is_allowed_constraint_refinement(
+    meta_slot: str, base_value: Any, target_value: Any
+) -> bool:
+    """
+    Decide whether a change in a constraint meta slot value from ``base_value``
+    to ``target_value`` is an allowed monotonic refinement that can be safely
+    emitted as part of a ``slot_usage`` entry.
+
+    LinkML schemas are intended to be monotonic — ``slot_usage`` should
+    *refine* (tighten) inherited constraints, not loosen or replace them.
+    The LinkML runtime does not currently enforce this (see
+    https://github.com/linkml/linkml/issues/1508), so this function
+    conservatively allows only a case that is an unambiguously safe
+    tightening.
+
+    Currently, the only allowed refinement is ``required`` going from
+    ``False`` to ``True``.
+
+    :param meta_slot: The name of the constraint meta slot
+    :param base_value: The value of ``meta_slot`` on the base slot
+    :param target_value: The value of ``meta_slot`` on the target slot
+    :return: ``True`` iff the change is an allowed monotonic refinement
+    """
+    if meta_slot == "required":
+        return base_value is False and target_value is True
+    return False
 
 
 class StrEnum(str, Enum):
@@ -512,10 +543,18 @@ def get_slot_usage_entry(
     target slot definition
 
     In LinkML, ``slot_usage`` entries can extend the base slot with new
-    properties and override non-constraint properties (e.g., ``title``,
-    ``description``), but cannot override constraint properties (those
-    defined in ``SlotExpression``, such as ``range``, ``required``,
-    ``multivalued``, etc.).
+    properties and override its non-constraint properties (e.g., ``title``,
+    ``description``). LinkML schemas are intended to be monotonic, meaning
+    a ``slot_usage`` entry should *refine* (tighten) the base slot's
+    constraint properties (those defined in ``SlotExpression``, such as
+    ``range``, ``required``, ``multivalued``, etc.) rather than loosen or
+    replace them. The LinkML runtime does not currently enforce
+    monotonicity (see https://github.com/linkml/linkml/issues/1508), so
+    this function conservatively allows only unambiguously safe monotonic
+    refinements of constraint properties. The set of allowed refinements
+    is determined by ``_is_allowed_constraint_refinement``. A change in a
+    constraint property that is not an allowed refinement triggers a
+    ``SlotUsageGenerationError``.
 
     :param base: The base slot definition
     :param target: The target slot definition. Must have the same ``name`` as
@@ -531,11 +570,12 @@ def get_slot_usage_entry(
     :raises ValueError: If ``base.name`` and ``target.name`` differ
     :raises SlotUsageGenerationError: If a slot usage entry cannot be
         generated to make the given base slot definition function like the
-        given target slot definition. A slot usage entry can only extend the
-        base with new properties (meta slots) or override non-constraint
-        properties of the base; it cannot remove properties from the base
-        nor override its constraint properties (those defined in
-        ``SlotExpression``).
+        given target slot definition. A slot usage entry can extend the
+        base with new properties (meta slots), override the base's
+        non-constraint properties, and apply allowed monotonic refinements
+        to the base's constraint properties (those defined in
+        ``SlotExpression``); it cannot remove properties from the base nor
+        change a constraint property in any other way.
     """
     if base.name != target.name:
         raise ValueError(
@@ -549,24 +589,36 @@ def get_slot_usage_entry(
     missing_properties = base_properties - target_properties
     common_properties = base_properties & target_properties
 
-    varied_properties = set()
+    varied_properties = set[str]()
     for p in common_properties:
         if getattr(base, p) != getattr(target, p):
             varied_properties.add(p)
 
-    # Split varied properties into constraint (disqualifying) and
-    # non-constraint (overridable in slot_usage)
+    # Split varied properties into constraint (subject to monotonicity rules)
+    # and non-constraint (freely overridable in slot_usage)
     constraint_varied = varied_properties & SLOT_EXPRESSION_FIELD_NAMES
     overridable_varied = varied_properties - SLOT_EXPRESSION_FIELD_NAMES
 
-    if missing_properties or constraint_varied:
+    # Among the constraint-varied properties, separate those whose
+    # (base, target) change is an allowed monotonic refinement from those
+    # that are not allowed.
+    allowed_refined = {
+        p
+        for p in constraint_varied
+        if _is_allowed_constraint_refinement(p, getattr(base, p), getattr(target, p))
+    }
+    disallowed_varied_constraint = constraint_varied - allowed_refined
+
+    if missing_properties or disallowed_varied_constraint:
         raise SlotUsageGenerationError(
             missing_meta_slots=missing_properties,
-            varied_constraint_meta_slots=constraint_varied,
+            disallowed_varied_constraint_meta_slots=disallowed_varied_constraint,
         )
 
     extended_properties = target_properties - base_properties
-    properties_for_slot_usage = extended_properties | overridable_varied
+    properties_for_slot_usage = (
+        extended_properties | overridable_varied | allowed_refined
+    )
 
     if not properties_for_slot_usage:
         return None

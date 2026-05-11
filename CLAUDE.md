@@ -128,11 +128,20 @@ Options:
    - `GeneratorReuseError` — attempting to reuse a single-use generator
    - `TranslationNotImplementedError` — schema type not yet handled
    - `SlotUsageGenerationError` — cannot generate a slot_usage entry to
-     make a base slot function like a target slot (a slot_usage entry can
-     only extend the base slot with new properties or override the base
-     slot's non-constraint properties); accepts any `Iterable[str]` for
-     its meta-slot lists and sorts them case-insensitively on
-     construction
+     make a base slot function like a target slot. A slot_usage entry can
+     extend the base slot with new properties, override the base slot's
+     non-constraint properties, and apply allowed monotonic refinements
+     to its constraint properties (those defined in `SlotExpression`).
+     The set of allowed refinements is defined by
+     `_is_allowed_constraint_refinement` in `tools.py`. Any other change
+     in a constraint property, or any meta slot missing from the target
+     that is present in the base, triggers this error. The error accepts
+     any `Iterable[str]` for its meta-slot lists (`missing_meta_slots`,
+     `disallowed_varied_constraint_meta_slots`) and sorts them
+     case-insensitively on construction. The "disallowed varied" framing
+     reflects that not every varied constraint meta slot is an error —
+     allowed monotonic refinements are emitted into the slot_usage entry
+     instead.
    - `YAMLContentError` — YAML file content is not what is expected (e.g.,
      not a mapping)
    - `InvalidLinkMLSchemaError` — schema does not conform to the LinkML
