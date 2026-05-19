@@ -755,7 +755,9 @@ class TestSlotGenerator:
                 # This is needed due to Pydantic's behavior:
                 # The any argument for `min_length` of `conlist` that is less than
                 # or equal to 0 is ignored.
-                None if (min_len is not None and min_len <= 0) else min_len
+                None
+                if (min_len is not None and min_len <= 0)
+                else min_len
             )
             assert slot.maximum_cardinality == max_len
             assert slot.range == expected_range
@@ -1205,3 +1207,54 @@ class TestSlotGenerator:
         assert slot.required is None
         assert slot.title is None
         assert slot.description is None
+
+    _READONLY_TEXT = (
+        "Managed exclusively by the owning authority; "
+        "attempts by another entity to modify the value are "
+        "expected to be ignored or rejected by that owning "
+        "authority"
+    )
+
+    @pytest.mark.parametrize(
+        ("jse", "expected_readonly"),
+        [
+            ({"readOnly": True}, _READONLY_TEXT),
+            ({"readOnly": True, "other": "value"}, _READONLY_TEXT),
+            ({"readOnly": False}, None),
+            ({"readOnly": "yes"}, None),
+            ({"other": "value"}, None),
+            ({}, None),
+            (None, None),
+        ],
+    )
+    def test_readonly_from_json_schema_extra(self, jse, expected_readonly):
+        field_kwargs = {}
+        if jse is not None:
+            field_kwargs["json_schema_extra"] = jse
+
+        class Foo(BaseModel):
+            x: str = Field(**field_kwargs)
+
+        slot = translate_field_to_slot(Foo, "x")
+
+        assert slot.readonly == expected_readonly
+
+    def test_readonly_not_set_for_callable_json_schema_extra(self):
+        def _extra(schema):
+            schema["readOnly"] = True
+
+        class Foo(BaseModel):
+            x: str = Field(json_schema_extra=_extra)
+
+        slot = translate_field_to_slot(Foo, "x")
+
+        assert slot.readonly is None
+
+    def test_subschema_excludes_readonly(self):
+        class Foo(BaseModel):
+            x: str = Field(json_schema_extra={"readOnly": True})
+
+        field_schema = get_field_schema(Foo, "x")._replace(is_subschema=True)
+        slot = SlotGenerator(field_schema).generate()
+
+        assert slot.readonly is None

@@ -115,7 +115,14 @@ Options:
 2. **`gen_linkml.py`** — Main translation logic:
    - `translate_defs(module_names)` — top-level entry point; loads modules, fetches defs, runs `LinkmlGenerator`
    - `LinkmlGenerator` — single-use class; converts a collection of Pydantic models and enums into a `SchemaDefinition`. Call `generate()` once per instance.
-   - `SlotGenerator` — single-use class; translates a single Pydantic `CoreSchema` into a `SlotDefinition`. Dispatches on schema `type` strings via handler methods. Handles nesting, optionality, lists, unions, literals, UUIDs, dates, etc.
+   - `SlotGenerator` — single-use class; translates a single Pydantic
+     `CoreSchema` into a `SlotDefinition`. Dispatches on schema `type`
+     strings via handler methods. Handles nesting, optionality, lists,
+     unions, literals, UUIDs, dates, etc. Field-level `FieldInfo`
+     metadata is mapped to LinkML meta slots: `title`, `description`,
+     and `readonly` (the last set from
+     `json_schema_extra={"readOnly": True}` to a fixed reason string
+     paraphrasing the JSON Schema 2019-09 §9.4 semantic).
    - `any_class_def` — module-level `ClassDefinition` constant for the LinkML `Any` type
 
 3. **`cli/`** — Typer-based CLI wrapping `translate_defs`; `cli/__init__.py`

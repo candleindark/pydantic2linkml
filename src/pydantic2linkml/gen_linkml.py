@@ -447,9 +447,10 @@ class SlotGenerator:
         if self._used:
             raise GeneratorReuseError(self)
 
-        # Field-level properties (`required`, `title`, `description`) are only
-        # appropriate when translating the schema of the field itself, not a
-        # sub-schema in the schema of the field (e.g., a choice in a union type).
+        # Field-level properties (`required`, `title`, `description`,
+        # `readonly`) are only appropriate when translating the schema of the
+        # field itself, not a sub-schema in the schema of the field (e.g., a
+        # choice in a union type).
         if not self._field_schema.is_subschema:
             # Initialized the `required` meta slot to `True` since all
             # Pydantic fields are required unless a default value is provided
@@ -461,6 +462,20 @@ class SlotGenerator:
                 self._slot.title = field_info.title
             if field_info.description is not None:
                 self._slot.description = field_info.description
+
+            # Translate Pydantic `json_schema_extra={"readOnly": True}` into a
+            # LinkML `readonly` meta slot value. LinkML's `readonly` is a
+            # free-text string ("If present, slot is read only. Text
+            # explains why."), so emit a description paraphrasing the
+            # JSON Schema 2019-09 §9.4 `readOnly` semantic.
+            match field_info.json_schema_extra:
+                case {"readOnly": True}:
+                    self._slot.readonly = (
+                        "Managed exclusively by the owning authority; "
+                        "attempts by another entity to modify the value are "
+                        "expected to be ignored or rejected by that owning "
+                        "authority"
+                    )
 
         # Shape the contained slot according to core schema of the corresponding field
         self._shape_slot(self._field_schema.schema)
