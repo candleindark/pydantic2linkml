@@ -1,0 +1,37 @@
+take a look at this https://github.com/dandi/pydantic2linkml/issues/68 and https://github.com/linkml/linkml/issues/3528 for context
+
+What I want now is to actually implement a partical solution in `pydantic2linkml` so that it can produce slots with meta slot `readonly` in the generated LinkML schema. 
+
+The slot definitons or `slot_usage` entries that I want to have the `readonly` meta slot entry correspond to the Pydantic fields that have the `json_schema_extra` parameter defined as a dictionary which contains the key-value pair `"readOnly": True`. (There are many examples of these Pydantic fields in `dandischema.models` which is available in a hatch managed Python env.)
+
+---
+
+Since this is a translation for a `json_schema_extra={"readOnly": True}` in the definition of a Pydantic field, let's use the semantic of `"readOnly": True` in JSON Schema, https://json-schema.org/draft/2019-09/json-schema-validation#rfc.section.9.4. Can you come up with a concise representation of the semantic?
+
+---
+
+What about
+
+"""
+Managed exclusively by the owning authority; attempts by another entity to modify the value are expected to be ignored or rejected by that owning authority
+"""
+
+---
+
+Do you think using a match statement in implementing the solution is better?
+
+---
+
+sure
+
+---
+
+`_READONLY_TEXT` is defined as a class attribute. It seems that you can refer to it in the parametrize argument list. Is this a standard behavior of Python?
+
+---
+
+I don't know why the match statement has to be indented inside `if not self._field_schema.is_subschema:` after all `readonly` is not a field in `AnonymousSlotExpression` so it will not be included in the output of `_get_ase`.
+
+---
+
+that's reasonable. However, why don't you update the documentation, particularly those in `SlotGenerator.generate`

@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.6.1",
+  "checkpoint_id": "7032cadc5a03",
+  "strategy": "manual-commit",
+  "branch": "translate-pydantic-readonly",
+  "checkpoints_count": 6,
+  "files_touched": [
+    "src/pydantic2linkml/gen_linkml.py",
+    "tests/test_gen_linkml.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/70/32cadc5a03/0/metadata.json",
+      "transcript": "/70/32cadc5a03/0/full.jsonl",
+      "content_hash": "/70/32cadc5a03/0/content_hash.txt",
+      "prompt": "/70/32cadc5a03/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 101,
+    "cache_creation_tokens": 168669,
+    "cache_read_tokens": 2777409,
+    "output_tokens": 17464,
+    "api_call_count": 51
+  }
+}

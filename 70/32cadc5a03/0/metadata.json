@@ -1,0 +1,95 @@
+{
+  "cli_version": "0.6.1",
+  "checkpoint_id": "7032cadc5a03",
+  "session_id": "40ee02d7-0bce-46c4-bbdb-5eadb62971f6",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-19T01:21:16.105952Z",
+  "branch": "translate-pydantic-readonly",
+  "checkpoints_count": 6,
+  "files_touched": [
+    "src/pydantic2linkml/gen_linkml.py",
+    "tests/test_gen_linkml.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-7",
+  "turn_id": "c3890d19a64e",
+  "token_usage": {
+    "input_tokens": 101,
+    "cache_creation_tokens": 168669,
+    "cache_read_tokens": 2777409,
+    "output_tokens": 17464,
+    "api_call_count": 51
+  },
+  "session_metrics": {
+    "turn_count": 8
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-19T01:21:16.097172Z",
+    "agent_lines": 68,
+    "agent_removed": 3,
+    "human_added": 10,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 79,
+    "total_lines_changed": 83,
+    "agent_percentage": 85.54216867469879,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 65,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 65,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 65,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 5,
+      "user_lines_added": 3,
+      "user_lines_removed": 1,
+      "agent_lines_added": 65,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "tests/test_gen_linkml.py": 3
+      },
+      "user_removed_per_file": {
+        "tests/test_gen_linkml.py": 1
+      }
+    },
+    {
+      "checkpoint_number": 6,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 68,
+      "agent_lines_removed": 1
+    },
+    {
+      "checkpoint_number": 7,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 72,
+      "agent_lines_removed": 4
+    }
+  ]
+}
