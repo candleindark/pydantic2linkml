@@ -466,16 +466,11 @@ class SlotGenerator:
             # Translate Pydantic `json_schema_extra={"readOnly": True}` into a
             # LinkML `readonly` meta slot value. LinkML's `readonly` is a
             # free-text string ("If present, slot is read only. Text
-            # explains why."), so emit a description paraphrasing the
-            # JSON Schema 2019-09 §9.4 `readOnly` semantic.
+            # explains why."), so emit a short reason capturing the JSON
+            # Schema 2019-09 §9.4 `readOnly` semantic.
             match field_info.json_schema_extra:
                 case {"readOnly": True}:
-                    self._slot.readonly = (
-                        "Managed exclusively by the owning authority; "
-                        "attempts by another entity to modify the value are "
-                        "expected to be ignored or rejected by that owning "
-                        "authority"
-                    )
+                    self._slot.readonly = "Read-only for clients; managed by server"
 
         # Shape the contained slot according to core schema of the corresponding field
         self._shape_slot(self._field_schema.schema)
