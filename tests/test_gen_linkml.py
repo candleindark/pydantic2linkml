@@ -1208,12 +1208,7 @@ class TestSlotGenerator:
         assert slot.title is None
         assert slot.description is None
 
-    _READONLY_TEXT = (
-        "Managed exclusively by the owning authority; "
-        "attempts by another entity to modify the value are "
-        "expected to be ignored or rejected by that owning "
-        "authority"
-    )
+    _READONLY_TEXT = "Read-only for clients; managed by server"
 
     @pytest.mark.parametrize(
         ("jse", "expected_readonly"),
