@@ -1,0 +1,5 @@
+sure
+
+---
+
+The supervisor of the project prefer a shorter string to be used for the value of the `readonly` meta slot. Something such as "Read-only for clients; managed by server".
