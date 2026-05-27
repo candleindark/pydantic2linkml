@@ -134,26 +134,23 @@ Options:
    - `NameCollisionError` — duplicate class/enum names across modules
    - `GeneratorReuseError` — attempting to reuse a single-use generator
    - `TranslationNotImplementedError` — schema type not yet handled
-   - `SlotUsageGenerationError` — cannot generate a slot_usage entry to
-     make a base slot function like a target slot. A slot_usage entry can
-     extend the base slot with new properties, override the base slot's
-     non-constraint properties, and apply allowed monotonic refinements
-     to its constraint properties (those defined in `SlotExpression`).
-     The set of allowed refinements is defined by
-     `_is_allowed_constraint_refinement` in `tools.py`. Any other change
-     in a constraint property, or any meta slot missing from the target
-     that is present in the base, triggers this error. The error accepts
-     any `Iterable[str]` for its meta-slot lists (`missing_meta_slots`,
-     `disallowed_varied_constraint_meta_slots`) and sorts them
-     case-insensitively on construction. The "disallowed varied" framing
-     reflects that not every varied constraint meta slot is an error —
-     allowed monotonic refinements are emitted into the slot_usage entry
-     instead.
    - `YAMLContentError` — YAML file content is not what is expected (e.g.,
      not a mapping)
    - `InvalidLinkMLSchemaError` — schema does not conform to the LinkML
      meta schema (unknown fields, wrong-type values, etc.); raised by
      `canonicalize_schema_yml`
+
+   When `get_slot_usage_entry` cannot fully represent the difference
+   between a base slot and a target slot — because the target lacks a
+   meta slot present in the base, or a constraint meta slot varies in a
+   way that is not an allowed monotonic refinement — it does *not*
+   raise. Instead it emits a partial `slot_usage` entry containing
+   everything that *can* be expressed (extended properties, allowed
+   refinements, non-constraint overrides) together with sorted notes
+   describing each unrepresentable discrepancy. Notes use the shared
+   `format_note` helper in `tools.py` so the package-name prefix stays
+   consistent with notes attached elsewhere (class definitions,
+   `SlotGenerator`).
 
 ### Key Design Patterns
 

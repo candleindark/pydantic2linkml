@@ -13,7 +13,6 @@ from pydantic_core import core_schema
 from pydantic2linkml.exceptions import (
     InvalidLinkMLSchemaError,
     NameCollisionError,
-    SlotUsageGenerationError,
     YAMLContentError,
 )
 from pydantic2linkml.tools import (
@@ -25,6 +24,7 @@ from pydantic2linkml.tools import (
     ensure_unique_names,
     fetch_defs,
     force_to_set,
+    format_note,
     get_field_schema,
     get_locally_defined_fields,
     get_non_empty_meta_slots,
@@ -598,30 +598,30 @@ class TestGetSlotUsageEntry:
         with pytest.raises(ValueError, match="must have the same name"):
             get_slot_usage_entry(base, target)
 
+    @staticmethod
+    def _missing_note(meta_slot: str) -> str:
+        return format_note(
+            f"Cannot express in a slot_usage entry the absence of the "
+            f"`{meta_slot}` meta slot, which is present in the base slot "
+            f"definition."
+        )
+
+    @staticmethod
+    def _disallowed_note(meta_slot: str) -> str:
+        return format_note(
+            f"Cannot express in a slot_usage entry a value for the "
+            f"`{meta_slot}` constraint meta slot that differs from the base "
+            f"by a change that is not an allowed monotonic refinement."
+        )
+
     @pytest.mark.parametrize(
-        (
-            "base",
-            "target",
-            "expected_missing",
-            "expected_disallowed_varied_constraint",
-            "expected_return",
-        ),
+        ("base", "target", "expected_return"),
         [
             # Base and target are the same
-            (SlotDefinition("a"), SlotDefinition("a"), [], [], None),
+            (SlotDefinition("a"), SlotDefinition("a"), None),
             (
                 SlotDefinition("a", required=True, range="integer"),
                 SlotDefinition("a", required=True, range="integer"),
-                [],
-                [],
-                None,
-            ),
-            # Target is missing some required meta slots
-            (
-                SlotDefinition("a", required=True, range="integer"),
-                SlotDefinition("a"),
-                ["range", "required"],
-                [],
                 None,
             ),
             # Target extends base
@@ -635,8 +635,6 @@ class TestGetSlotUsageEntry:
                     mixins=["b"],
                     description="Hello, world!",
                 ),
-                [],
-                [],
                 SlotDefinition(
                     "a",
                     required=True,
@@ -649,89 +647,87 @@ class TestGetSlotUsageEntry:
             (
                 SlotDefinition("a", description="old"),
                 SlotDefinition("a", description="new"),
-                [],
-                [],
                 SlotDefinition("a", description="new"),
             ),
             # Mixed non-constraint varied + extended properties
             (
                 SlotDefinition("a", title="T1"),
                 SlotDefinition("a", title="T2", required=True),
-                [],
-                [],
                 SlotDefinition("a", title="T2", required=True),
             ),
             # Allowed monotonic refinement: required False -> True
             (
                 SlotDefinition("a", required=False),
                 SlotDefinition("a", required=True),
-                [],
-                [],
                 SlotDefinition("a", required=True),
             ),
             # Allowed refinement combined with extended + overridable changes
             (
                 SlotDefinition("a", required=False, description="old"),
                 SlotDefinition("a", required=True, description="new", title="T"),
-                [],
-                [],
                 SlotDefinition("a", required=True, description="new", title="T"),
+            ),
+        ],
+    )
+    def test_representable(self, base, target, expected_return):
+        assert get_slot_usage_entry(base, target) == expected_return
+
+    @pytest.mark.parametrize(
+        ("base", "target", "expected_return"),
+        [
+            # Target is missing meta slots present in base; nothing else to
+            # apply -- an entry is still emitted with notes describing the
+            # unrepresentable absences.
+            (
+                SlotDefinition("a", required=True, range="integer"),
+                SlotDefinition("a"),
+                SlotDefinition(
+                    "a",
+                    notes=sorted(
+                        [_missing_note("range"), _missing_note("required")],
+                        key=str.casefold,
+                    ),
+                ),
             ),
             # Disallowed: required True -> False (loosening)
             (
                 SlotDefinition("a", required=True),
                 SlotDefinition("a", required=False),
-                [],
-                ["required"],
-                None,
+                SlotDefinition("a", notes=[_disallowed_note("required")]),
             ),
-            # Other constraint varied property still raises
+            # Disallowed `range` change
             (
                 SlotDefinition("a", range="integer"),
                 SlotDefinition("a", range="string"),
-                [],
-                ["range"],
-                None,
+                SlotDefinition("a", notes=[_disallowed_note("range")]),
             ),
             # Mixed disallowed constraint + non-constraint varied:
-            # only the disallowed constraint change is reported
+            # the non-constraint override is still emitted alongside the note.
             (
                 SlotDefinition("a", range="integer", description="old"),
                 SlotDefinition("a", range="string", description="new"),
-                [],
-                ["range"],
-                None,
+                SlotDefinition(
+                    "a",
+                    description="new",
+                    notes=[_disallowed_note("range")],
+                ),
             ),
             # Mixed: allowed `required` refinement coexists with a disallowed
-            # `range` change. Only the disallowed one is reported.
+            # `range` change. The allowed refinement is emitted; the
+            # disallowed change becomes a note.
             (
                 SlotDefinition("a", required=False, range="integer"),
                 SlotDefinition("a", required=True, range="string"),
-                [],
-                ["range"],
-                None,
+                SlotDefinition(
+                    "a",
+                    required=True,
+                    notes=[_disallowed_note("range")],
+                ),
             ),
         ],
     )
-    def test_slot_usage_entry(
-        self,
-        base,
-        target,
-        expected_missing,
-        expected_disallowed_varied_constraint,
-        expected_return,
-    ):
-        if expected_missing or expected_disallowed_varied_constraint:
-            with pytest.raises(SlotUsageGenerationError) as exc_info:
-                get_slot_usage_entry(base, target)
-            error = exc_info.value
-            assert error.missing_meta_slots == expected_missing
-            assert (
-                error.disallowed_varied_constraint_meta_slots
-                == expected_disallowed_varied_constraint
-            )
-        else:
-            assert get_slot_usage_entry(base, target) == expected_return
+    def test_unrepresentable_yields_notes(self, base, target, expected_return):
+        assert get_slot_usage_entry(base, target) == expected_return
 
 
 class TestCanonicalizeSchemaYml:
