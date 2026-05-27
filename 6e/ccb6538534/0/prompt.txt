@@ -1,0 +1,9 @@
+yes
+
+---
+
+I want to augment the note append to `discrepancy_notes` in `get_slot_usage_entry`. So that the values of meta slot in the base and in the target are both printed out.
+
+---
+
+have you done type check as well.

@@ -1,0 +1,61 @@
+{
+  "cli_version": "0.6.1",
+  "checkpoint_id": "6eccb6538534",
+  "session_id": "b45962ee-8879-4cc9-9b54-ca8e79fbed98",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-27T17:45:57.006903Z",
+  "branch": "slot-usage-note-include-values",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/pydantic2linkml/tools.py",
+    "tests/test_tools.py"
+  ],
+  "agent": "Claude Code",
+  "model": "",
+  "turn_id": "dab59ae5ba1a",
+  "token_usage": {
+    "input_tokens": 4184,
+    "cache_creation_tokens": 347290,
+    "cache_read_tokens": 5702638,
+    "output_tokens": 40355,
+    "api_call_count": 82
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-27T17:45:56.995305Z",
+    "agent_lines": 21,
+    "agent_removed": 11,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 21,
+    "total_lines_changed": 32,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 21,
+      "agent_lines_removed": 11
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 21,
+      "agent_lines_removed": 11
+    }
+  ]
+}
