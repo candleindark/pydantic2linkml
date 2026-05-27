@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.6.1",
+  "checkpoint_id": "8936a78d6308",
+  "strategy": "manual-commit",
+  "branch": "slot-usage-partial-entry-with-notes",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "CLAUDE.md",
+    "src/pydantic2linkml/exceptions.py",
+    "src/pydantic2linkml/gen_linkml.py",
+    "src/pydantic2linkml/tools.py",
+    "tests/test_exceptions.py",
+    "tests/test_tools.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/89/36a78d6308/0/metadata.json",
+      "transcript": "/89/36a78d6308/0/full.jsonl",
+      "content_hash": "/89/36a78d6308/0/content_hash.txt",
+      "prompt": "/89/36a78d6308/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 3557,
+    "cache_creation_tokens": 248389,
+    "cache_read_tokens": 3170726,
+    "output_tokens": 31440,
+    "api_call_count": 52
+  }
+}

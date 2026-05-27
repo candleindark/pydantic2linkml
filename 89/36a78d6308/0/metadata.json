@@ -1,0 +1,78 @@
+{
+  "cli_version": "0.6.1",
+  "checkpoint_id": "8936a78d6308",
+  "session_id": "b45962ee-8879-4cc9-9b54-ca8e79fbed98",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-27T06:50:05.99291Z",
+  "branch": "slot-usage-partial-entry-with-notes",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "CLAUDE.md",
+    "src/pydantic2linkml/exceptions.py",
+    "src/pydantic2linkml/gen_linkml.py",
+    "src/pydantic2linkml/tools.py",
+    "tests/test_exceptions.py",
+    "tests/test_tools.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-7",
+  "turn_id": "81fce64cd1e2",
+  "token_usage": {
+    "input_tokens": 3557,
+    "cache_creation_tokens": 248389,
+    "cache_read_tokens": 3170726,
+    "output_tokens": 31440,
+    "api_call_count": 52
+  },
+  "session_metrics": {
+    "turn_count": 3
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-27T06:50:05.983194Z",
+    "agent_lines": 117,
+    "agent_removed": 303,
+    "human_added": 7,
+    "human_modified": 8,
+    "human_removed": 0,
+    "total_committed": 132,
+    "total_lines_changed": 435,
+    "agent_percentage": 96.55172413793103,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 131,
+      "agent_lines_removed": 308
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 15,
+      "user_lines_removed": 8,
+      "agent_lines_added": 131,
+      "agent_lines_removed": 308,
+      "user_added_per_file": {
+        "src/pydantic2linkml/tools.py": 15
+      },
+      "user_removed_per_file": {
+        "src/pydantic2linkml/tools.py": 8
+      }
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 140,
+      "agent_lines_removed": 311
+    }
+  ]
+}

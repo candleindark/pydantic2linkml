@@ -1,0 +1,15 @@
+Currently, "if a slot usage entry cannot be
+        generated to make the given base slot definition function like the
+        given target slot definition," a `SlotUsageGenerationError` is raised and  a note is attached to the LinkML class being constructed and the `slot_usage` entry being generated is abandoned, not attached to the class. However, I think we can do better with the following:
+
+- when a slot usage entry cannot be generated to make the given base slot definition function like the given target slot definition, don't raise a `SlotUsageGenerationError` but add a note to the generated slot entry. (Make sure the notes in the slot usage entry is sorted. Use the same format for a note as defined in `attach_note` inner function in `_generate_class`. You may do some refactoring to reduce code duplication.)
+
+In that way, at least a partially correct `slot_usage` entry can be attached to the containing class.
+
+---
+
+I added a few comments, please act on them.
+
+---
+
+I made some modification please take a look. I also made some requests in a few todo comments.
