@@ -29,11 +29,19 @@ from pydantic_core import core_schema
 from pydantic2linkml.exceptions import (
     InvalidLinkMLSchemaError,
     NameCollisionError,
-    SlotUsageGenerationError,
     YAMLContentError,
 )
 
 logger = logging.getLogger(__name__)
+
+
+def format_note(note: str) -> str:
+    """
+    Format a free-form note with the package-name prefixed on every
+    note that this package attaches to LinkML definitions.
+    """
+    return f"{__package__}: {note}"
+
 
 # The set of field names defined in SlotExpression. These represent
 # constraint properties of a slot. A change in such a property between a base
@@ -249,9 +257,9 @@ def get_model_schema(model: type[BaseModel]) -> core_schema.ModelSchema:
         else:
             model_schema = inner_schema
 
-    assert model_schema["type"] == "model", (
-        "Assumption about how model schema is stored is wrong."
-    )
+    assert (
+        model_schema["type"] == "model"
+    ), "Assumption about how model schema is stored is wrong."
 
     return cast(core_schema.ModelSchema, model_schema)
 
@@ -552,30 +560,29 @@ def get_slot_usage_entry(
     monotonicity (see https://github.com/linkml/linkml/issues/1508), so
     this function conservatively allows only unambiguously safe monotonic
     refinements of constraint properties. The set of allowed refinements
-    is determined by ``_is_allowed_constraint_refinement``. A change in a
-    constraint property that is not an allowed refinement triggers a
-    ``SlotUsageGenerationError``.
+    is determined by ``_is_allowed_constraint_refinement``.
+
+    When the target slot is missing a meta slot that the base provides, or
+    a constraint meta slot varies in a way that is not an allowed monotonic
+    refinement, the discrepancy cannot be expressed in a ``slot_usage``
+    entry. In that case the returned entry includes everything that
+    *can* be expressed (extended properties, allowed refinements, and
+    non-constraint overrides) together with sorted notes describing each
+    unrepresentable discrepancy.
 
     :param base: The base slot definition
     :param target: The target slot definition. Must have the same ``name`` as
         *base*.
 
     :return: The slot usage entry that extends or overrides aspects of the
-        base slot definition to achieve the behavior of the target slot
-        definition. If the base slot definition doesn't need any extension
-        or overriding to achieve the behavior of the target slot definition,
-        i.e., the base slot definition and the target slot definition are
-        identical from a slot_usage perspective, ``None`` is returned.
+        base slot definition to make it function as closely as possible to
+        the target slot definition. If the base slot definition doesn't
+        need any extension or overriding to achieve the behavior of the
+        target slot definition, i.e., the base slot definition and
+        the target slot definition are identical from a slot_usage perspective,
+        ``None`` is returned.
 
     :raises ValueError: If ``base.name`` and ``target.name`` differ
-    :raises SlotUsageGenerationError: If a slot usage entry cannot be
-        generated to make the given base slot definition function like the
-        given target slot definition. A slot usage entry can extend the
-        base with new properties (meta slots), override the base's
-        non-constraint properties, and apply allowed monotonic refinements
-        to the base's constraint properties (those defined in
-        ``SlotExpression``); it cannot remove properties from the base nor
-        change a constraint property in any other way.
     """
     if base.name != target.name:
         raise ValueError(
@@ -609,26 +616,49 @@ def get_slot_usage_entry(
     }
     disallowed_varied_constraint = constraint_varied - allowed_refined
 
-    if missing_properties or disallowed_varied_constraint:
-        raise SlotUsageGenerationError(
-            missing_meta_slots=missing_properties,
-            disallowed_varied_constraint_meta_slots=disallowed_varied_constraint,
-        )
-
     extended_properties = target_properties - base_properties
     properties_for_slot_usage = (
         extended_properties | overridable_varied | allowed_refined
     )
 
-    if not properties_for_slot_usage:
+    # Notes describing discrepancies that cannot be expressed in a
+    # slot_usage entry. These are merged with any notes already on the
+    # target slot below, since ``notes`` is itself a meta slot and may
+    # appear in ``properties_for_slot_usage``.
+    discrepancy_notes: list[str] = []
+    for p in missing_properties:
+        discrepancy_notes.append(
+            format_note(
+                f"Cannot express in a slot_usage entry the absence of the "
+                f"`{p}` meta slot, which is present in the base slot "
+                f"definition."
+            )
+        )
+    for p in disallowed_varied_constraint:
+        discrepancy_notes.append(
+            format_note(
+                f"Cannot express in a slot_usage entry a value for the "
+                f"`{p}` constraint meta slot that differs from the base by a "
+                f"change that is not an allowed monotonic refinement."
+            )
+        )
+
+    if not properties_for_slot_usage and not discrepancy_notes:
         return None
+
+    kwargs = {p: getattr(target, p) for p in properties_for_slot_usage}
+    if discrepancy_notes:
+        target_notes = kwargs.get("notes", [])
+        if not isinstance(target_notes, list):
+            # `target_notes` can be a `str` or `None` at this point
+            target_notes = [target_notes] if target_notes is not None else []
+        merged_notes = target_notes + discrepancy_notes
+        merged_notes.sort(key=str.casefold)
+        kwargs["notes"] = merged_notes
 
     # Note: A `name` argument is provided because the `SlotDefinition`
     # class requires it
-    return SlotDefinition(
-        name=base.name,
-        **{p: getattr(target, p) for p in properties_for_slot_usage},
-    )
+    return SlotDefinition(name=base.name, **kwargs)
 
 
 @functools.cache

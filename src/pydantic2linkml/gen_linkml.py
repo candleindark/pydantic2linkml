@@ -33,7 +33,6 @@ from pydantic_core import core_schema
 
 from pydantic2linkml.exceptions import (
     GeneratorReuseError,
-    SlotUsageGenerationError,
     TranslationNotImplementedError,
 )
 from pydantic2linkml.tools import (
@@ -43,6 +42,7 @@ from pydantic2linkml.tools import (
     ensure_unique_names,
     fetch_defs,
     force_to_set,
+    format_note,
     get_all_modules,
     get_field_schema,
     get_locally_defined_fields,
@@ -267,7 +267,7 @@ class LinkmlGenerator:
 
             :param note: The note to attach
             """
-            notes.append(f"{__package__}: {note}")
+            notes.append(format_note(note))
 
         parents = get_parent_models(model)
         local_fields = self._m_f_map[model]
@@ -330,32 +330,11 @@ class LinkmlGenerator:
 
             # At this point, `overridden_field_slot_rep` must be set
 
-            try:
-                entry = get_slot_usage_entry(
-                    overridden_field_slot_rep, overriding_field_slot_rep
-                )
-            except SlotUsageGenerationError as e:
-                # Attach needed note
-                missing_substr = (
-                    f"lacks meta slots: {e.missing_meta_slots} "
-                    if e.missing_meta_slots
-                    else ""
-                )
-                varied_substr = (
-                    f"has disallowed changes in value in constraint meta "
-                    f"slots: {e.disallowed_varied_constraint_meta_slots} "
-                    if e.disallowed_varied_constraint_meta_slots
-                    else ""
-                )
-                substr = "and ".join(s for s in [missing_substr, varied_substr] if s)
-                attach_note(
-                    f"Impossible to generate slot usage entry for the {name} slot. "
-                    f"The slot representation of the {name} field in the "
-                    f"{model.__name__} Pydantic model {substr}."
-                )
-            else:
-                if entry is not None:
-                    slot_usage.append(entry)
+            entry = get_slot_usage_entry(
+                overridden_field_slot_rep, overriding_field_slot_rep
+            )
+            if entry is not None:
+                slot_usage.append(entry)
 
         # Ensure collections in class definition are sorted by name case-insensitively
         slots.sort(key=str.casefold)
@@ -502,7 +481,7 @@ class SlotGenerator:
 
         :param note: The note to attach
         """
-        self._slot.notes.append(f"{__package__}: {note}")
+        self._slot.notes.append(format_note(note))
 
     def _get_ase(self, subschema: core_schema.CoreSchema) -> AnonymousSlotExpression:
         """
