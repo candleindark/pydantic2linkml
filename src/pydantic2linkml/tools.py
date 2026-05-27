@@ -631,7 +631,7 @@ def get_slot_usage_entry(
             format_note(
                 f"Cannot express in a slot_usage entry the absence of the "
                 f"`{p}` meta slot, which is present in the base slot "
-                f"definition."
+                f"definition (base value: {getattr(base, p)!r})."
             )
         )
     for p in disallowed_varied_constraint:
@@ -639,7 +639,9 @@ def get_slot_usage_entry(
             format_note(
                 f"Cannot express in a slot_usage entry a value for the "
                 f"`{p}` constraint meta slot that differs from the base by a "
-                f"change that is not an allowed monotonic refinement."
+                f"change that is not an allowed monotonic refinement (base "
+                f"value: {getattr(base, p)!r}; target value: "
+                f"{getattr(target, p)!r})."
             )
         )
 
