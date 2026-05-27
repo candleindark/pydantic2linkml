@@ -599,19 +599,20 @@ class TestGetSlotUsageEntry:
             get_slot_usage_entry(base, target)
 
     @staticmethod
-    def _missing_note(meta_slot: str) -> str:
+    def _missing_note(meta_slot: str, base_value) -> str:
         return format_note(
             f"Cannot express in a slot_usage entry the absence of the "
             f"`{meta_slot}` meta slot, which is present in the base slot "
-            f"definition."
+            f"definition (base value: {base_value!r})."
         )
 
     @staticmethod
-    def _disallowed_note(meta_slot: str) -> str:
+    def _disallowed_note(meta_slot: str, base_value, target_value) -> str:
         return format_note(
             f"Cannot express in a slot_usage entry a value for the "
             f"`{meta_slot}` constraint meta slot that differs from the base "
-            f"by a change that is not an allowed monotonic refinement."
+            f"by a change that is not an allowed monotonic refinement (base "
+            f"value: {base_value!r}; target value: {target_value!r})."
         )
 
     @pytest.mark.parametrize(
@@ -684,7 +685,10 @@ class TestGetSlotUsageEntry:
                 SlotDefinition(
                     "a",
                     notes=sorted(
-                        [_missing_note("range"), _missing_note("required")],
+                        [
+                            _missing_note("range", "integer"),
+                            _missing_note("required", True),
+                        ],
                         key=str.casefold,
                     ),
                 ),
@@ -693,13 +697,17 @@ class TestGetSlotUsageEntry:
             (
                 SlotDefinition("a", required=True),
                 SlotDefinition("a", required=False),
-                SlotDefinition("a", notes=[_disallowed_note("required")]),
+                SlotDefinition(
+                    "a", notes=[_disallowed_note("required", True, False)]
+                ),
             ),
             # Disallowed `range` change
             (
                 SlotDefinition("a", range="integer"),
                 SlotDefinition("a", range="string"),
-                SlotDefinition("a", notes=[_disallowed_note("range")]),
+                SlotDefinition(
+                    "a", notes=[_disallowed_note("range", "integer", "string")]
+                ),
             ),
             # Mixed disallowed constraint + non-constraint varied:
             # the non-constraint override is still emitted alongside the note.
@@ -709,7 +717,7 @@ class TestGetSlotUsageEntry:
                 SlotDefinition(
                     "a",
                     description="new",
-                    notes=[_disallowed_note("range")],
+                    notes=[_disallowed_note("range", "integer", "string")],
                 ),
             ),
             # Mixed: allowed `required` refinement coexists with a disallowed
@@ -721,7 +729,7 @@ class TestGetSlotUsageEntry:
                 SlotDefinition(
                     "a",
                     required=True,
-                    notes=[_disallowed_note("range")],
+                    notes=[_disallowed_note("range", "integer", "string")],
                 ),
             ),
         ],
